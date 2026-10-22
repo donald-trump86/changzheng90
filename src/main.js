@@ -55,8 +55,8 @@ function render() {
     for (const key of ['situation', 'action', 'result', 'insight']) $(`#${key}`).textContent = chapter[key];
     $('#chapter-detail').hidden = !state.revealed;
     $('#reveal').setAttribute('aria-expanded', String(state.revealed));
-    $('#reveal').disabled = state.revealed;
-    $('#reveal').textContent = state.revealed ? '路线已展开' : '展开路线 ↗';
+    $('#reveal').textContent = state.revealed ? '重播路线 ↻' : '展开路线 ↗';
+    $('#reveal').setAttribute('aria-label', state.revealed ? '重播路线' : '展开路线');
     $('#prev').textContent = state.chapter === 1 ? '返回开场' : '← 上一渡';
     $('#next').textContent = state.chapter === 4 ? '阅读尾声 →' : '下一渡 →';
     $('#map-caption').textContent = state.revealed
@@ -72,9 +72,15 @@ function render() {
 }
 
 function dispatch(event) {
+  if (event.type === 'REVEAL' && state.revealed) {
+    map.play();
+    return;
+  }
   const previousChapter = state.chapter;
+  const wasRevealed = state.revealed;
   state = transition(state, event);
   render();
+  if (event.type === 'REVEAL' && !wasRevealed && state.revealed) map.play();
   if (state.chapter !== previousChapter) {
     const heading = state.chapter === 5 ? $('#epilogue-heading') : state.chapter === 0 ? $('#cover-heading') : $('#chapter-heading');
     heading.setAttribute('tabindex', '-1');

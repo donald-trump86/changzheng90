@@ -2,10 +2,10 @@ import { chapters } from './story.js';
 
 // Schematic relationships, not surveyed coordinates or reconstructed march tracks.
 const routes = [
-  { path: 'M480 176C425 155 365 155 320 177S217 210 187 260S130 338 104 385', arrow: 'M371 164L285 192', label: [180, 143] },
-  { path: 'M104 385C150 350 193 306 253 276S338 269 381 277S495 312 560 345', arrow: 'M332 271L435 290', label: [458, 250] },
-  { path: 'M572 464C512 480 454 474 403 449S310 420 275 377S224 285 207 235', arrow: 'M452 469L354 433', label: [206, 479] },
-  { path: 'M207 235C244 235 285 273 321 315S391 340 445 355S526 454 542 548', arrow: 'M326 322L427 348', label: [466, 397] },
+  { path: 'M480 176C425 155 365 155 320 177S217 210 187 260S130 338 104 385', label: [180, 143] },
+  { path: 'M104 385C150 350 193 306 253 276S338 269 381 277S495 312 560 345', label: [458, 250] },
+  { path: 'M572 464C512 480 454 474 403 449S310 420 275 377S224 285 207 235', label: [206, 479] },
+  { path: 'M207 235C244 235 285 273 321 315S391 340 445 355S526 454 542 548', label: [466, 397] },
 ];
 
 export function createMap(container) {
@@ -33,13 +33,77 @@ export function createMap(container) {
       <g><circle cx="560" cy="345" r="5"/><text x="573" y="337">桐梓</text></g>
       <g><circle cx="572" cy="464" r="5"/><text x="587" y="474">遵义</text></g>
     </g>
-    <g class="routes">${routes.map((route, i) => `<g data-route="${i + 1}" hidden><path class="march-line" pathLength="1" d="${route.path}"/><circle class="march-point" r="7" style="offset-path:path('${route.path}')" aria-hidden="true"/><path class="crossing-arrow" d="${route.arrow}" marker-end="url(#march-arrow)"/><text class="route-label" x="${route.label[0]}" y="${route.label[1]}">${['一渡 ← 西', '二渡 → 东', '三渡 ← 西', '四渡 → 东'][i]}</text></g>`).join('')}</g>
+    <g class="routes">${routes.map((route, i) => `<g data-route="${i + 1}" hidden><path class="march-line" pathLength="1" d="${route.path}" marker-end="url(#march-arrow)"/><circle class="march-point" r="7" aria-hidden="true"/><text class="route-label" x="${route.label[0]}" y="${route.label[1]}">${['一渡 ← 西', '二渡 → 东', '三渡 ← 西', '四渡 → 东'][i]}</text></g>`).join('')}</g>
     <text class="south-label" x="548" y="558">南下 ↓</text>
   </svg>`;
   const svg = container.querySelector('svg');
   const summary = svg.querySelector('#river-summary');
   const groups = [...svg.querySelectorAll('[data-route]')];
+  let frame = 0;
+  let generation = 0;
+  const motionAllowed = () => document.body.dataset.motion === 'on' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Every render invalidates pending positioning/paint/draw work, including rapid navigation.
+  function complete() {
+    generation++;
+    cancelAnimationFrame(frame);
+    frame = 0;
+    for (const group of groups) {
+      group.classList.remove('is-drawing');
+      group.querySelector('.march-line').style.strokeDashoffset = '0';
+    }
+  }
+
+  function play() {
+    complete();
+    const group = groups.find((node) => node.classList.contains('current-route') && !node.hasAttribute('hidden'));
+    if (!group || !motionAllowed()) return;
+    const line = group.querySelector('.march-line');
+    const point = group.querySelector('.march-point');
+    const length = line.getTotalLength();
+    const token = generation;
+    const valid = () => token === generation && !group.hasAttribute('hidden') && motionAllowed();
+    group.classList.add('is-drawing');
+    line.style.strokeDashoffset = '1';
+    const origin = line.getPointAtLength(0);
+    point.setAttribute('cx', origin.x);
+    point.setAttribute('cy', origin.y);
+    const bounds = svg.getBoundingClientRect();
+    if (bounds.top < 0 || bounds.bottom > innerHeight) {
+      // The application positions the WHOLE map before drawing; focus stays on the trigger.
+      container.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }
+    // Two paint opportunities keep a hidden/unpainted route from consuming its animation.
+    frame = requestAnimationFrame(() => {
+      if (!valid()) return;
+      frame = requestAnimationFrame(() => {
+        if (!valid()) return;
+        const painted = svg.getBoundingClientRect();
+        if (painted.top < 0 || painted.bottom > innerHeight) return complete();
+        const started = performance.now();
+        function draw(now) {
+          if (!valid()) return;
+          const progress = Math.min(1, (now - started) / 1900);
+          line.style.strokeDashoffset = String(1 - progress);
+          const head = line.getPointAtLength(length * progress);
+          point.setAttribute('cx', head.x);
+          point.setAttribute('cy', head.y);
+          if (progress < 1) frame = requestAnimationFrame(draw);
+          else complete();
+        }
+        frame = requestAnimationFrame(draw);
+      });
+    });
+  }
+
+  // media.js remains the authority for motion preference; turning it off finishes, not freezes.
+  const motionObserver = new MutationObserver(() => { if (!motionAllowed()) complete(); });
+  motionObserver.observe(document.body, { attributes: true, attributeFilter: ['data-motion'] });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) complete(); });
+  window.addEventListener('pagehide', complete);
+
   function render(state) {
+    complete();
     const overview = state.chapter === 0 || state.chapter === 5;
     groups.forEach((group, index) => {
       const current = index + 1 === state.chapter;
@@ -53,5 +117,5 @@ export function createMap(container) {
       : `${chapter.title}，${chapter.date}。${state.revealed ? `${chapter.direction === 'west' ? '西渡' : '东渡'}，渡口：${chapter.crossings.join('、')}。${chapter.action}` : '本次路线尚未展开。'}此前各渡以虚线留痕。路线为概略示意。`;
   }
   render({ chapter: 0, revealed: false });
-  return { render, svg };
+  return { render, play, complete, svg };
 }

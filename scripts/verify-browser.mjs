@@ -85,6 +85,65 @@ async (page) => {
     const announcement = await page.locator('#announcement').textContent();
     assert(announcement.includes(chapter.title) && announcement.includes(chapter.date), 'live chapter announcement missing');
   }
+  async function routeSample() {
+    return page.locator('#map .current-route').evaluate((group) => {
+      const path = group.querySelector('.march-line');
+      const style = getComputedStyle(path);
+      const map = group.closest('svg').getBoundingClientRect();
+      const length = path.getTotalLength();
+      const offset = parseFloat(style.strokeDashoffset);
+      const screenPoint = (distance) => {
+        const p = path.getPointAtLength(distance);
+        const screen = new DOMPoint(p.x, p.y).matrixTransform(path.getScreenCTM());
+        return { x: screen.x, y: screen.y, inViewport: screen.x >= 0 && screen.x <= innerWidth && screen.y >= 0 && screen.y <= innerHeight };
+      };
+      const head = group.querySelector('.march-point');
+      const actualHead = new DOMPoint(Number(head.getAttribute('cx')), Number(head.getAttribute('cy'))).matrixTransform(path.getScreenCTM());
+      const drawnHead = screenPoint(length * (1 - offset));
+      return { time: performance.now(), offset, length, drawnLength: length * (1 - offset), stroke: style.stroke,
+        dasharray: style.strokeDasharray, marker: style.markerEnd, display: style.display,
+        visible: !group.hasAttribute('hidden') && path.checkVisibility(), drawing: group.classList.contains('is-drawing'),
+        map: { top: map.top, bottom: map.bottom, height: map.height, wholeInViewport: map.top >= 0 && map.bottom <= innerHeight },
+        start: screenPoint(0), end: screenPoint(length), drawnHead,
+        headError: Math.hypot(actualHead.x - drawnHead.x, actualHead.y - drawnHead.y),
+        pointDisplay: getComputedStyle(head).display, pathCount: group.querySelectorAll('path').length };
+    });
+  }
+  async function actualDraw(label, replay = false) {
+    // Native click may scroll the CONTROL; the APP must then position its map itself.
+    await page.getByRole('button', { name: replay ? '重播路线' : '展开路线', exact: true }).click({ timeout: 5000 });
+    await page.waitForFunction(() => {
+      const path = document.querySelector('#map .current-route .march-line');
+      const offset = parseFloat(getComputedStyle(path).strokeDashoffset);
+      return offset < 0.96 && offset > 0.65;
+    }, null, { timeout: 1500 });
+    const early = await routeSample();
+    await page.waitForTimeout(440);
+    const middle = await routeSample();
+    for (const sample of [early, middle]) {
+      assert(sample.visible && sample.display !== 'none' && sample.stroke !== 'none' && sample.pathCount === 1,
+        `${label}: single rendered stroke missing ${JSON.stringify(sample)}`);
+      assert(sample.map.wholeInViewport && sample.start.inViewport && sample.end.inViewport && sample.drawnHead.inViewport,
+        `${label}: drawing offscreen ${JSON.stringify(sample)}`);
+      assert(sample.drawing && sample.offset > 0 && sample.offset < 1 && sample.marker === 'none' && sample.pointDisplay !== 'none' && sample.headError < 2,
+        `${label}: unfinished stroke/head/endpoint mismatch ${JSON.stringify(sample)}`);
+    }
+    const measuredDuration = (middle.time - early.time) / (early.offset - middle.offset);
+    assert(early.offset > middle.offset && early.drawnLength < middle.drawnLength && measuredDuration >= 1600 && measuredDuration <= 2200,
+      `${label}: no visible 1.6–2.2s progression ${JSON.stringify({ early, middle, measuredDuration })}`);
+    if (label.includes('replay')) {
+      const path = `${artifacts}/${label}-drawing.png`;
+      await page.screenshot({ path, fullPage: false });
+      screenshots.push(path);
+    }
+    await page.waitForFunction(() => {
+      const group = document.querySelector('#map .current-route');
+      return !group.classList.contains('is-drawing') && parseFloat(getComputedStyle(group.querySelector('.march-line')).strokeDashoffset) === 0;
+    }, null, { timeout: 2500 });
+    const complete = await routeSample();
+    assert(complete.offset === 0 && complete.marker.includes('march-arrow') && complete.pointDisplay === 'none', `${label}: incomplete terminal route`);
+    return { early, middle, complete, measuredDuration };
+  }
   page.on('console', consoleListener);
   page.on('pageerror', pageErrorListener);
   page.on('request', mediaRequestListener);
@@ -98,6 +157,7 @@ async (page) => {
       const { chapters, epilogue, questions, sources } = await import('./src/story.js');
       return { chapters, epilogue, questions, sources };
     });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     const viewports = [{ width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1440, height: 1000 }, { width: 320, height: 844 }];
     for (const viewport of viewports) {
       const width = viewport.width;
@@ -107,16 +167,37 @@ async (page) => {
         // Measure BEFORE any click/locator action that can auto-scroll.
         const firstAction = await start().boundingBox();
         assert(firstAction && firstAction.y >= 0 && firstAction.y + firstAction.height <= viewport.height, `first action outside ${width}×${viewport.height} viewport: ${JSON.stringify(firstAction)}`);
+        const opening = await page.evaluate(() => {
+          const heading = document.querySelector('h1');
+          const map = document.querySelector('#map').getBoundingClientRect();
+          return { headingSize: parseFloat(getComputedStyle(heading).fontSize), headingHeight: heading.getBoundingClientRect().height,
+            mapTop: map.top, mapBottom: map.bottom, mapHeight: map.height,
+            entries: [...document.querySelectorAll('[data-event="START"]')].filter((el) => el.checkVisibility()).length };
+        });
+        assert(opening.headingSize >= (width <= 640 ? 30 : 36) && opening.headingSize <= (width <= 640 ? 36 : 56), `oversized title ${JSON.stringify(opening)}`);
+        assert(opening.mapTop >= 0 && opening.mapBottom <= viewport.height && opening.mapHeight > opening.headingHeight * 3 && opening.entries === 1,
+          `actual map/one entry must dominate first screen ${JSON.stringify(opening)}`);
+        const singlePaths = await page.locator('#map [data-route]').evaluateAll((groups) => groups.map((group) => {
+          const paths = group.querySelectorAll('path');
+          const d = paths[0]?.getAttribute('d') ?? '';
+          return { id: group.dataset.route, paths: paths.length, moves: (d.match(/m/gi) ?? []).length, continuous: /^M/i.test(d), d };
+        }));
+        assert(singlePaths.length === 4 && singlePaths.every((item) => item.paths === 1 && item.moves === 1 && item.continuous), `disjoint/extra crossing paths ${JSON.stringify(singlePaths)}`);
         const coverLayout = await layout('cover');
         assert(!await page.locator('body').evaluate((el) => /戴诗旭|Jason Dai/i.test(el.textContent)), 'personal identity in current page');
         await shot(`${width}-cover`);
         await start().click({ timeout: 5000 });
-        const chapterLayouts = [];
+        const chapterLayouts = [], draws = [];
         for (const chapter of story.chapters) {
           await chapterState(chapter, false);
-          await page.getByRole('button', { name: '展开路线', exact: false }).click({ timeout: 5000 });
+          draws.push(await actualDraw(`${width}-chapter-${chapter.id}`));
           await chapterState(chapter, true);
-          assert(await page.getByRole('button', { name: '路线已展开', exact: true }).isDisabled(), 'revealed control should indicate completion');
+          assert(await page.getByRole('button', { name: '重播路线', exact: true }).isEnabled(), 'reachable replay control missing');
+          if (chapter.id === 1) {
+            const focus = await page.locator('#reveal').evaluate((el) => el === document.activeElement);
+            assert(focus, 'positioning the map stole focus from reveal');
+            draws.push(await actualDraw(`${width}-replay`, true));
+          }
           chapterLayouts.push(await layout(chapter.title));
           if (chapter.id === 2 || chapter.id === 4) await shot(`${width}-chapter-${chapter.id}`);
           await page.getByRole('button', { name: chapter.id === 4 ? '阅读尾声 →' : '下一渡 →', exact: true }).click({ timeout: 5000 });
@@ -126,7 +207,7 @@ async (page) => {
         assert(await page.getByText(story.epilogue.reflection, { exact: true }).isVisible(), 'author interpretation missing');
         const epilogueLayout = await layout('epilogue/quiz');
         await shot(`${width}-epilogue`);
-        return { firstAction, coverLayout, chapterLayouts, epilogueLayout };
+        return { firstAction, opening, singlePaths, draws, coverLayout, chapterLayouts, epilogueLayout };
       });
       await check(`${width}: reverse/direct/rapid navigation, back, reset, reload, unknown hash`, async () => {
         for (const chapter of [...story.chapters].reverse()) {
@@ -138,6 +219,27 @@ async (page) => {
           if (chapter.id > 1) await chapterState(story.chapters[chapter.id - 2], false);
           else assert(await start().isVisible(), 'PREV from first chapter must return cover');
         }
+        await jump(story.chapters[0]).click({ timeout: 5000 });
+        await page.getByRole('button', { name: '展开路线', exact: true }).click({ timeout: 5000 });
+        await page.waitForTimeout(180);
+        const beforeCancel = await routeSample();
+        assert(beforeCancel.offset > 0 && beforeCancel.offset < 1, 'cancel fixture never drew');
+        await page.getByRole('button', { name: '下一渡 →', exact: true }).click({ timeout: 5000 });
+        await chapterState(story.chapters[1], false);
+        await page.waitForTimeout(180);
+        const cancelled = await page.locator('#map [data-route]').evaluateAll((groups) => groups.map((group) => ({
+          id: Number(group.dataset.route), drawing: group.classList.contains('is-drawing'),
+          offset: parseFloat(getComputedStyle(group.querySelector('.march-line')).strokeDashoffset),
+          visible: !group.hasAttribute('hidden'), paths: group.querySelectorAll('path').length,
+        })));
+        assert(cancelled.every((route) => !route.drawing && route.offset === 0 && route.paths === 1 && route.visible === (route.id === 1)), `ghost route after cancellation ${JSON.stringify(cancelled)}`);
+        // A rapid replay followed immediately by reset must also cancel its pending paint frames.
+        await jump(story.chapters[0]).click({ timeout: 5000 });
+        await page.getByRole('button', { name: '展开路线', exact: true }).click({ timeout: 5000 });
+        await page.getByRole('button', { name: '重播路线', exact: true }).click({ timeout: 5000 });
+        await page.getByRole('button', { name: '重新开始', exact: false }).click({ timeout: 5000 });
+        await page.waitForTimeout(150);
+        assert(await page.locator('#map .is-drawing').count() === 0, 'pending replay survived reset');
         for (const id of [3, 1, 4, 2, 4, 1]) await jump(story.chapters[id - 1]).click({ delay: 0, timeout: 5000 });
         await chapterState(story.chapters[0], false);
         await page.getByRole('button', { name: '重新开始', exact: false }).click({ timeout: 5000 });
@@ -147,7 +249,7 @@ async (page) => {
         assert(await start().isVisible(), 'reload must start on cover');
         await page.goto(`${base}#unrecognized`, { waitUntil: 'networkidle' });
         assert(await start().isVisible(), 'unknown hash must show cover');
-        return 'reverse jumps/reveal/back, six immediate jumps, restart, reload and unknown hash passed';
+        return { navigation: 'reverse jumps/reveal/back, six immediate jumps, restart, reload and unknown hash passed', beforeCancel, cancelled, pendingReplayReset: true };
       });
     }
     await page.setViewportSize({ width: 390, height: 844 });
@@ -331,7 +433,7 @@ async (page) => {
         return motion;
       } finally { await page.emulateMedia({ reducedMotion: null }); }
     });
-    await check('red commemorative scene, original static gold emblem, live motion and terminal pause', async () => {
+    await check('compact red opening, static standard emblem, real replay and terminal pause/reduce', async () => {
       await page.emulateMedia({ reducedMotion: 'no-preference' });
       try {
         await openApp();
@@ -341,43 +443,42 @@ async (page) => {
           return { width: img.naturalWidth, height: img.naturalHeight, bytes: new TextEncoder().encode(text).length,
             standard: text.includes('viewBox="1 1 32 32"') && /#fdcf30/i.test(text),
             animated: img.getAnimations({ subtree: true }).length, transform: getComputedStyle(img).transform,
-            background: getComputedStyle(document.body).backgroundColor };
+            background: getComputedStyle(document.body).backgroundColor,
+            caption: img.closest('figure').querySelector('figcaption').textContent };
         });
-        assert(emblem.width === 320 && emblem.height === 320 && emblem.bytes === 420 && emblem.standard && emblem.animated === 0 && emblem.transform === 'none', `emblem changed: ${JSON.stringify(emblem)}`);
+        assert(emblem.width === 320 && emblem.height === 320 && emblem.bytes === 420 && emblem.standard && emblem.animated === 0 && emblem.transform === 'none' && emblem.caption.includes('中国共产党党徽'), `emblem changed: ${JSON.stringify(emblem)}`);
         assert(emblem.background === 'rgb(165, 28, 39)', 'default page is not red');
-        const sample = () => page.locator('.cloud-one').evaluate((el) => getComputedStyle(el).transform);
-        const cloudStart = await sample();
-        await page.waitForTimeout(240);
-        const cloudEnd = await sample();
-        assert(cloudStart !== cloudEnd, 'opening cloud did not actually move');
+        assert(await page.locator('.opening-landscape').count() === 0, 'redundant mountain banner remains');
         await start().click({ timeout: 5000 });
-        await page.getByRole('button', { name: '展开路线', exact: false }).click({ timeout: 5000 });
-        const route = page.locator('#map .current-route .march-line');
-        const offsetStart = await route.evaluate((el) => getComputedStyle(el).strokeDashoffset);
+        const replay = await actualDraw('390-motion-replay-sequence');
+        const repeated = await actualDraw('390-motion-replay', true);
+        await page.getByRole('button', { name: '重播路线', exact: true }).click({ timeout: 5000 });
         await page.waitForTimeout(200);
-        const offsetEnd = await route.evaluate((el) => getComputedStyle(el).strokeDashoffset);
-        assert(parseFloat(offsetStart) > parseFloat(offsetEnd), 'revealed route did not draw between samples');
-        await page.waitForTimeout(1550);
-        const point = page.locator('#map .current-route .march-point');
-        const pointStart = await point.evaluate((el) => getComputedStyle(el).offsetDistance);
-        await page.waitForTimeout(240);
-        const pointEnd = await point.evaluate((el) => getComputedStyle(el).offsetDistance);
-        assert(pointStart !== pointEnd, 'march point did not actually advance');
+        const beforePause = await routeSample();
+        assert(beforePause.offset > 0 && beforePause.offset < 1, 'pause fixture never drew');
         await page.getByRole('button', { name: '暂停动画', exact: true }).click({ timeout: 5000 });
-        const terminal = await page.evaluate(() => ({
-          offset: getComputedStyle(document.querySelector('.current-route .march-line')).strokeDashoffset,
-          point: getComputedStyle(document.querySelector('.current-route .march-point')).offsetDistance,
-          cloud: getComputedStyle(document.querySelector('.map-clouds')).transform,
-          active: document.getAnimations().filter((a) => a.playState === 'running').length,
-          opacity: getComputedStyle(document.querySelector('#chapter-detail')).opacity,
-        }));
-        await page.waitForTimeout(200);
-        const stopped = await point.evaluate((el) => getComputedStyle(el).offsetDistance);
-        assert(parseFloat(terminal.offset) === 0 && terminal.point === '100%' && stopped === terminal.point && terminal.active === 0 && terminal.opacity === '1', `pause incomplete: ${JSON.stringify(terminal)}`);
+        const terminal = await routeSample();
+        await page.waitForTimeout(160);
+        const stopped = await routeSample();
+        const active = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length);
+        assert(terminal.offset === 0 && stopped.offset === 0 && !stopped.drawing && stopped.pointDisplay === 'none' && active === 0, `pause incomplete ${JSON.stringify({ terminal, stopped, active })}`);
+        await page.getByRole('button', { name: '重播路线', exact: true }).click({ timeout: 5000 });
+        assert((await routeSample()).offset === 0, 'motion-off replay should remain a complete static route');
         await shot('390-motion-paused-terminal');
         await page.getByRole('button', { name: '开启动画', exact: true }).click({ timeout: 5000 });
         assert(await page.locator('body').getAttribute('data-motion') === 'on', 'motion restart failed');
-        return { emblem, cloudStart, cloudEnd, offsetStart, offsetEnd, pointStart, pointEnd, terminal };
+        // Enabling motion alone must not replay an already revealed route.
+        await page.waitForTimeout(80);
+        assert(!(await routeSample()).drawing, 'enabling motion unexpectedly replayed route');
+        await page.getByRole('button', { name: '重播路线', exact: true }).click({ timeout: 5000 });
+        await page.waitForTimeout(200);
+        const beforeReduce = await routeSample();
+        assert(beforeReduce.offset > 0 && beforeReduce.offset < 1, 'OS reduce fixture never drew');
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.waitForFunction(() => document.body.dataset.motion === 'off');
+        const reduced = await routeSample();
+        assert(reduced.offset === 0 && !reduced.drawing && reduced.pointDisplay === 'none', `live OS reduce left half stroke ${JSON.stringify(reduced)}`);
+        return { emblem, replay, repeated, beforePause, terminal, stopped, active, beforeReduce, reduced };
       } finally { await page.emulateMedia({ reducedMotion: null }); }
     });
     await check('actual silent audio decode, opt-in playtime, pause, visibility pause and error retry', async () => {
@@ -491,7 +592,7 @@ async (page) => {
   const compactEvidence = (evidence) => {
     if (evidence?.coverLayout) {
       const layouts = [evidence.coverLayout, ...evidence.chapterLayouts, evidence.epilogueLayout];
-      return { width: evidence.coverLayout.width, firstAction: evidence.firstAction, layoutsChecked: layouts.length,
+      return { width: evidence.coverLayout.width, firstAction: evidence.firstAction, opening: evidence.opening, singlePaths: evidence.singlePaths, draws: evidence.draws, layoutsChecked: layouts.length,
         maxDocumentWidth: Math.max(...layouts.map((item) => item.documentWidth)), minControlCount: Math.min(...layouts.map((item) => item.controlCount)) };
     }
     if (evidence?.signature) return { signature: evidence.signature, bytes: evidence.bytes, type: evidence.type, width: evidence.width,

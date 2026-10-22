@@ -1,6 +1,24 @@
 # 验证记录
 
-## 本轮红色动效版：Node 21/21，真实浏览器 15/15 通过
+## 第三版地图优先修订：Node 21/21，真实浏览器 PENDING
+
+2026-10-22。本轮按用户明确反馈移除巨型标题和独立山川横幅，采用紧凑 split-stage／map-first 开场。每渡只保留一个连续 stroked path；真实点击后先把地图置入视口，再开始1900ms描线；支持同路径重播与导航取消。历史内容、音乐／党徽字节、本机 PNG 和构建／服务器模块未改。
+
+| 本轮实际命令 | 结果 |
+| --- | --- |
+| `npm test`，最终完整套件一次 | **21/21**通过，0失败／取消／跳过，317.473041ms；测试使用自有临时端口并关闭 |
+| `npm run build` | **12个静态文件**写入dist |
+| `node --check src/main.js && node --check src/map.js && node --check scripts/verify-browser.mjs` | 退出0，仅证明语法 |
+| `git diff --check` | 退出0 |
+| `node /Users/jasondai/.dsh/skills/design-taste-frontend/scripts/lint.mjs index.html src --json` | 退出0，7个文件，0 FAIL，1 WARN：`em-dash`／`6 em dashes` |
+
+6处横线是保留的三组历史日期范围在共享数据和无脚本正文中的对应写法；没有为消除静态警告改动历史日期。
+
+[浏览器函数](../scripts/verify-browser.mjs)仍有15组实质检查。四种宽度新增初始标题和整张地图几何、每渡单一路径与唯一M、真实点击后的视口／描线头／两次strokeDashoffset进度采样、实测1.6–2.2秒与最终完整终态。第一渡重播、运行中导航取消、快速重播后reset、暂停与系统reduce中途收束均有专门断言；原键盘、来源、音乐、媒体错误、PNG、无脚本及finally恢复均保留。没有用测试强行滚动地图。
+
+**本轮真实浏览器执行、截图主观复核与独立只读审查均PENDING，待控制器完成。** 实现者未开启或操作浏览器／CDP／客户端，也未管理控制器的4173持久预览。下文旧版15/15和主观评分仅是历史记录，不代表本轮通过。
+
+## 历史基线：红色动效版 Node 21/21、真实浏览器15/15
 
 2026-10-22。控制器使用已有专用 Brave 和本地最终构建，在提交 `214b6e1184cd40718ba3c1dee3aab0c8e4e3c11a` 的完整[浏览器函数](../scripts/verify-browser.mjs)上得到 `pass: true`、15/15 组通过、`errors: []`、预期媒体取消 0。两条预期无脚本隔离消息为脚本阻止／autofocus 限制，不是意外错误。原始 JSON 由控制器保存在 [最终验收报告](/tmp/dsh-browser-output/brave-agent/red-qa-214b6e1-final.json)，随后移除了任务自有 QA global。下文旧版浏览器记录仅作为历史基线。
 

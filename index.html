@@ -18,22 +18,12 @@
   </header>
   <audio id="background-music" src="./public/internationale.mp3" preload="none" loop></audio>
   <main class="frame" id="reading">
-    <div class="title-block"><h1>四渡赤水</h1><div class="title-meta"><p class="subtitle">为什么这样走</p><button id="cover-start" class="primary" type="button" data-event="START" hidden>开始阅读 <span aria-hidden="true">→</span></button></div>
-      <div class="media-controls" hidden><button type="button" id="music-toggle" aria-pressed="false" aria-describedby="music-status">播放音乐</button><button type="button" id="motion-toggle" aria-pressed="true">暂停动画</button><p id="music-status" role="status" aria-live="polite">《国际歌》· 数字器乐，点击播放</p></div>
+    <div class="title-block">
+      <div class="title-copy"><h1>四渡赤水</h1><p class="subtitle">为什么这样走</p></div>
+      <figure class="emblem-figure"><img src="./public/party-emblem.svg" width="56" height="56" alt="中国共产党党徽"><figcaption>中国共产党党徽<br>党史学习 · 长征纪念</figcaption></figure>
+      <div class="opening-controls"><button id="cover-start" class="primary" type="button" data-event="START" hidden>开始阅读 <span aria-hidden="true">→</span></button><div class="media-controls" hidden><button type="button" id="music-toggle" aria-pressed="false" aria-describedby="music-status">播放音乐</button><button type="button" id="motion-toggle" aria-pressed="true">暂停动画</button><p id="music-status" role="status" aria-live="polite">《国际歌》· 数字器乐，点击播放</p></div></div>
     </div>
     <div id="experience" hidden>
-      <div class="opening-scene">
-        <svg class="opening-landscape" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-          <g class="scene-cloud cloud-one"><path d="M70 60c90-34 150-34 240 0s150 34 240 0"/><path d="M840 45c80-24 150-24 230 0s150 24 230 0"/></g>
-          <g class="scene-cloud cloud-two"><path d="M420 94c100-25 175-25 275 0s175 25 275 0"/></g>
-          <path class="scene-ridge scene-far" d="M0 220 100 133 178 168 303 43 397 132 492 78 619 189 721 103 807 150 910 37 1030 153 1130 82 1240 174 1342 104 1440 191V300H0Z"/>
-          <path class="scene-ridge scene-middle" d="M0 260 121 207 229 233 360 135 495 239 608 157 730 231 856 150 985 224 1109 142 1244 228 1355 173 1440 234V300H0Z"/>
-          <path class="scene-ridge scene-front" d="M0 290 136 253 270 283 417 223 574 285 744 225 896 280 1045 234 1229 281 1358 237 1440 264V300H0Z"/>
-          <path class="scene-water" d="M1440 265C1240 226 1125 312 930 272S612 222 430 271 160 285 0 258"/>
-        </svg>
-        <figure class="emblem-figure"><img src="./public/party-emblem.svg" width="80" height="80" alt="中国共产党党徽"><figcaption>中国共产党党徽<br>党史学习 · 长征纪念</figcaption></figure>
-        <p class="scene-dates">1935 · 四次渡河<br><span>西渡，东渡，在变化中寻找主动。</span></p>
-      </div>
       <nav class="chapter-nav" aria-label="选择渡河章节">
         <button type="button" data-chapter="1">一渡<span>西渡</span></button>
         <button type="button" data-chapter="2">二渡<span>东渡</span></button>
@@ -47,10 +37,9 @@
         </figure>
         <article id="narrative" class="narrative" aria-labelledby="chapter-heading">
           <div id="cover">
-            <h2 id="cover-heading">沿四次渡河，<br>看懂一次次调整。</h2>
-            <p>沿四次渡河，读懂中央红军如何从被动转向主动。</p>
-            <p>先看局势，再展开路线。约3分钟，沿四次渡河读下去。</p>
-            <button class="primary" type="button" data-event="START">开始阅读 <span aria-hidden="true">→</span></button>
+            <h2 id="cover-heading">先看局势，再展开路线</h2>
+            <p>1935年，中央红军四渡赤水。沿四次渡河，读懂每一次调整的依据。</p>
+            <p>约3分钟，读完四次渡河的局势、行动与结果。</p>
           </div>
           <div id="chapter" hidden>
             <p id="chapter-date" class="chapter-date"></p>
