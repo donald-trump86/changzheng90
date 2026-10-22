@@ -88,6 +88,7 @@ figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap
 .reading-controls { display: flex; justify-content: space-between; gap: 12px; margin-top: 28px; }
 .epilogue-controls { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
 .quiz { margin-block: 84px; padding: 36px; background: var(--ink); color: var(--ground); }
+.quiz :focus-visible { outline-color: var(--ground); }
 .quiz > p { margin-block: 14px 28px; }
 #questions { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
 fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
