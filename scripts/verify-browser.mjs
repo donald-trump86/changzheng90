@@ -1,4 +1,7 @@
-async (page) => {
+async (page, { phase: selectedPhase = 'all' } = {}) => {
+  // MCP calls use one bounded phase; aggregate all five phases for full 15-group coverage.
+  if (!['all', '390', '768', '1440', '320', 'extras'].includes(selectedPhase)) throw new Error(`Unknown QA phase: ${selectedPhase}`);
+  const expectedChecks = selectedPhase === 'all' ? 15 : selectedPhase === 'extras' ? 7 : 2;
   // Run only through the controller's dedicated Brave MCP, using its supplied page.
   // Browser policy permits only this temporary QA output root (no deliverable claim).
   const artifacts = '/tmp/dsh-browser-output/brave-agent';
@@ -159,7 +162,7 @@ async (page) => {
     });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     const viewports = [{ width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1440, height: 1000 }, { width: 320, height: 844 }];
-    for (const viewport of viewports) {
+    for (const viewport of viewports.filter(({ width }) => selectedPhase === 'all' || selectedPhase === String(width))) {
       const width = viewport.width;
       await check(`${width}: cover, full story, reveal, routes, epilogue, layout`, async () => {
         await page.setViewportSize(viewport);
@@ -252,6 +255,7 @@ async (page) => {
         return { navigation: 'reverse jumps/reveal/back, six immediate jumps, restart, reload and unknown hash passed', beforeCancel, cancelled, pendingReplayReset: true };
       });
     }
+    if (selectedPhase === 'all' || selectedPhase === 'extras') {
     await page.setViewportSize({ width: 390, height: 844 });
     await openApp();
     await jump(story.chapters[3]).click({ timeout: 5000 });
@@ -561,6 +565,7 @@ async (page) => {
         phase = 'app';
       }
     });
+    }
   } catch (error) {
     checks.push({ name: 'harness setup/execution', pass: false, error: String(error.message).slice(0, 1200) });
   } finally {
@@ -582,13 +587,14 @@ async (page) => {
     }
   }
   const failures = checks.filter((item) => !item.pass);
-  const counts = { passed: checks.length - failures.length, total: checks.length, expected: 15, errors: errors.length,
+  const counts = { passed: checks.length - failures.length, total: checks.length, expected: expectedChecks, errors: errors.length,
     expectedMediaAborts: expectedMediaAborts.length, expectedSandboxMessages: sandboxMessages.length };
-  const pass = failures.length === 0 && checks.length === 15 && errors.length === 0;
+  const pass = failures.length === 0 && checks.length === expectedChecks && errors.length === 0;
+  const coverage = selectedPhase === 'all' ? 'full' : 'phase-only';
   const limits = ['localhost Chromium evidence only; no real WeChat or mainland-network claim', 'visual critique belongs to controller screenshot review', 'media override reset to browser preference; supplied viewport restored'];
   // The full evidence stays in this task's QA artifact; the MCP return puts failures first.
   await page.evaluate((report) => { window.__chishuiLastQAReport = report; },
-    { failures, errors, counts, pass, checks, expectedMediaAborts, expectedSandboxMessages: sandboxMessages, screenshots, limits });
+    { phase: selectedPhase, coverage, failures, errors, counts, pass, checks, expectedMediaAborts, expectedSandboxMessages: sandboxMessages, screenshots, limits });
   const compactEvidence = (evidence) => {
     if (evidence?.coverLayout) {
       const layouts = [evidence.coverLayout, ...evidence.chapterLayouts, evidence.epilogueLayout];
@@ -600,7 +606,7 @@ async (page) => {
     if (Array.isArray(evidence)) return evidence.map((item) => ({ quiz: item.quiz, contrast: item.contrast, focused: item.focused, inViewport: item.inViewport, settled: item.settle?.settled }));
     return evidence;
   };
-  return { failures, errors, counts, pass, expectedMediaAborts,
+  return { phase: selectedPhase, coverage, failures, errors, counts, pass, expectedMediaAborts,
     checks: checks.map((item) => ({ name: item.name, pass: item.pass, ...(item.pass ? { evidence: compactEvidence(item.evidence) } : { error: item.error }) })),
     screenshots, fullReportGlobal: 'window.__chishuiLastQAReport', limits };
 }
