@@ -4,7 +4,20 @@ async (page) => {
   const artifacts = '/tmp/dsh-browser-output/brave-agent';
   const base = 'http://127.0.0.1:4173/';
   const originalViewport = page.viewportSize();
-  const checks = [], screenshots = [], errors = [], sandboxMessages = [];
+  const checks = [], screenshots = [], errors = [], sandboxMessages = [], expectedMediaAborts = [];
+  const mediaURL = new URL('public/internationale.mp3', base).href;
+  const inFlightMedia = new Set(), intentionalMediaCancellation = new Map();
+  const markMediaCancellation = (reason) => {
+    // Only Request objects already in flight before this exact replacement/navigation qualify.
+    for (const request of inFlightMedia) intentionalMediaCancellation.set(request, reason);
+  };
+  const mediaRequestListener = (request) => {
+    if (request.url() === mediaURL && request.method() === 'GET') inFlightMedia.add(request);
+  };
+  const requestFinishedListener = (request) => {
+    inFlightMedia.delete(request);
+    intentionalMediaCancellation.delete(request);
+  };
   let phase = 'app';
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
   const recordError = (kind, text) => {
@@ -14,7 +27,14 @@ async (page) => {
   };
   const consoleListener = (message) => { if (message.type() === 'error') recordError('console', message.text()); };
   const pageErrorListener = (error) => recordError('pageerror', error.message);
-  const requestListener = (request) => recordError('requestfailed', `${request.url()} ${request.failure()?.errorText}`);
+  const requestListener = (request) => {
+    const error = request.failure()?.errorText;
+    const reason = intentionalMediaCancellation.get(request);
+    if (reason && request.url() === mediaURL && error === 'net::ERR_ABORTED') {
+      expectedMediaAborts.push({ url: request.url(), error, reason, phase });
+    } else recordError('requestfailed', `${request.url()} ${error}`);
+    requestFinishedListener(request);
+  };
   const responseListener = (response) => { if (response.status() >= 400) recordError('http', `${response.status()} ${response.url()}`); };
   const check = async (name, run) => {
     try { const evidence = await run(); checks.push({ name, pass: true, evidence }); }
@@ -29,6 +49,7 @@ async (page) => {
   const jump = (chapter) => page.getByRole('navigation', { name: '选择渡河章节' })
     .getByRole('button', { name: new RegExp(`^${chapter.title.slice(0, 2)}`) });
   async function openApp() {
+    markMediaCancellation('explicit app navigation discards the current audio fixture');
     const response = await page.goto(base, { waitUntil: 'networkidle', timeout: 15000 });
     assert(response?.status() === 200, 'local app must respond HTTP 200');
     await start().waitFor({ state: 'visible', timeout: 5000 });
@@ -66,6 +87,8 @@ async (page) => {
   }
   page.on('console', consoleListener);
   page.on('pageerror', pageErrorListener);
+  page.on('request', mediaRequestListener);
+  page.on('requestfinished', requestFinishedListener);
   page.on('requestfailed', requestListener);
   page.on('response', responseListener);
   try {
@@ -255,7 +278,8 @@ async (page) => {
            return { signature: [...bytes.slice(0, 8)], bytes: bytes.length, type: blob.type, width: img.naturalWidth, height: img.naturalHeight, url: img.src, corner: [...ctx.getImageData(0, 0, 1, 1).data] };
         });
         assert(JSON.stringify(png.signature) === '[137,80,78,71,13,10,26,10]' && png.type === 'image/png' && png.width === 1080 && png.height === 1440 && png.url.startsWith('blob:'), `PNG invalid: ${JSON.stringify(png)}`);
-        assert(JSON.stringify(png.corner) === '[165,28,39,255]', 'PNG must use red ground');
+        // Canvas readback may vary by 1 LSB; retain a tight red-only tolerance.
+        assert(png.corner[3] === 255 && png.corner.slice(0, 3).every((value, index) => Math.abs(value - [165, 28, 39][index]) <= 2), `PNG must use red ground: ${JSON.stringify(png.corner)}`);
          const cardText = await page.evaluate(() => window.__chishuiCanvasQA.text);
          assert(cardText.length > 10 && !/戴诗旭|Jason Dai|作品作者：/i.test(cardText.join(' ')), 'personal identity in actual Canvas text');
          assert(!/作者|戴诗旭|Jason Dai/i.test(await preview.getAttribute('alt')), 'personal identity in card alt');
@@ -364,6 +388,7 @@ async (page) => {
         const initial = await music.evaluate((audio) => ({ paused: audio.paused, time: audio.currentTime, autoplay: audio.autoplay }));
         assert(initial.paused && initial.time === 0 && !initial.autoplay, 'audio must start off');
         // Muting this element is an extra precaution; the dedicated browser stays host-muted.
+        markMediaCancellation('explicit initial audio load resets the preload-none resource');
         await music.evaluate((audio) => { audio.muted = true; audio.preload = 'auto'; audio.load(); });
         await page.waitForFunction(() => document.querySelector('#background-music').readyState >= 2, null, { timeout: 12000 });
         const decoded = await music.evaluate((audio) => ({ duration: audio.duration, ready: audio.readyState, error: audio.error?.code ?? null }));
@@ -389,6 +414,7 @@ async (page) => {
           } finally { if (descriptor) Object.defineProperty(document, 'hidden', descriptor); else delete document.hidden; }
         });
         assert(hidden.paused && hidden.pressed === 'false', 'visibility did not pause audio');
+        markMediaCancellation('replace decoded real MP3 with deliberately invalid audio Blob');
         invalidURL = await music.evaluate((audio) => {
           const url = URL.createObjectURL(new Blob(['deliberately invalid encoded audio'], { type: 'audio/mpeg' }));
           audio.src = url; audio.load(); return url;
@@ -397,10 +423,12 @@ async (page) => {
         assert(await page.getByRole('button', { name: '重试音乐', exact: true }).getAttribute('aria-pressed') === 'false', 'error button falsely claims playback');
         const errorCode = await music.evaluate((audio) => audio.error.code);
         await music.evaluate((audio) => { audio.src = './public/internationale.mp3'; });
+        markMediaCancellation('retry button explicitly reloads the restored real MP3');
         await page.getByRole('button', { name: '重试音乐', exact: true }).click({ timeout: 5000 });
         await page.waitForFunction(() => { const a = document.querySelector('#background-music'); return !a.error && !a.paused && a.currentTime > 0.1; }, null, { timeout: 10000 });
         return { initial, decoded, playing, pausedTime, hidden, actualInvalidAudioErrorCode: errorCode, retry: 'real asset decoded and playback time advanced' };
       } finally {
+        markMediaCancellation('audio fixture cleanup resets playback before navigation');
         await music.evaluate((audio) => { audio.pause(); audio.currentTime = 0; });
         if (invalidURL) await page.evaluate((url) => URL.revokeObjectURL(url), invalidURL);
         await openApp();
@@ -444,11 +472,35 @@ async (page) => {
     finally {
       page.off('console', consoleListener);
       page.off('pageerror', pageErrorListener);
+      page.off('request', mediaRequestListener);
+      page.off('requestfinished', requestFinishedListener);
       page.off('requestfailed', requestListener);
+      inFlightMedia.clear();
+      intentionalMediaCancellation.clear();
       page.off('response', responseListener);
       if (originalViewport) await page.setViewportSize(originalViewport);
     }
   }
-  return { pass: checks.every((item) => item.pass) && errors.length === 0, checks, errors, expectedSandboxMessages: sandboxMessages, screenshots,
-    limits: ['localhost Chromium evidence only; no real WeChat or mainland-network claim', 'visual critique belongs to controller screenshot review', 'media override reset to browser preference; supplied viewport restored'] };
+  const failures = checks.filter((item) => !item.pass);
+  const counts = { passed: checks.length - failures.length, total: checks.length, expected: 15, errors: errors.length,
+    expectedMediaAborts: expectedMediaAborts.length, expectedSandboxMessages: sandboxMessages.length };
+  const pass = failures.length === 0 && checks.length === 15 && errors.length === 0;
+  const limits = ['localhost Chromium evidence only; no real WeChat or mainland-network claim', 'visual critique belongs to controller screenshot review', 'media override reset to browser preference; supplied viewport restored'];
+  // The full evidence stays in this task's QA artifact; the MCP return puts failures first.
+  await page.evaluate((report) => { window.__chishuiLastQAReport = report; },
+    { failures, errors, counts, pass, checks, expectedMediaAborts, expectedSandboxMessages: sandboxMessages, screenshots, limits });
+  const compactEvidence = (evidence) => {
+    if (evidence?.coverLayout) {
+      const layouts = [evidence.coverLayout, ...evidence.chapterLayouts, evidence.epilogueLayout];
+      return { width: evidence.coverLayout.width, firstAction: evidence.firstAction, layoutsChecked: layouts.length,
+        maxDocumentWidth: Math.max(...layouts.map((item) => item.documentWidth)), minControlCount: Math.min(...layouts.map((item) => item.controlCount)) };
+    }
+    if (evidence?.signature) return { signature: evidence.signature, bytes: evidence.bytes, type: evidence.type, width: evidence.width,
+      height: evidence.height, corner: evidence.corner, canvasTextCount: evidence.cardText.length, download: evidence.download };
+    if (Array.isArray(evidence)) return evidence.map((item) => ({ quiz: item.quiz, contrast: item.contrast, focused: item.focused, inViewport: item.inViewport, settled: item.settle?.settled }));
+    return evidence;
+  };
+  return { failures, errors, counts, pass, expectedMediaAborts,
+    checks: checks.map((item) => ({ name: item.name, pass: item.pass, ...(item.pass ? { evidence: compactEvidence(item.evidence) } : { error: item.error }) })),
+    screenshots, fullReportGlobal: 'window.__chishuiLastQAReport', limits };
 }
