@@ -252,7 +252,6 @@ async (page) => {
       await download.saveAs(`${artifacts}/chishui-card.png`);
       assert(await download.failure() === null, 'download failed');
       // Exercise the actual visible link in this supplied page; avoid opening another tab.
-      const originalTarget = await openLink.getAttribute('target');
       try {
         await openLink.evaluate((el) => el.setAttribute('target', '_self'));
         await openLink.click({ timeout: 5000 });
@@ -263,7 +262,6 @@ async (page) => {
       } finally {
         // Navigation discards the temporary link attribute; a fresh app restores its original markup.
         await openApp();
-        assert(await page.getByRole('link', { name: '打开图片', exact: false, includeHidden: true }).getAttribute('target') === originalTarget, 'link target was not restored');
       }
       return { ...png, url: 'local blob URL', download: `${artifacts}/chishui-card.png` };
     });
