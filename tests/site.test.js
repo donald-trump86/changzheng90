@@ -1,0 +1,119 @@
+import test, { before } from 'node:test';
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { once } from 'node:events';
+import { request } from 'node:http';
+import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { basename, dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { createStaticServer } from '../scripts/serve.mjs';
+
+const root = await realpath(fileURLToPath(new URL('../', import.meta.url)));
+const dist = join(root, 'dist');
+const domain = 'changzheng90.luvch1nabest.me\n';
+before(() => execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root }));
+
+function get(port, path) {
+  return new Promise((resolve, reject) => {
+    const req = request({ hostname: '127.0.0.1', port, path, agent: false }, (res) => {
+      const chunks = [];
+      res.on('data', (chunk) => chunks.push(chunk));
+      res.on('end', () => resolve({ status: res.statusCode, type: res.headers['content-type'], body: Buffer.concat(chunks).toString('utf8') }));
+    });
+    req.setTimeout(3000, () => req.destroy(new Error('HTTP check timed out')));
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+async function withServer(directory, run) {
+  const server = await createStaticServer(directory);
+  try {
+    server.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    await run(server.address().port);
+  } finally {
+    if (server.listening) await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    assert.equal(server.listening, false, 'owned HTTP listener closed');
+  }
+}
+
+async function withFixture(run) {
+  const parent = await realpath(tmpdir());
+  const fixture = await realpath(await mkdtemp(join(parent, 'chishui-site-')));
+  try { await run(fixture); }
+  finally {
+    assert.equal(dirname(fixture), parent);
+    assert.ok(basename(fixture).startsWith('chishui-site-'));
+    assert.equal(await realpath(fixture), fixture);
+    await rm(fixture, { recursive: true });
+  }
+}
+
+test('custom domain is exact in source and deployment root', async () => {
+  assert.equal(await readFile(join(root, 'public/CNAME'), 'utf8'), domain);
+  assert.equal(await readFile(join(dist, 'CNAME'), 'utf8'), domain);
+  assert.equal(await readFile(join(dist, '.nojekyll'), 'utf8'), '');
+});
+
+test('deployment contains only the public site, no source tooling or private artifacts', async () => {
+  const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
+    .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', 'src/main.js', 'src/map.js', 'src/share.js', 'src/story.js', 'src/styles.css']);
+});
+
+test('built HTML assets and recursive module imports resolve over HTTP under a repository prefix', async () => {
+  await withFixture(async (fixture) => {
+    await cp(dist, join(fixture, 'repository'), { recursive: true });
+    await withServer(fixture, async (port) => {
+      const base = new URL(`http://127.0.0.1:${port}/repository/index.html`);
+      const html = await get(port, base.pathname);
+      assert.equal(html.status, 200);
+      const refs = [...html.body.matchAll(/<(?:script|link)\b[^>]*\b(?:src|href)="([^"]+)"/g)].map((match) => match[1]);
+      assert.equal(refs.length, 3, 'module, stylesheet and favicon');
+      const visited = new Set();
+      async function visit(reference, from) {
+        assert.match(reference, /^\.\.?\//, 'resources use relative URLs');
+        const url = new URL(reference, from);
+        assert.equal(url.origin, base.origin);
+        assert.ok(url.pathname.startsWith('/repository/'), url.pathname);
+        if (visited.has(url.href)) return;
+        visited.add(url.href);
+        const response = await get(port, url.pathname);
+        assert.equal(response.status, 200, url.pathname);
+        if (url.pathname.endsWith('.js')) {
+          assert.match(response.type, /^text\/javascript/);
+          for (const match of response.body.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)) await visit(match[1], url);
+        } else if (url.pathname.endsWith('.css')) assert.match(response.type, /^text\/css/);
+        else assert.match(response.type, /^image\/svg\+xml/);
+      }
+      for (const ref of refs) await visit(ref, base);
+      assert.equal(visited.size, 6, 'four modules, stylesheet, favicon all fetched');
+    });
+  });
+});
+
+test('source and built servers return 404 and deny encoded traversal and hidden paths', async () => {
+  for (const directory of [root, dist]) await withServer(directory, async (port) => {
+    for (const path of ['/missing-file', '/src/', '/docs/absent']) assert.equal((await get(port, path)).status, 404, path);
+    for (const path of ['/%2e%2e/package.json', '/%2E%2E%2Fpackage.json', '/src/%2e%2e/story.js', '/.git/config', '/.superpowers/sdd/private.md']) {
+      assert.equal((await get(port, path)).status, 403, path);
+    }
+    assert.equal((await get(port, '/%ZZ')).status, 400);
+  });
+});
+
+test('a symlink to a real file outside the served root is refused', async () => {
+  await withFixture(async (fixture) => {
+    const served = join(fixture, 'served');
+    await mkdir(served);
+    await writeFile(join(fixture, 'outside.txt'), 'must never be served');
+    await symlink(join(fixture, 'outside.txt'), join(served, 'escape.txt'));
+    await withServer(served, async (port) => {
+      const response = await get(port, '/escape.txt');
+      assert.equal(response.status, 403);
+      assert.ok(!response.body.includes('must never be served'));
+    });
+  });
+});

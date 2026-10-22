@@ -38,7 +38,7 @@ try {
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist);
 for (const name of files) {
-  const output = join(dist, name);
+  const output = join(dist, name === 'public/CNAME' ? 'CNAME' : name);
   await mkdir(dirname(output), { recursive: true });
   await copyFile(join(projectRoot, name), output);
 }

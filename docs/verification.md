@@ -1,0 +1,86 @@
+# 验证记录
+
+2026-10-22。Task3 本地代码和发布准备已完成；完整浏览器验收、最终截图复核及 Task3 审查仍待控制器执行。当前没有上线，也没有真实微信、国内网络或正式域名 TLS 的实测结果。
+
+## 已运行的本地检查
+
+环境：Node v26.12.1；项目要求 Node >=22，没有安装依赖。以下命令均在仓库根目录执行。
+
+| 命令 | 实际结果 |
+| --- | --- |
+| `node --test tests/site.test.js`，加入 CNAME 前 | RED：5 项中 3 通过、2 失败；源 CNAME 不存在，部署清单缺少根目录 CNAME |
+| `node --test tests/site.test.js`，最小修正后 | GREEN：5/5 通过，无取消或跳过 |
+| `npm test`，最终完整套件一次 | 19/19 通过，无失败、取消或跳过，208.783333ms |
+| `npm run build`，最终构建 | 输出 9 个静态文件 |
+| `node --check scripts/verify-browser.mjs` | 退出 0，仅证明表达式语法有效，不证明浏览器行为 |
+| `git diff --check` | 退出 0 |
+
+包装测试实际构建后，把站点复制到临时仓库子路径，通过 HTTP 读取 HTML 的模块、样式、图标及递归模块依赖，检查 MIME 和相对 URL。部署文件清单排除文档、测试、工具脚本及私有产物。源站和构建站均检查缺失路径 404、隐藏路径拒绝、编码目录穿越拒绝；另用真实外部文件及符号链接验证根目录边界。每个自有 HTTP listener 和临时目录都在 `finally` 中关闭或清理。未启动持久服务器；控制器持有的预览与浏览器不归本实现者管理。
+
+最小包装修正是添加 [../public/CNAME](../public/CNAME)，并让 [../scripts/build.mjs](../scripts/build.mjs) 将该文件放到构建根目录。`.nojekyll` 沿用原有构建逻辑。
+
+## 静态 taste lint
+
+运行了 brief 指定的原命令，没有增加 `--app`：
+
+```sh
+node /Users/jasondai/.dsh/skills/design-taste-frontend/scripts/lint.mjs index.html src --json
+```
+
+实际退出 0，扫描 6 个文件，只有 1 条 WARN，没有 FAIL：
+
+```json
+{
+ "files": 6,
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "em-dash",
+   "file": "(all files)",
+   "line": 0,
+   "match": "6 em dashes",
+   "message": "Em-dash habit. Use a full stop or a comma; keep at most one or two on a page."
+  }
+ ]
+}
+```
+
+6 处横线是三组历史日期范围在共享数据和无脚本正文中的对应写法，保留批准的日期格式。原创示意地图和稀疏路线动效遵循设计说明；没有为营销页的图片或动效数量要求添加无关素材。会启动独立浏览器的 taste inspector 未运行。
+
+## 控制器已发回的初步观察
+
+控制器使用专用 Brave 对源页面进行了 1440px 与 390px 的初步截图复核，报告标题、地图及正文整体可读。390px 开场 h2 的原有移动端 CSS 隐藏了语义换行，实际排成“沿四次渡河，看 / 懂一次次调整。”，拆开“看懂”；控制器还确认文本区宽 358px、字号 28px、`br` 的计算 display 为 none。
+
+本次仅移除 [../src/styles.css](../src/styles.css) 中隐藏该换行的移动端规则，保留原文与桌面排版。修正后的 390px 视觉复核仍待控制器执行。两处“开始阅读”和多处“史料来源”是不同位置的入口，验收函数按作用域或首个匹配定位。
+
+初步截图文件名为 `source-cover-390.png`、`source-cover-1440.png`，均位于下述临时 QA 目录。本实现者没有操作浏览器或自行查看这些截图；以上结论明确来自控制器回传，不是最终视觉评分。
+
+## 完整浏览器验收待执行
+
+[../scripts/verify-browser.mjs](../scripts/verify-browser.mjs) 是单个 `async (page) => { ... }` 表达式，没有顶层模块导入、导出、驱动或启动浏览器的代码；它在页面内动态导入公开的共享故事数据。控制器读取表达式后，通过已有专用 Brave MCP 传入当前页面执行。控制器将先用构建结果替换自己的源站预览，在同一个本地 URL 验收。
+
+脚本的实际配置为：
+
+```js
+const base = 'http://127.0.0.1:4173/';
+const artifacts = '/tmp/dsh-browser-output/brave-agent';
+```
+
+原 brief 要求截图保存在工作树 `artifacts/`；控制器实际尝试后收到 MCP 允许目录限制的拒绝，随后明确要求只写上述已配置输出目录。本脚本遵循这一后续裁定，不通过其他路径复制被拒绝的截图。截图和 PNG 下载仅作临时 QA 证据，不声称作为工作树交付物长期保留。工作树的 `artifacts/` 仍加入忽略清单，供本地 ZIP 等非浏览器交付使用。脚本通过正常源码读取后以代码参数传入 MCP，不让 MCP 越界读取源码文件。
+
+计划检查和输出如下，尚没有实际通过结果：
+
+| 检查 | 预定证据 |
+| --- | --- |
+| 390×844、768×1024、1440×1000、320×844 | 390px 首个操作在任何自动滚动前的边界；正文 >=16px；按钮与题目标签 >=44px；无横向溢出；四章标题/日期/方向与共享数据一致；展开及累计路线同步 |
+| 顺序、倒序、直达、快速跳转、返回开场、重置、刷新、未知 hash | 可见标题、正文、当前章节语义、路线隐藏/显示与 live region 文本 |
+| 两道理解题 | 各组原生 radio 通过 Tab 获得实际 `:focus-visible`；计算可见 outline 与渲染背景对比 >=3:1；错误/正确解释与重新选择 |
+| 来源对话框 | 打开焦点、12 次正反 Tab 包含、Escape/外部点击/关闭按钮及焦点恢复；来源链接正确且不访问外站 |
+| 纪念卡 | Blob PNG 签名、浏览器真实解码 1080×1440、下载事件、可见“打开图片”在同一页打开原生图像并解码 |
+| 减少动态 | `page.emulateMedia` 后立即显示完整第四渡路线，动画名 none、dash offset 0 |
+| 真正禁用脚本 | 同源 iframe 只允许 same-origin、不允许 scripts，检查实际 noscript 四章全文、日期方向、尾声、来源；预期 sandbox 模块阻止消息单独收集 |
+| 控制台与恢复 | 收集 JS、console 和 HTTP/请求错误；`finally` 恢复浏览器偏好媒体、原视口及普通页面，移除自有 listener；不新建或关闭 page/context |
+
+每种宽度预定输出 `{width}-cover.png`、`{width}-chapter-2.png`、`{width}-chapter-4.png`、`{width}-epilogue.png`。390px 另有 `390-quiz-1-keyboard-focus.png`、`390-quiz-2-keyboard-focus.png`、`390-source-dialog.png`、`390-share-preview.png`、`390-native-png.png`、`390-reduced-motion-final-route.png`、`390-noscript-full-narrative.png`，以及实际下载的 `chishui-card.png`。这些都是相对于临时 QA 输出目录的文件名；是否生成、最终路径及截图批评将在控制器返回后补写。
+
+完整验收、最终截图批评、修复后复测、真实微信/国内网络、上线域名和 TLS 均保持待验证。当前不打视觉分，也不以 Node 通过代替浏览器通过。
