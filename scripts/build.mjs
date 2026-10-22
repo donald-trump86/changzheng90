@@ -6,7 +6,8 @@ const projectRoot = await realpath(fileURLToPath(new URL('../', import.meta.url)
 const dist = resolve(projectRoot, 'dist');
 const sourceFiles = new Set(['src/styles.css', 'src/main.js', 'src/story.js', 'src/map.js', 'src/share.js', 'src/media.js']);
 const assetFiles = new Set(['public/favicon.svg', 'public/party-emblem.svg', 'public/internationale.mp3', 'public/CNAME', 'public/history/long-march-gathering.jpg', 'public/history/sixth-army-1935.jpg', 'public/history/luding-bridge-museum.jpg', 'public/history/luding-chain-museum.jpg']);
-const files = ['index.html'];
+const studyFiles = ['design-study/index.html', 'design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
+const files = ['index.html', ...studyFiles];
 
 async function inventory(directory, allowed) {
   for (const entry of (await readdir(join(projectRoot, directory), { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name, 'en'))) {
@@ -17,7 +18,7 @@ async function inventory(directory, allowed) {
     else if (entry.isFile() && allowed.has(name)) files.push(name);
   }
 }
-for (const directory of ['src', 'public']) {
+for (const directory of ['src', 'public', 'design-study']) {
   const info = await lstat(join(projectRoot, directory));
   if (!info.isDirectory() || info.isSymbolicLink()) throw new Error(`Expected regular directory: ${directory}`);
 }

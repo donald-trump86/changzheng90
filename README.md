@@ -4,6 +4,10 @@
 
 **在线体验：[https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)**。入口通过Cloudflare代理，静态源站和源码仍在GitHub。
 
+**新设计预览：[三种可切换的阅读版式](https://changzheng90.luvch1nabest.me/design-study/index.html)**。包含“行军档案”“长征图录”“山河长卷”，采用原创河谷艺术示意和已有出处依据的历史老照片；无音乐自动播放。公开预览不包含本地研究中尚未确认复用许可的两件原图，页面保留官方原文入口。
+
+本项目后续已授权的修改默认提交到现有远程并提供在线链接，压缩包只在用户另行要求时提供。预览源文件在 [design-study](design-study/)，随白名单构建发布。
+
 ## 本地预览
 
 当前本地仓库为 `~/changzheng90`，公开源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。在本地仓库根目录运行以下命令。
@@ -55,7 +59,7 @@ PORT=4174 npm run dev -- --root dist
 
 所有站点脚本、样式、图形、照片和音乐均随站点同源托管；使用系统字体，没有第三方脚本或字体依赖、统计、账号或上传接口。纪念卡在设备内生成。下载受限时可用“打开图片”查看本机生成图，再长按保存；不同设备的中文字体和保存行为仍需实测。
 
-## 验证与发布状态
+## 既有正式应用的验证与发布状态
 
 [验证记录](docs/verification.md)把本轮与历史版本分开。本轮最终完整 Node 套件仅运行一次，**22/22**通过；构建输出**16个静态文件**，四张JPEG的实际文件、部署副本、仓库子路径HTTP与MIME检查均通过。7个JavaScript语法检查、验收表达式编译及未知阶段拒绝通过；非浏览器taste lint为0 FAIL、1个原有日期范围横线提示。
 
@@ -63,6 +67,8 @@ PORT=4174 npm run dev -- --root dist
 
 本轮音频始终静音，没有主观听感评估；后台暂停使用合成 `document.hidden` fixture。真实手机设备／微信、内地网络，以及缺少IntersectionObserver时的浏览器降级路径尚未测试。本轮独立审查已完成：Spec PASS、Quality Approved，无产品问题；仅提出的非阻断文档状态清理已在本次同步。
 
-源码在 `main` 分支维护，16文件构建发布到独立 `gh-pages` 分支。新“赤水朱印”favicon已发布，并用 `red-river-2` 版本参数更新缓存；16／32／64px深浅背景、实际SVG解码与聚焦包装测试1/1通过。这次小修没有重跑上述图库版本的完整22／17组验收。
+源码在 `main` 分支维护，构建发布到独立 `gh-pages` 分支。正式应用原有16个文件之外，构建新增 `design-study/` 的HTML、原创河谷图与两幅历史照片，共20个静态文件。新“赤水朱印”favicon已发布，并用 `red-river-2` 版本参数更新缓存；16／32／64px深浅背景、实际SVG解码与聚焦包装测试1/1通过。这次favicon小修没有重跑上述图库版本的完整22／17组验收。
+
+2026-10-23在线设计预览的包装与HTTP检查**9/9通过**，覆盖20文件白名单、实际仓库子路径、三幅图片的同源读取、JPEG／PNG类型和原始字节、隐藏路径与穿越边界。公开版与本地已验收样稿的样式、脚本完全相同；本次另在390／1440px实际检查三种版式共6组，均无横向溢出，正文至少16px，三图实际解码与图片对话框关闭后焦点恢复通过。未将旧版验收计为新预览的完整回归。
 
 公开链接现为 **[https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)**。专用域名已启用Cloudflare代理，访客HTTPS使用其Google Trust Services边缘证书，严格TLS校验通过；区域原有Full回源模式未变。用户已反馈关闭代理后能正常进入，其他运营商与微信设备仍需测试。自动公开GET遇Cloudflare验证页，未记为200或浏览器通过。首次GitHub直连时的14资源哈希与音频范围验证属于历史证据。实际状态见[发布记录](docs/deployment.md)。

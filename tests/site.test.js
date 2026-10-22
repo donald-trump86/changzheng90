@@ -61,7 +61,34 @@ test('custom domain is exact in source and deployment root', async () => {
 test('deployment contains only the public site, no source tooling or private artifacts', async () => {
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css'].sort());
+  const studyFiles = ['design-study/index.html', 'design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css', ...studyFiles].sort());
+});
+
+test('published design study resolves local images under a repository prefix without private research', async () => {
+  await withFixture(async (fixture) => {
+    await cp(dist, join(fixture, 'repository'), { recursive: true });
+    await withServer(fixture, async (port) => {
+      const base = new URL(`http://127.0.0.1:${port}/repository/design-study/index.html`);
+      const html = await get(port, base.pathname);
+      assert.equal(html.status, 200);
+      assert.doesNotMatch(html.body, /reference-(?:weiriver|conference-1934)\.jpg|\/Users\/|artifacts\/|context-b\d+|<audio\b/);
+      const refs = new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]));
+      assert.equal(refs.size, 3);
+      for (const ref of refs) {
+        assert.match(ref, /^\.\//);
+        const url = new URL(ref, base);
+        assert.ok(url.pathname.startsWith('/repository/design-study/'));
+        const response = await get(port, url.pathname);
+        assert.equal(response.status, 200, ref);
+        assert.equal(response.type, ref.endsWith('.png') ? 'image/png' : 'image/jpeg');
+        assert.deepEqual(response.bytes, await readFile(join(root, 'design-study', basename(url.pathname))));
+      }
+      for (const name of ['long-march-gathering.jpg', 'sixth-army-1935.jpg']) {
+        assert.deepEqual(await readFile(join(dist, 'design-study', name)), await readFile(join(root, 'public/history', name)));
+      }
+    });
+  });
 });
 
 test('historical JPEGs have actual encoded bytes and identical deployment copies', async () => {
