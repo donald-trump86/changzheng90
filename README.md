@@ -59,6 +59,6 @@ PORT=4174 npm run dev -- --root dist
 
 控制器已对产品提交 `6e56dbe` 完成六次串行浏览器验收：`gallery` 与390／768／1440／320各2组，`extras` 7组，汇总**17个不同实质组全部通过，应用错误0、媒体取消0**。这是六阶段合并覆盖。四宽度的实际图片解码与排版、无脚本图库、新动效推进及暂停／减少动态、原生路线绘制、键盘焦点、音频和PNG回归均通过。控制器另查看四宽首屏及390／1440px默认折叠图库截图，未发现需修正的视觉问题。PNG实际为213668bytes、1080×1440；音乐解码78秒，真实播放推进及暂停／错误重试通过。
 
-本轮音频始终静音，没有主观听感评估；后台暂停使用合成 `document.hidden` fixture。真实手机设备／微信、内地网络、线上DNS和正式域名TLS，以及缺少IntersectionObserver时的浏览器降级路径尚未测试。本轮独立审查已完成：Spec PASS、Quality Approved，无产品问题；仅提出的非阻断文档状态清理已在本次同步。
+本轮音频始终静音，没有主观听感评估；后台暂停使用合成 `document.hidden` fixture。真实手机设备／微信、内地网络，以及缺少IntersectionObserver时的浏览器降级路径尚未测试。本轮独立审查已完成：Spec PASS、Quality Approved，无产品问题；仅提出的非阻断文档状态清理已在本次同步。
 
-源码在 `main` 分支维护，公开源码仓库已创建；GitHub Pages和DNS仍未执行，待用户看过最终内容并确认。[发布提案](docs/deployment.md)保留后续部署说明。
+源码在 `main` 分支维护；用户确认发布后，16文件构建已推到独立 `gh-pages` 分支，GitHub Pages构建成功，并绑定专用域名。公开测试链接为 **[http://changzheng90.luvch1nabest.me/](http://changzheng90.luvch1nabest.me/)**。已核对公开14个页面资源的实际内容哈希与构建一致，音频64字节范围请求返回206。HTTPS证书仍在等待GitHub就绪，当前未强制跳转；公开域名Brave验收受到HTTP客户端拦截，未记为通过。实际发布状态和维护边界见[发布记录](docs/deployment.md)。
