@@ -1,5 +1,13 @@
 # 验证记录
 
+## Favicon与Cloudflare入口更新
+
+2026-10-22，产品增量 `b918f2ac26ee6f14e24978376356fbd4904d575f` 只修改原创favicon和HTML缓存版本。SVG为291bytes；控制器查看16／32／64px深浅背景，实际应用内解码150×150；仓库子路径GET、MIME与 `red-river-2` 参数通过，聚焦包装测试1/1通过。下文22组Node及17组浏览器结果属于图库运行时，未为本次小改重复运行。
+
+用户选择为现有专用CNAME启用Cloudflare代理，回读确认只有 `proxied:false→true`，目标、TTL、其他DNS和原有区域SSL模式Full不变。访客HTTPS严格TLS校验通过；Cloudflare Universal SSL由Google Trust Services签发，覆盖目标域名。Full回源与Full (strict)不同，不能把边缘证书正常写成GitHub回源证书已经有效。
+
+站点分支 `58bf45844cf7e4161ef62c33d07d757f093073e3` 最新Pages构建built、错误为空；远端favicon与构建字节一致，SHA-256为 `807ac5d0f8e38234c366911b27251cbaea9e5229ef1ea28e4950b021c2c3c53f`，HTML版本参数匹配。自动公开GET遇403／Cloudflare验证页后停止，未记为200；用户随后用自己的浏览器关闭代理测试，反馈能正常进入。当前无运营商覆盖、真实微信或独立大陆出口验证；本机Fake-IP路由下的两种请求方式不能冒充两条直连证据。详情见[发布记录](deployment.md)。
+
 ## 本轮历史影像结尾：Node22/22，浏览器17/17（六阶段汇总）
 
 2026-10-22。实施基线 `da62624c0df4e00690f6bc7c4fa7beab77217813`，运行时基线 `a6108d0af8291f62791e64b83cf5743bb8d82865`。本轮移除可见党徽身份图注、四章 insight 和尾声 reflection 的数据／显示／无脚本副本，加入四张本地历史影像与有限阅读／照片入场、独立河面流线。历史事实字段、问题、来源、标准党徽／音乐字节及PNG模块保持原样。

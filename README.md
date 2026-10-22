@@ -2,6 +2,8 @@
 
 沿四次渡河，读懂中央红军如何从被动转向主动。读者先看局势，再展开概略路线，查看行动与结果；尾声有两道理解题、本机生成的 PNG 纪念卡，以及四幅有出处的长征主题影像。
 
+**在线体验：[https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)**。入口通过Cloudflare代理，静态源站和源码仍在GitHub。
+
 ## 本地预览
 
 当前本地仓库为 `~/changzheng90`，公开源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。在本地仓库根目录运行以下命令。
@@ -34,7 +36,7 @@ PORT=4174 npm run dev -- --root dist
 | [src/media.js](src/media.js) | 独立音乐与动画控制、系统减少动态与后台暂停 |
 | [public/party-emblem.svg](public/party-emblem.svg)、[public/internationale.mp3](public/internationale.mp3) | 静态标准党徽与 CC0 数字器乐录音 |
 | [src/styles.css](src/styles.css) | 响应式排版、焦点和减少动态设置 |
-| [public/favicon.svg](public/favicon.svg)、[public/CNAME](public/CNAME) | 原创站点图标和预定独立子域名 |
+| [public/favicon.svg](public/favicon.svg)、[public/CNAME](public/CNAME) | 原创站点图标和专用子域名 |
 | [scripts/serve.mjs](scripts/serve.mjs)、[scripts/build.mjs](scripts/build.mjs) | Node 标准库预览服务器与白名单构建 |
 | [tests/story.test.js](tests/story.test.js)、[tests/site.test.js](tests/site.test.js) | 内容、状态、包装及 HTTP 边界测试 |
 | [scripts/verify-browser.mjs](scripts/verify-browser.mjs) | 交给控制器现有 Brave 页面的浏览器验收函数 |
@@ -51,7 +53,7 @@ PORT=4174 npm run dev -- --root dist
 
 《国际歌》采用 MuseScore 数字器乐复刻录音，作曲 Pierre de Geyter，Realmartcraft 上传并将该音频以 CC0 1.0 发布。音频、标准党徽与四幅照片的来源、许可、大小、尺寸及哈希见[素材清单](docs/assets.md)。录音许可由具体音频文件页核实，不仅依据曲调属于公版。
 
-所有站点脚本、样式、图形、照片和音乐均在本地；使用系统字体，没有 CDN、外部字体、统计、账号或上传接口。纪念卡在设备内生成。下载受限时可用“打开图片”查看本机生成图，再长按保存；不同设备的中文字体和保存行为仍需实测。
+所有站点脚本、样式、图形、照片和音乐均随站点同源托管；使用系统字体，没有第三方脚本或字体依赖、统计、账号或上传接口。纪念卡在设备内生成。下载受限时可用“打开图片”查看本机生成图，再长按保存；不同设备的中文字体和保存行为仍需实测。
 
 ## 验证与发布状态
 
@@ -61,4 +63,6 @@ PORT=4174 npm run dev -- --root dist
 
 本轮音频始终静音，没有主观听感评估；后台暂停使用合成 `document.hidden` fixture。真实手机设备／微信、内地网络，以及缺少IntersectionObserver时的浏览器降级路径尚未测试。本轮独立审查已完成：Spec PASS、Quality Approved，无产品问题；仅提出的非阻断文档状态清理已在本次同步。
 
-源码在 `main` 分支维护；用户确认发布后，16文件构建已推到独立 `gh-pages` 分支，GitHub Pages构建成功，并绑定专用域名。公开测试链接为 **[http://changzheng90.luvch1nabest.me/](http://changzheng90.luvch1nabest.me/)**。已核对公开14个页面资源的实际内容哈希与构建一致，音频64字节范围请求返回206。HTTPS证书仍在等待GitHub就绪，当前未强制跳转；公开域名Brave验收受到HTTP客户端拦截，未记为通过。实际发布状态和维护边界见[发布记录](docs/deployment.md)。
+源码在 `main` 分支维护，16文件构建发布到独立 `gh-pages` 分支。新“赤水朱印”favicon已发布，并用 `red-river-2` 版本参数更新缓存；16／32／64px深浅背景、实际SVG解码与聚焦包装测试1/1通过。这次小修没有重跑上述图库版本的完整22／17组验收。
+
+公开链接现为 **[https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)**。专用域名已启用Cloudflare代理，访客HTTPS使用其Google Trust Services边缘证书，严格TLS校验通过；区域原有Full回源模式未变。用户已反馈关闭代理后能正常进入，其他运营商与微信设备仍需测试。自动公开GET遇Cloudflare验证页，未记为200或浏览器通过。首次GitHub直连时的14资源哈希与音频范围验证属于历史证据。实际状态见[发布记录](docs/deployment.md)。
