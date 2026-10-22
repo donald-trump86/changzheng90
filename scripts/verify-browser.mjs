@@ -86,16 +86,16 @@ async (page) => {
         if (width === 390) assert(firstAction && firstAction.y >= 0 && firstAction.y + firstAction.height <= viewport.height, `first action outside 390×844 viewport: ${JSON.stringify(firstAction)}`);
         const coverLayout = await layout('cover');
         await shot(`${width}-cover`);
-        await start().click();
+        await start().click({ timeout: 5000 });
         const chapterLayouts = [];
         for (const chapter of story.chapters) {
           await chapterState(chapter, false);
-          await page.getByRole('button', { name: '展开路线', exact: false }).click();
+          await page.getByRole('button', { name: '展开路线', exact: false }).click({ timeout: 5000 });
           await chapterState(chapter, true);
           assert(await page.getByRole('button', { name: '路线已展开', exact: true }).isDisabled(), 'revealed control should indicate completion');
           chapterLayouts.push(await layout(chapter.title));
           if (chapter.id === 2 || chapter.id === 4) await shot(`${width}-chapter-${chapter.id}`);
-          await page.getByRole('button', { name: chapter.id === 4 ? '阅读尾声 →' : '下一渡 →', exact: true }).click();
+          await page.getByRole('button', { name: chapter.id === 4 ? '阅读尾声 →' : '下一渡 →', exact: true }).click({ timeout: 5000 });
         }
         await page.getByRole('heading', { name: story.epilogue.title, exact: true }).waitFor({ state: 'visible', timeout: 3000 });
         assert(await page.getByText(story.epilogue.body, { exact: true }).isVisible(), 'epilogue body missing');
@@ -106,19 +106,19 @@ async (page) => {
       });
       await check(`${width}: reverse/direct/rapid navigation, back, reset, reload, unknown hash`, async () => {
         for (const chapter of [...story.chapters].reverse()) {
-          await jump(chapter).click();
+          await jump(chapter).click({ timeout: 5000 });
           await chapterState(chapter, false);
-          await page.getByRole('button', { name: '展开路线', exact: false }).click();
+          await page.getByRole('button', { name: '展开路线', exact: false }).click({ timeout: 5000 });
           await chapterState(chapter, true);
-          await page.getByRole('button', { name: chapter.id === 1 ? '返回开场' : '← 上一渡', exact: true }).click();
+          await page.getByRole('button', { name: chapter.id === 1 ? '返回开场' : '← 上一渡', exact: true }).click({ timeout: 5000 });
           if (chapter.id > 1) await chapterState(story.chapters[chapter.id - 2], false);
           else assert(await start().isVisible(), 'PREV from first chapter must return cover');
         }
-        for (const id of [3, 1, 4, 2, 4, 1]) await jump(story.chapters[id - 1]).click({ delay: 0 });
+        for (const id of [3, 1, 4, 2, 4, 1]) await jump(story.chapters[id - 1]).click({ delay: 0, timeout: 5000 });
         await chapterState(story.chapters[0], false);
-        await page.getByRole('button', { name: '重新开始', exact: false }).click();
+        await page.getByRole('button', { name: '重新开始', exact: false }).click({ timeout: 5000 });
         assert(await start().isVisible(), 'restart did not show cover');
-        await jump(story.chapters[3]).click();
+        await jump(story.chapters[3]).click({ timeout: 5000 });
         await page.reload({ waitUntil: 'networkidle' });
         assert(await start().isVisible(), 'reload must start on cover');
         await page.goto(`${base}#unrecognized`, { waitUntil: 'networkidle' });
@@ -128,8 +128,8 @@ async (page) => {
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await openApp();
-    await jump(story.chapters[3]).click();
-    await page.getByRole('button', { name: '阅读尾声 →', exact: true }).click();
+    await jump(story.chapters[3]).click({ timeout: 5000 });
+    await page.getByRole('button', { name: '阅读尾声 →', exact: true }).click({ timeout: 5000 });
     await check('both quizzes: real keyboard focus, rendered contrast, wrong/correct reselection and explanations', async () => {
       const evidence = [];
       for (const [index, question] of story.questions.entries()) {
@@ -142,6 +142,22 @@ async (page) => {
           if (reached) break;
         }
         assert(reached, `keyboard did not reach quiz ${index + 1} radio with :focus-visible`);
+        // Native focus can start a smooth viewport scroll. Observe it settling; never force-scroll.
+        const settle = await firstRadio.evaluate(async (el) => {
+          const started = performance.now();
+          let previousTop, stableSamples = 0, sample;
+          do {
+            const r = el.getBoundingClientRect();
+            const focused = el === document.activeElement && el.matches(':focus-visible');
+            const inViewport = r.top >= 0 && r.bottom <= innerHeight;
+            stableSamples = focused && inViewport && previousTop !== undefined && Math.abs(r.top - previousTop) < 0.5 ? stableSamples + 1 : 0;
+            sample = { top: r.top, bottom: r.bottom, viewportHeight: innerHeight, scrollY, focused, inViewport, elapsedMs: performance.now() - started };
+            if (stableSamples >= 2) return { ...sample, settled: true };
+            previousTop = r.top;
+            await new Promise((resolve) => setTimeout(resolve, 25));
+          } while (performance.now() - started < 2000);
+          return { ...sample, settled: false };
+        });
         const focus = await firstRadio.evaluate((el) => {
           const style = getComputedStyle(el);
           let ancestor = el.parentElement, background;
@@ -157,18 +173,20 @@ async (page) => {
           const values = [luminance(style.outlineColor), luminance(background)].sort((a, b) => b - a);
           const r = el.getBoundingClientRect();
           return { outline: style.outlineColor, background, width: style.outlineWidth, style: style.outlineStyle,
-            contrast: (values[0] + 0.05) / (values[1] + 0.05), inViewport: r.top >= 0 && r.bottom <= innerHeight };
+            contrast: (values[0] + 0.05) / (values[1] + 0.05), focused: el === document.activeElement && el.matches(':focus-visible'),
+            top: r.top, bottom: r.bottom, viewportHeight: innerHeight, scrollY, inViewport: r.top >= 0 && r.bottom <= innerHeight };
         });
-        assert(focus.style !== 'none' && parseFloat(focus.width) > 0 && focus.contrast >= 3 && focus.inViewport, `rendered focus failed: ${JSON.stringify(focus)}`);
+        assert(settle.settled && focus.focused && focus.style !== 'none' && parseFloat(focus.width) > 0 && focus.contrast >= 3 && focus.inViewport,
+          `quiz ${index + 1} rendered focus failed: ${JSON.stringify({ ...focus, settle })}`);
         await shot(`390-quiz-${index + 1}-keyboard-focus`);
         const wrong = (question.answer + 1) % question.options.length;
-        await group.getByRole('radio', { name: question.options[wrong], exact: true }).check();
+        await group.getByRole('radio', { name: question.options[wrong], exact: true }).check({ timeout: 5000 });
         assert((await group.getByRole('status').textContent()).includes(`再想一想，可以重新选择。${question.explanation}`), 'wrong-answer explanation missing');
-        await group.getByRole('radio', { name: question.options[question.answer], exact: true }).check();
+        await group.getByRole('radio', { name: question.options[question.answer], exact: true }).check({ timeout: 5000 });
         assert((await group.getByRole('status').textContent()).includes(`回答正确。${question.explanation}`), 'correct-answer explanation missing');
-        evidence.push({ quiz: index + 1, ...focus });
+        evidence.push({ quiz: index + 1, ...focus, settle });
       }
-      await page.getByRole('button', { name: '回看全程', exact: true }).click();
+      await page.getByRole('button', { name: '回看全程', exact: true }).click({ timeout: 5000 });
       await chapterState(story.chapters[0], false);
       return evidence;
     });
@@ -176,35 +194,44 @@ async (page) => {
       const trigger = page.getByRole('button', { name: /^史料来源/ }).first();
       const dialog = page.getByRole('dialog', { name: '史料来源', exact: true });
       const focusedTrigger = () => trigger.evaluate((el) => el === document.activeElement);
-      await trigger.click();
-      await dialog.waitFor({ state: 'visible', timeout: 3000 });
       const close = dialog.getByRole('button', { name: /^关闭/ });
-      assert(await close.evaluate((el) => el === document.activeElement), 'dialog did not take focus');
-      for (const source of story.sources) assert(await dialog.getByRole('link', { name: `${source.title} ↗`, exact: true }).getAttribute('href') === source.url, 'source link mismatch');
-      for (const key of ['Tab', 'Shift+Tab']) for (let i = 0; i < 6; i++) {
-        await page.keyboard.press(key);
-        assert(await dialog.evaluate((el) => el.contains(document.activeElement)), `focus escaped on ${key}`);
+      try {
+        await trigger.click({ timeout: 5000 });
+        await dialog.waitFor({ state: 'visible', timeout: 3000 });
+        assert(await close.evaluate((el) => el === document.activeElement), 'dialog did not take focus');
+        for (const source of story.sources) assert(await dialog.getByRole('link', { name: `${source.title} ↗`, exact: true }).getAttribute('href') === source.url, 'source link mismatch');
+        for (const key of ['Tab', 'Shift+Tab']) for (let i = 0; i < 12; i++) {
+          await page.keyboard.press(key);
+          const active = await dialog.evaluate((el) => ({ contained: el.contains(document.activeElement), tag: document.activeElement?.tagName, text: document.activeElement?.textContent?.trim().slice(0, 100) }));
+          assert(active.contained, `focus escaped on ${key} step ${i + 1}: ${JSON.stringify(active)}`);
+        }
+        await layout('source dialog');
+        await shot('390-source-dialog');
+        await page.keyboard.press('Escape');
+        await dialog.waitFor({ state: 'hidden', timeout: 3000 });
+        assert(await focusedTrigger(), 'Escape did not close/restore focus');
+        await trigger.click({ timeout: 5000 });
+        const bounds = await dialog.boundingBox();
+        assert(bounds && bounds.x > 2, 'no outside backdrop coordinate');
+        await page.mouse.click(2, 2);
+        await dialog.waitFor({ state: 'hidden', timeout: 3000 });
+        assert(await focusedTrigger(), 'outside dismissal did not restore focus');
+        await trigger.click({ timeout: 5000 });
+        await close.click({ timeout: 3000 });
+        await dialog.waitFor({ state: 'hidden', timeout: 3000 });
+        assert(await focusedTrigger(), 'close button did not restore focus');
+        return { sources: story.sources.length, tabChecks: 24, dismissalModes: 3 };
+      } finally {
+        if (await dialog.isVisible()) {
+          await page.keyboard.press('Escape');
+          await dialog.waitFor({ state: 'hidden', timeout: 3000 });
+        }
       }
-      await layout('source dialog');
-      await shot('390-source-dialog');
-      await page.keyboard.press('Escape');
-      assert(!await dialog.isVisible() && await focusedTrigger(), 'Escape did not close/restore focus');
-      await trigger.click();
-      const bounds = await dialog.boundingBox();
-      assert(bounds && bounds.x > 2, 'no outside backdrop coordinate');
-      await page.mouse.click(2, 2);
-      await dialog.waitFor({ state: 'hidden', timeout: 3000 });
-      assert(await focusedTrigger(), 'outside dismissal did not restore focus');
-      await trigger.click();
-      await close.click();
-      await dialog.waitFor({ state: 'hidden', timeout: 3000 });
-      assert(await focusedTrigger(), 'close button did not restore focus');
-      return { sources: story.sources.length, tabChecks: 12, dismissalModes: 3 };
     });
     await check('local PNG signature, native decoding, download and visible open-image fallback', async () => {
-      await jump(story.chapters[3]).click();
-      await page.getByRole('button', { name: '阅读尾声 →', exact: true }).click();
-      await page.getByRole('button', { name: '制作纪念卡', exact: false }).click();
+      await jump(story.chapters[3]).click({ timeout: 5000 });
+      await page.getByRole('button', { name: '阅读尾声 →', exact: true }).click({ timeout: 5000 });
+      await page.getByRole('button', { name: '制作纪念卡', exact: false }).click({ timeout: 5000 });
       const preview = page.getByRole('img', { name: /^四渡赤水纪念卡：/ });
       await preview.waitFor({ state: 'visible', timeout: 10000 });
       const png = await preview.evaluate(async (img) => {
@@ -220,7 +247,7 @@ async (page) => {
       await layout('share preview');
       await shot('390-share-preview');
       const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
-      await downloadLink.click();
+      await downloadLink.click({ timeout: 5000 });
       const download = await downloadPromise;
       await download.saveAs(`${artifacts}/chishui-card.png`);
       assert(await download.failure() === null, 'download failed');
@@ -228,7 +255,7 @@ async (page) => {
       const originalTarget = await openLink.getAttribute('target');
       try {
         await openLink.evaluate((el) => el.setAttribute('target', '_self'));
-        await openLink.click();
+        await openLink.click({ timeout: 5000 });
         await page.waitForURL(/^blob:/, { timeout: 5000 });
         const native = await page.locator('img').evaluate(async (img) => { await img.decode(); return { width: img.naturalWidth, height: img.naturalHeight }; });
         assert(native.width === 1080 && native.height === 1440, 'native open-image fallback did not decode');
@@ -244,8 +271,8 @@ async (page) => {
       try {
         await page.emulateMedia({ reducedMotion: 'reduce' });
         await openApp();
-        await jump(story.chapters[3]).click();
-        await page.getByRole('button', { name: '展开路线', exact: false }).click();
+        await jump(story.chapters[3]).click({ timeout: 5000 });
+        await page.getByRole('button', { name: '展开路线', exact: false }).click({ timeout: 5000 });
         await chapterState(story.chapters[3], true);
         const motion = await page.locator('#map .current-route .march-line').evaluate((el) => {
           const style = getComputedStyle(el);
@@ -259,7 +286,7 @@ async (page) => {
     await check('genuinely disabled scripting: sandboxed same-origin iframe exposes full noscript narrative', async () => {
       phase = 'noscript';
       try {
-        await page.setContent(`<iframe title="无脚本阅读验证" sandbox="allow-same-origin" src="${base}" style="border:0;width:100%;height:800px"></iframe>`, { waitUntil: 'networkidle', timeout: 15000 });
+        await page.setContent(`<head><link rel="icon" type="image/svg+xml" href="./public/favicon.svg"></head><body><iframe title="无脚本阅读验证" sandbox="allow-same-origin" src="${base}" style="border:0;width:100%;height:800px"></iframe></body>`, { waitUntil: 'networkidle', timeout: 15000 });
         const frame = page.frameLocator('iframe[title="无脚本阅读验证"]');
         await frame.getByText('当前未启用 JavaScript，以下可阅读四次渡河全文与史料来源。', { exact: true }).waitFor({ state: 'visible', timeout: 5000 });
         for (const chapter of story.chapters) {

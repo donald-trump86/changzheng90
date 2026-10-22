@@ -84,6 +84,9 @@ figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap
 #reveal { margin-bottom: 28px; }
 #chapter-detail { animation: chapter-in 260ms ease both; }
 @keyframes chapter-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.keep-together { white-space: nowrap; }
+#map-caption { word-break: keep-all; }
+#reflection { text-wrap: pretty; }
 .interpretation { padding: 20px; background: var(--surface); margin-top: 24px; }
 .reading-controls { display: flex; justify-content: space-between; gap: 12px; margin-top: 28px; }
 .epilogue-controls { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }

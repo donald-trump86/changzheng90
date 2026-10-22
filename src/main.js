@@ -43,7 +43,12 @@ function render() {
   });
   if (chapter) {
     $('#chapter-date').textContent = `${chapter.date} · ${chapter.direction === 'west' ? '西渡' : '东渡'}`;
-    $('#chapter-heading').textContent = chapter.title;
+    $('#chapter-heading').replaceChildren(...chapter.title.match(/[^：，]+[：，]?/gu).map((part) => {
+      const span = document.createElement('span');
+      span.className = 'keep-together';
+      span.textContent = part;
+      return span;
+    }));
     for (const key of ['situation', 'action', 'result', 'insight']) $(`#${key}`).textContent = chapter[key];
     $('#chapter-detail').hidden = !state.revealed;
     $('#reveal').setAttribute('aria-expanded', String(state.revealed));
@@ -134,6 +139,17 @@ document.querySelectorAll('[data-open-sources]').forEach((button) => {
   });
 });
 $('#close-sources').addEventListener('click', () => dialog.close());
+dialog.addEventListener('keydown', (event) => {
+  if (event.key !== 'Tab' || !dialog.open) return;
+  const controls = [...dialog.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')]
+    .filter((element) => element.checkVisibility() && element.tabIndex >= 0);
+  if (!controls.length) return;
+  const index = controls.indexOf(document.activeElement);
+  if (event.shiftKey ? index <= 0 : index === controls.length - 1 || index === -1) {
+    event.preventDefault();
+    controls[event.shiftKey ? controls.length - 1 : 0].focus();
+  }
+});
 dialog.addEventListener('click', (event) => {
   const bounds = dialog.getBoundingClientRect();
   if (event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) dialog.close();
