@@ -14,12 +14,12 @@ const dist = join(root, 'dist');
 const domain = 'changzheng90.luvch1nabest.me\n';
 before(() => execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root }));
 
-function get(port, path) {
+function get(port, path, options = {}) {
   return new Promise((resolve, reject) => {
-    const req = request({ hostname: '127.0.0.1', port, path, agent: false }, (res) => {
+    const req = request({ hostname: '127.0.0.1', port, path, agent: false, ...options }, (res) => {
       const chunks = [];
       res.on('data', (chunk) => chunks.push(chunk));
-      res.on('end', () => resolve({ status: res.statusCode, type: res.headers['content-type'], body: Buffer.concat(chunks).toString('utf8') }));
+      res.on('end', () => { const bytes = Buffer.concat(chunks); resolve({ status: res.statusCode, type: res.headers['content-type'], headers: res.headers, bytes, body: bytes.toString('utf8') }); });
     });
     req.setTimeout(3000, () => req.destroy(new Error('HTTP check timed out')));
     req.on('error', reject);
@@ -60,7 +60,7 @@ test('custom domain is exact in source and deployment root', async () => {
 test('deployment contains only the public site, no source tooling or private artifacts', async () => {
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', 'src/main.js', 'src/map.js', 'src/share.js', 'src/story.js', 'src/styles.css']);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', 'public/internationale.mp3', 'public/party-emblem.svg', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css']);
 });
 
 test('built HTML assets and recursive module imports resolve over HTTP under a repository prefix', async () => {
@@ -70,8 +70,8 @@ test('built HTML assets and recursive module imports resolve over HTTP under a r
       const base = new URL(`http://127.0.0.1:${port}/repository/index.html`);
       const html = await get(port, base.pathname);
       assert.equal(html.status, 200);
-      const refs = [...html.body.matchAll(/<(?:script|link)\b[^>]*\b(?:src|href)="([^"]+)"/g)].map((match) => match[1]);
-      assert.equal(refs.length, 3, 'module, stylesheet and favicon');
+      const refs = [...html.body.matchAll(/<(?:script|link|img|audio)\b[^>]*\b(?:src|href)="([^"]+)"/g)].map((match) => match[1]);
+      assert.equal(refs.length, 5, 'module, stylesheet, favicon, emblem and audio');
       const visited = new Set();
       async function visit(reference, from) {
         assert.match(reference, /^\.\.?\//, 'resources use relative URLs');
@@ -86,10 +86,11 @@ test('built HTML assets and recursive module imports resolve over HTTP under a r
           assert.match(response.type, /^text\/javascript/);
           for (const match of response.body.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)) await visit(match[1], url);
         } else if (url.pathname.endsWith('.css')) assert.match(response.type, /^text\/css/);
+        else if (url.pathname.endsWith('.mp3')) assert.equal(response.type, 'audio/mpeg');
         else assert.match(response.type, /^image\/svg\+xml/);
       }
       for (const ref of refs) await visit(ref, base);
-      assert.equal(visited.size, 6, 'four modules, stylesheet, favicon all fetched');
+      assert.equal(visited.size, 9, 'five modules, stylesheet, favicon, emblem and audio all fetched');
     });
   });
 });
@@ -116,4 +117,48 @@ test('a symlink to a real file outside the served root is refused', async () => 
       assert.ok(!response.body.includes('must never be served'));
     });
   });
+});
+
+
+test('local audio supports exact GET ranges, suffixes, HEAD and 416', async () => {
+  const original = await readFile(join(root, 'public/internationale.mp3'));
+  assert.ok(original.length > 100000, 'actual encoded instrumental asset');
+  await withServer(dist, async (port) => {
+    const path = '/public/internationale.mp3';
+    const full = await get(port, path);
+    assert.equal(full.type, 'audio/mpeg');
+    assert.deepEqual(full.bytes, original);
+    assert.equal(full.headers['accept-ranges'], 'bytes');
+    for (const [range, start, end] of [['bytes=0-127', 0, 127], ['bytes=128-', 128, original.length - 1], ['bytes=-97', original.length - 97, original.length - 1], ['bytes=0-999999999', 0, original.length - 1]]) {
+      const part = await get(port, path, { headers: { Range: range } });
+      assert.equal(part.status, 206, range);
+      assert.equal(part.headers['content-range'], `bytes ${start}-${end}/${original.length}`);
+      assert.equal(Number(part.headers['content-length']), end - start + 1);
+      assert.deepEqual(part.bytes, original.subarray(start, end + 1));
+    }
+    const head = await get(port, path, { method: 'HEAD', headers: { Range: 'bytes=0-127' } });
+    assert.equal(head.status, 206);
+    assert.equal(head.bytes.length, 0);
+    assert.equal(head.headers['content-length'], '128');
+    const fullHead = await get(port, path, { method: 'HEAD' });
+    assert.equal(fullHead.status, 200);
+    assert.equal(Number(fullHead.headers['content-length']), original.length);
+    assert.equal(fullHead.bytes.length, 0);
+    for (const range of [`bytes=${original.length}-`, 'bytes=5-2', 'bytes=-0', 'bytes=0-1,4-5', 'bytes=nope']) {
+      const invalid = await get(port, path, { headers: { Range: range } });
+      assert.equal(invalid.status, 416, range);
+      assert.equal(invalid.headers['content-range'], `bytes */${original.length}`);
+    }
+  });
+});
+
+test('static standard emblem and current deployed copy contain no personal signature', async () => {
+  const emblem = await readFile(join(root, 'public/party-emblem.svg'), 'utf8');
+  assert.equal(Buffer.byteLength(emblem), 420);
+  assert.match(emblem, /viewBox="1 1 32 32"/);
+  assert.match(emblem, /#fdcf30/i);
+  assert.doesNotMatch(emblem, /<(?:script|animate|image|foreignObject)\b|(?:href|src)=/i);
+  for (const file of ['index.html', 'src/main.js', 'src/map.js', 'src/share.js']) {
+    assert.doesNotMatch(await readFile(join(dist, file), 'utf8'), /戴诗旭|Jason Dai|作品作者：/i, file);
+  }
 });

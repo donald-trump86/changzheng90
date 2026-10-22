@@ -18,6 +18,7 @@ export function createMap(container) {
       <path class="ridge-near" d="M0 449 67 348 135 386 197 286 276 416 349 338 409 427 481 314 560 399 620 283 720 415V580H0Z"/>
       <g class="ridge-folds"><path d="m57 66 17 87-32 69m110-203 18 89-34 80m363-157-13 86 28 58m103-127-12 103 33 81M190 125l-8 95 30 69m348-154-15 108 29 55M197 286l-13 90 32 74m404-167-17 115 33 65"/></g>
     </g>
+    <g class="map-clouds" aria-hidden="true"><path d="M20 105q85-30 170 0t170 0"/><path d="M410 180q80-30 160 0t160 0"/></g>
     <path class="river-bank" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
     <path class="river" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
     <g class="land-labels"><text x="42" y="52">西岸 · 川南方向</text><text x="475" y="52">东岸 · 黔北方向</text><text class="river-name" x="440" y="127" transform="rotate(-24 440 127)">赤水河</text></g>
@@ -32,7 +33,7 @@ export function createMap(container) {
       <g><circle cx="560" cy="345" r="5"/><text x="573" y="337">桐梓</text></g>
       <g><circle cx="572" cy="464" r="5"/><text x="587" y="474">遵义</text></g>
     </g>
-    <g class="routes">${routes.map((route, i) => `<g data-route="${i + 1}" hidden><path class="march-line" pathLength="1" d="${route.path}"/><path class="crossing-arrow" d="${route.arrow}" marker-end="url(#march-arrow)"/><text class="route-label" x="${route.label[0]}" y="${route.label[1]}">${['一渡 ← 西', '二渡 → 东', '三渡 ← 西', '四渡 → 东'][i]}</text></g>`).join('')}</g>
+    <g class="routes">${routes.map((route, i) => `<g data-route="${i + 1}" hidden><path class="march-line" pathLength="1" d="${route.path}"/><circle class="march-point" r="7" style="offset-path:path('${route.path}')" aria-hidden="true"/><path class="crossing-arrow" d="${route.arrow}" marker-end="url(#march-arrow)"/><text class="route-label" x="${route.label[0]}" y="${route.label[1]}">${['一渡 ← 西', '二渡 → 东', '三渡 ← 西', '四渡 → 东'][i]}</text></g>`).join('')}</g>
     <text class="south-label" x="548" y="558">南下 ↓</text>
   </svg>`;
   const svg = container.querySelector('svg');

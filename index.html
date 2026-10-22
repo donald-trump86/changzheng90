@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#163c35">
+  <meta name="theme-color" content="#a51c27">
   <meta name="description" content="沿四次渡河，读懂中央红军如何从被动转向主动。原创静态历史互动作品，纪念红军长征胜利90周年。">
   <title>四渡赤水 · 为什么这样走</title>
   <link rel="icon" type="image/svg+xml" href="./public/favicon.svg">
@@ -16,9 +16,24 @@
     <p>纪念红军长征胜利90周年</p>
     <button class="text-button" type="button" data-open-sources hidden>史料来源 <span aria-hidden="true">↗</span></button>
   </header>
+  <audio id="background-music" src="./public/internationale.mp3" preload="none" loop></audio>
   <main class="frame" id="reading">
-    <div class="title-block"><h1>四渡赤水</h1><div class="title-meta"><p class="subtitle">为什么这样走</p><button id="cover-start" class="primary" type="button" data-event="START" hidden>开始阅读 <span aria-hidden="true">→</span></button></div></div>
+    <div class="title-block"><h1>四渡赤水</h1><div class="title-meta"><p class="subtitle">为什么这样走</p><button id="cover-start" class="primary" type="button" data-event="START" hidden>开始阅读 <span aria-hidden="true">→</span></button></div>
+      <div class="media-controls" hidden><button type="button" id="music-toggle" aria-pressed="false" aria-describedby="music-status">播放音乐</button><button type="button" id="motion-toggle" aria-pressed="true">暂停动画</button><p id="music-status" role="status" aria-live="polite">《国际歌》· 数字器乐，点击播放</p></div>
+    </div>
     <div id="experience" hidden>
+      <div class="opening-scene">
+        <svg class="opening-landscape" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <g class="scene-cloud cloud-one"><path d="M70 60c90-34 150-34 240 0s150 34 240 0"/><path d="M840 45c80-24 150-24 230 0s150 24 230 0"/></g>
+          <g class="scene-cloud cloud-two"><path d="M420 94c100-25 175-25 275 0s175 25 275 0"/></g>
+          <path class="scene-ridge scene-far" d="M0 220 100 133 178 168 303 43 397 132 492 78 619 189 721 103 807 150 910 37 1030 153 1130 82 1240 174 1342 104 1440 191V300H0Z"/>
+          <path class="scene-ridge scene-middle" d="M0 260 121 207 229 233 360 135 495 239 608 157 730 231 856 150 985 224 1109 142 1244 228 1355 173 1440 234V300H0Z"/>
+          <path class="scene-ridge scene-front" d="M0 290 136 253 270 283 417 223 574 285 744 225 896 280 1045 234 1229 281 1358 237 1440 264V300H0Z"/>
+          <path class="scene-water" d="M1440 265C1240 226 1125 312 930 272S612 222 430 271 160 285 0 258"/>
+        </svg>
+        <figure class="emblem-figure"><img src="./public/party-emblem.svg" width="80" height="80" alt="中国共产党党徽"><figcaption>中国共产党党徽<br>党史学习 · 长征纪念</figcaption></figure>
+        <p class="scene-dates">1935 · 四次渡河<br><span>西渡，东渡，在变化中寻找主动。</span></p>
+      </div>
       <nav class="chapter-nav" aria-label="选择渡河章节">
         <button type="button" data-chapter="1">一渡<span>西渡</span></button>
         <button type="button" data-chapter="2">二渡<span>东渡</span></button>
@@ -61,10 +76,10 @@
       <section class="quiz" id="quiz" aria-labelledby="quiz-heading" hidden><h2 id="quiz-heading">想一想</h2><p>选择后可查看解释，也可重新选择。</p><div id="questions"></div></section>
       <section class="share-section" id="share-section" aria-labelledby="share-heading" hidden>
         <h2 id="share-heading">四渡赤水纪念卡</h2><p id="share-status" role="status">图片在本机生成。可下载图片；也可打开图片后长按保存。</p>
-        <div id="share-result" hidden><img id="share-preview" alt="四渡赤水纪念卡：四次渡河日期与方向、原创概略路线图、作者与作品域名" width="1080" height="1440"><div class="share-actions"><a id="download-card" class="button primary" download="四渡赤水纪念卡.png">下载纪念卡</a><a id="open-card" class="button" target="_blank" rel="noopener">打开图片 ↗</a></div></div>
+        <div id="share-result" hidden><img id="share-preview" alt="四渡赤水纪念卡：四次渡河日期与方向、原创概略路线图、长征纪念主题与作品域名" width="1080" height="1440"><div class="share-actions"><a id="download-card" class="button primary" download="四渡赤水纪念卡.png">下载纪念卡</a><a id="open-card" class="button" target="_blank" rel="noopener">打开图片 ↗</a></div></div>
         <button id="retry-card" type="button" hidden>重新生成图片</button>
       </section>
-      <footer class="footer"><p>文字整理、交互设计与示意图创作：<span class="keep-together">戴诗旭</span></p><div><button class="text-button" type="button" data-open-sources>史料来源 ↗</button><button class="text-button" type="button" data-event="RESTART">重新开始 ↑</button></div></footer>
+      <footer class="footer"><p>纪念红军长征胜利90周年</p><div><button class="text-button" type="button" data-open-sources>史料来源 ↗</button><button class="text-button" type="button" data-event="RESTART">重新开始 ↑</button></div></footer>
     </div>
     <noscript>
       <div class="noscript-text">
@@ -91,10 +106,10 @@
           <h3>结果</h3><p>红军重回黔北并向南行动。之后的南渡乌江、威逼贵阳、巧渡金沙江，继续改变了围追堵截的局面。</p>
           <p>作者解读：每次调整都要回应眼前的形势；四次渡河的过程，不能理解为事先排好的四步计划。</p></section>
         <section><h2>渡过赤水，路还在前方</h2><p>四渡赤水结束，不等于长征结束，也不意味着红军在渡河当天就完全摆脱了所有围堵。此后，中央红军南渡乌江、威逼贵阳，继而向云南机动，并于5月初巧渡金沙江，逐步跳出敌军的包围。</p><p>作者解读：读这段历史，我更关注每次调整的依据。学习和做事时，目标需要坚持，方法也要随实际情况检验、调整。</p></section>
-        <section><h2>史料来源</h2><ul><li><a href="https://www.news.cn/politics/2016-10/02/c_129309668.htm">【镜头·长征路上】四渡赤水出奇兵</a>，新华网（来源：中央纪委监察部网站）。</li><li><a href="https://www.dswxyjy.org.cn/BIG5/n1/2026/0930/c244516-40808291.html">四渡赤水，以少胜多的光辉典范</a>，中共中央党史和文献研究院网站（来源：《光明日报》）。</li></ul><p>地图为原创概略示意，只帮助理解四次渡河的方向、渡口与先后关系。线条不代表精确行军轨迹，山形不代表真实地形。一渡、三渡西渡，二渡、四渡东渡。</p><p>文字整理、交互设计与示意图创作：戴诗旭。本作品不代表史料发布机构的制作、授权或背书。</p></section>
+        <section><h2>史料来源</h2><ul><li><a href="https://www.news.cn/politics/2016-10/02/c_129309668.htm">【镜头·长征路上】四渡赤水出奇兵</a>，新华网（来源：中央纪委监察部网站）。</li><li><a href="https://www.dswxyjy.org.cn/BIG5/n1/2026/0930/c244516-40808291.html">四渡赤水，以少胜多的光辉典范</a>，中共中央党史和文献研究院网站（来源：《光明日报》）。</li></ul><p>地图为原创概略示意，只帮助理解四次渡河的方向、渡口与先后关系。线条不代表精确行军轨迹，山形不代表真实地形。一渡、三渡西渡，二渡、四渡东渡。</p><p>长征主题历史互动作品。本作品不代表史料发布机构的制作、授权或背书。</p><h3>素材来源</h3><p>党徽采用标准金黄色图形，作为党史学习内容展示。来源：<a href="https://commons.wikimedia.org/wiki/File:Danghui_golden.svg" target="_blank" rel="noopener noreferrer">Danghui golden.svg · Wikimedia Commons</a>（PD-China 标注）。</p><p>音乐《国际歌》，作曲 Pierre de Geyter；2023年由 MuseScore 数字器乐复刻，Realmartcraft 上传并对该音频作 <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0 1.0</a> 声明。<a href="https://commons.wikimedia.org/wiki/File:L%27internationale.ogg" target="_blank" rel="noopener noreferrer">音频来源 · Wikimedia Commons</a>。音乐初始关闭，可自行播放或暂停。</p></section>
       </div>
     </noscript>
   </main>
-  <dialog id="sources-dialog" aria-labelledby="sources-heading"><div class="dialog-header"><h2 id="sources-heading">史料来源</h2><button type="button" id="close-sources" autofocus>关闭<span class="sr-only">史料来源</span> ×</button></div><p id="source-context"></p><ul id="sources-list"></ul><h3>关于这张地图</h3><p>地图为原创概略示意，只帮助理解四次渡河的方向、渡口与先后关系。线条不代表精确行军轨迹，山形不代表真实地形。西渡、东渡以文字和路线箭头共同标明；一渡、三渡西渡，二渡、四渡东渡。</p><p>历史叙述据新华网与中共中央党史和文献研究院网站所载材料整理，详细来源可点击查看。章节中的“作者解读”与尾声感想为作者的理解。</p><p>文字整理、交互设计与示意图创作：戴诗旭。本作品不代表史料发布机构的制作、授权或背书。</p></dialog>
+  <dialog id="sources-dialog" aria-labelledby="sources-heading"><div class="dialog-header"><h2 id="sources-heading">史料来源</h2><button type="button" id="close-sources" autofocus>关闭<span class="sr-only">史料来源</span> ×</button></div><p id="source-context"></p><ul id="sources-list"></ul><h3>关于这张地图</h3><p>地图为原创概略示意，只帮助理解四次渡河的方向、渡口与先后关系。线条不代表精确行军轨迹，山形不代表真实地形。西渡、东渡以文字和路线箭头共同标明；一渡、三渡西渡，二渡、四渡东渡。</p><p>历史叙述据新华网与中共中央党史和文献研究院网站所载材料整理，详细来源可点击查看。章节中的“作者解读”与尾声感想为作者的理解。</p><p>长征主题历史互动作品。本作品不代表史料发布机构的制作、授权或背书。</p><h3>素材来源</h3><p>党徽采用标准金黄色图形，作为党史学习内容展示。来源：<a href="https://commons.wikimedia.org/wiki/File:Danghui_golden.svg" target="_blank" rel="noopener noreferrer">Danghui golden.svg · Wikimedia Commons</a>（PD-China 标注）。</p><p>音乐《国际歌》，作曲 Pierre de Geyter；2023年由 MuseScore 数字器乐复刻，Realmartcraft 上传并对该音频作 <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0 1.0</a> 声明。<a href="https://commons.wikimedia.org/wiki/File:L%27internationale.ogg" target="_blank" rel="noopener noreferrer">音频来源 · Wikimedia Commons</a>。音乐初始关闭，可自行播放或暂停。</p></dialog>
 </body>
 </html>

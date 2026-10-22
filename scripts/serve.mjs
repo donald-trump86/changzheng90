@@ -8,7 +8,7 @@ const mime = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
-  '.ico': 'image/x-icon', '.json': 'application/json; charset=utf-8',
+  '.mp3': 'audio/mpeg', '.ico': 'image/x-icon', '.json': 'application/json; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8', '.woff2': 'font/woff2',
 };
 function isInside(root, target) {
@@ -42,13 +42,39 @@ export async function createStaticServer(root = projectRoot) {
       if (!isInside(realRoot, target)) return send(403, 'Forbidden');
       if (!(await stat(target)).isFile()) return send(404, 'Not found');
       const body = await readFile(target);
-      response.writeHead(200, {
+      const headers = {
         'Content-Type': mime[extname(target).toLowerCase()] ?? 'application/octet-stream',
-        'Content-Length': body.length,
+        'Accept-Ranges': 'bytes',
         'Cache-Control': 'no-store',
         'X-Content-Type-Options': 'nosniff',
-      });
-      response.end(request.method === 'HEAD' ? undefined : body);
+      };
+      let start = 0, end = body.length - 1, status = 200;
+      if (request.headers.range !== undefined) {
+        // One bounded byte range only. Reject malformed/multipart inputs consistently.
+        const match = /^bytes=(\d*)-(\d*)$/.exec(request.headers.range);
+        let valid = Boolean(match && (match[1] || match[2]) && body.length);
+        if (valid) {
+          if (!match[1]) {
+            const suffix = Number(match[2]);
+            valid = Number.isSafeInteger(suffix) && suffix > 0;
+            start = Math.max(0, body.length - suffix);
+          } else {
+            start = Number(match[1]);
+            const requestedEnd = match[2] ? Number(match[2]) : end;
+            valid = Number.isSafeInteger(start) && Number.isSafeInteger(requestedEnd) && start < body.length && requestedEnd >= start;
+            end = Math.min(requestedEnd, end);
+          }
+        }
+        if (!valid) {
+          response.writeHead(416, { ...headers, 'Content-Range': `bytes */${body.length}`, 'Content-Length': 0 });
+          return response.end();
+        }
+        status = 206;
+        headers['Content-Range'] = `bytes ${start}-${end}/${body.length}`;
+      }
+      headers['Content-Length'] = Math.max(0, end - start + 1);
+      response.writeHead(status, headers);
+      response.end(request.method === 'HEAD' ? undefined : body.subarray(start, end + 1));
     } catch (error) {
       if (['ENOENT', 'ENOTDIR', 'EISDIR'].includes(error.code)) return send(404, 'Not found');
       if (['EACCES', 'EPERM'].includes(error.code)) return send(403, 'Forbidden');

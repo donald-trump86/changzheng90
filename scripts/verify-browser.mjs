@@ -61,7 +61,7 @@ async (page) => {
     assert(routes.length === 4 && routes.every((route) => route.visible === (route.id < chapter.id || (route.id === chapter.id && revealed))), `route visibility ${JSON.stringify(routes)}`);
     assert(routes.find((route) => route.id === chapter.id)?.current, 'current route marker missing');
     assert(await jump(chapter).getAttribute('aria-current') === 'step', 'chapter selection missing text/semantic marker');
-    const announcement = await page.getByRole('status').first().textContent();
+    const announcement = await page.locator('#announcement').textContent();
     assert(announcement.includes(chapter.title) && announcement.includes(chapter.date), 'live chapter announcement missing');
   }
   page.on('console', consoleListener);
@@ -83,8 +83,9 @@ async (page) => {
         await openApp();
         // Measure BEFORE any click/locator action that can auto-scroll.
         const firstAction = await start().boundingBox();
-        if (width === 390) assert(firstAction && firstAction.y >= 0 && firstAction.y + firstAction.height <= viewport.height, `first action outside 390×844 viewport: ${JSON.stringify(firstAction)}`);
+        assert(firstAction && firstAction.y >= 0 && firstAction.y + firstAction.height <= viewport.height, `first action outside ${width}×${viewport.height} viewport: ${JSON.stringify(firstAction)}`);
         const coverLayout = await layout('cover');
+        assert(!await page.locator('body').evaluate((el) => /戴诗旭|Jason Dai/i.test(el.textContent)), 'personal identity in current page');
         await shot(`${width}-cover`);
         await start().click({ timeout: 5000 });
         const chapterLayouts = [];
@@ -199,7 +200,8 @@ async (page) => {
         await trigger.click({ timeout: 5000 });
         await dialog.waitFor({ state: 'visible', timeout: 3000 });
         assert(await close.evaluate((el) => el === document.activeElement), 'dialog did not take focus');
-        for (const source of story.sources) assert(await dialog.getByRole('link', { name: `${source.title} ↗`, exact: true }).getAttribute('href') === source.url, 'source link mismatch');
+        assert(await dialog.locator('#sources-list a').count() === 2, 'two historical references remain separate from asset credits');
+         for (const source of story.sources) assert(await dialog.getByRole('link', { name: `${source.title} ↗`, exact: true }).getAttribute('href') === source.url, 'source link mismatch');
         for (const key of ['Tab', 'Shift+Tab']) for (let i = 0; i < 12; i++) {
           await page.keyboard.press(key);
           const active = await dialog.evaluate((el) => ({ contained: el.contains(document.activeElement), tag: document.activeElement?.tagName, text: document.activeElement?.textContent?.trim().slice(0, 100) }));
@@ -229,41 +231,65 @@ async (page) => {
       }
     });
     await check('local PNG signature, native decoding, download and visible open-image fallback', async () => {
-      await jump(story.chapters[3]).click({ timeout: 5000 });
-      await page.getByRole('button', { name: '阅读尾声 →', exact: true }).click({ timeout: 5000 });
-      await page.getByRole('button', { name: '制作纪念卡', exact: false }).click({ timeout: 5000 });
-      const preview = page.getByRole('img', { name: /^四渡赤水纪念卡：/ });
-      await preview.waitFor({ state: 'visible', timeout: 10000 });
-      const png = await preview.evaluate(async (img) => {
-        await img.decode();
-        const blob = await (await fetch(img.src)).blob();
-        const bytes = new Uint8Array(await blob.arrayBuffer());
-        return { signature: [...bytes.slice(0, 8)], bytes: bytes.length, type: blob.type, width: img.naturalWidth, height: img.naturalHeight, url: img.src };
+      // Observe actual Canvas text, then restore the native method even on failure.
+      await page.evaluate(() => {
+        const original = CanvasRenderingContext2D.prototype.fillText;
+        window.__chishuiCanvasQA = { original, text: [] };
+        CanvasRenderingContext2D.prototype.fillText = function (...args) {
+          window.__chishuiCanvasQA.text.push(String(args[0]));
+          return original.apply(this, args);
+        };
       });
-      assert(JSON.stringify(png.signature) === '[137,80,78,71,13,10,26,10]' && png.type === 'image/png' && png.width === 1080 && png.height === 1440 && png.url.startsWith('blob:'), `PNG invalid: ${JSON.stringify(png)}`);
-      const downloadLink = page.getByRole('link', { name: '下载纪念卡', exact: true });
-      const openLink = page.getByRole('link', { name: '打开图片', exact: false });
-      assert(await downloadLink.getAttribute('href') === png.url && await openLink.getAttribute('href') === png.url, 'fallback/download must use generated local PNG');
-      await layout('share preview');
-      await shot('390-share-preview');
-      const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
-      await downloadLink.click({ timeout: 5000 });
-      const download = await downloadPromise;
-      await download.saveAs(`${artifacts}/chishui-card.png`);
-      assert(await download.failure() === null, 'download failed');
-      // Exercise the actual visible link in this supplied page; avoid opening another tab.
       try {
-        await openLink.evaluate((el) => el.setAttribute('target', '_self'));
-        await openLink.click({ timeout: 5000 });
-        await page.waitForURL(/^blob:/, { timeout: 5000 });
-        const native = await page.locator('img').evaluate(async (img) => { await img.decode(); return { width: img.naturalWidth, height: img.naturalHeight }; });
-        assert(native.width === 1080 && native.height === 1440, 'native open-image fallback did not decode');
-        await shot('390-native-png');
+        await jump(story.chapters[3]).click({ timeout: 5000 });
+        await page.getByRole('button', { name: '阅读尾声 →', exact: true }).click({ timeout: 5000 });
+        await page.getByRole('button', { name: '制作纪念卡', exact: false }).click({ timeout: 5000 });
+        const preview = page.getByRole('img', { name: /^四渡赤水纪念卡：/ });
+        await preview.waitFor({ state: 'visible', timeout: 10000 });
+        const png = await preview.evaluate(async (img) => {
+          await img.decode();
+          const blob = await (await fetch(img.src)).blob();
+          const bytes = new Uint8Array(await blob.arrayBuffer());
+          const canvas = document.createElement('canvas'); canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+           const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
+           return { signature: [...bytes.slice(0, 8)], bytes: bytes.length, type: blob.type, width: img.naturalWidth, height: img.naturalHeight, url: img.src, corner: [...ctx.getImageData(0, 0, 1, 1).data] };
+        });
+        assert(JSON.stringify(png.signature) === '[137,80,78,71,13,10,26,10]' && png.type === 'image/png' && png.width === 1080 && png.height === 1440 && png.url.startsWith('blob:'), `PNG invalid: ${JSON.stringify(png)}`);
+        assert(JSON.stringify(png.corner) === '[165,28,39,255]', 'PNG must use red ground');
+         const cardText = await page.evaluate(() => window.__chishuiCanvasQA.text);
+         assert(cardText.length > 10 && !/戴诗旭|Jason Dai|作品作者：/i.test(cardText.join(' ')), 'personal identity in actual Canvas text');
+         assert(!/作者|戴诗旭|Jason Dai/i.test(await preview.getAttribute('alt')), 'personal identity in card alt');
+         const downloadLink = page.getByRole('link', { name: '下载纪念卡', exact: true });
+        const openLink = page.getByRole('link', { name: '打开图片', exact: false });
+        assert(await downloadLink.getAttribute('href') === png.url && await openLink.getAttribute('href') === png.url, 'fallback/download must use generated local PNG');
+        await layout('share preview');
+        await shot('390-share-preview');
+        const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
+        await downloadLink.click({ timeout: 5000 });
+        const download = await downloadPromise;
+        await download.saveAs(`${artifacts}/chishui-card.png`);
+        assert(await download.failure() === null, 'download failed');
+        // Exercise the actual visible link in this supplied page; avoid opening another tab.
+        try {
+          await openLink.evaluate((el) => el.setAttribute('target', '_self'));
+          await openLink.click({ timeout: 5000 });
+          await page.waitForURL(/^blob:/, { timeout: 5000 });
+          const native = await page.locator('img').evaluate(async (img) => { await img.decode(); return { width: img.naturalWidth, height: img.naturalHeight }; });
+          assert(native.width === 1080 && native.height === 1440, 'native open-image fallback did not decode');
+          await shot('390-native-png');
+        } finally {
+          // Navigation discards the temporary link attribute; a fresh app restores its original markup.
+          await openApp();
+        }
+        return { ...png, url: 'local blob URL', download: `${artifacts}/chishui-card.png`, cardText };
       } finally {
-        // Navigation discards the temporary link attribute; a fresh app restores its original markup.
-        await openApp();
+        await page.evaluate(() => {
+          if (window.__chishuiCanvasQA) {
+            CanvasRenderingContext2D.prototype.fillText = window.__chishuiCanvasQA.original;
+            delete window.__chishuiCanvasQA;
+          }
+        });
       }
-      return { ...png, url: 'local blob URL', download: `${artifacts}/chishui-card.png` };
     });
     await check('reduced motion: revealed final route is complete immediately', async () => {
       try {
@@ -274,12 +300,111 @@ async (page) => {
         await chapterState(story.chapters[3], true);
         const motion = await page.locator('#map .current-route .march-line').evaluate((el) => {
           const style = getComputedStyle(el);
-          return { reduced: matchMedia('(prefers-reduced-motion: reduce)').matches, animation: style.animationName, offset: style.strokeDashoffset, length: el.getTotalLength() };
+          return { reduced: matchMedia('(prefers-reduced-motion: reduce)').matches, animation: style.animationName, offset: style.strokeDashoffset, length: el.getTotalLength(), activeAnimations: document.getAnimations().filter((a) => a.playState === 'running').length, motion: document.body.dataset.motion };
         });
-        assert(motion.reduced && motion.animation === 'none' && parseFloat(motion.offset) === 0 && motion.length > 0, `route incomplete: ${JSON.stringify(motion)}`);
+        assert(motion.reduced && motion.animation === 'none' && parseFloat(motion.offset) === 0 && motion.length > 0 && motion.activeAnimations === 0 && motion.motion === 'off', `route incomplete: ${JSON.stringify(motion)}`);
         await shot('390-reduced-motion-final-route');
         return motion;
       } finally { await page.emulateMedia({ reducedMotion: null }); }
+    });
+    await check('red commemorative scene, original static gold emblem, live motion and terminal pause', async () => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      try {
+        await openApp();
+        const emblem = await page.getByRole('img', { name: '中国共产党党徽', exact: true }).evaluate(async (img) => {
+          await img.decode();
+          const text = await (await fetch(img.src)).text();
+          return { width: img.naturalWidth, height: img.naturalHeight, bytes: new TextEncoder().encode(text).length,
+            standard: text.includes('viewBox="1 1 32 32"') && /#fdcf30/i.test(text),
+            animated: img.getAnimations({ subtree: true }).length, transform: getComputedStyle(img).transform,
+            background: getComputedStyle(document.body).backgroundColor };
+        });
+        assert(emblem.width === 320 && emblem.height === 320 && emblem.bytes === 420 && emblem.standard && emblem.animated === 0 && emblem.transform === 'none', `emblem changed: ${JSON.stringify(emblem)}`);
+        assert(emblem.background === 'rgb(165, 28, 39)', 'default page is not red');
+        const sample = () => page.locator('.cloud-one').evaluate((el) => getComputedStyle(el).transform);
+        const cloudStart = await sample();
+        await page.waitForTimeout(240);
+        const cloudEnd = await sample();
+        assert(cloudStart !== cloudEnd, 'opening cloud did not actually move');
+        await start().click({ timeout: 5000 });
+        await page.getByRole('button', { name: '展开路线', exact: false }).click({ timeout: 5000 });
+        const route = page.locator('#map .current-route .march-line');
+        const offsetStart = await route.evaluate((el) => getComputedStyle(el).strokeDashoffset);
+        await page.waitForTimeout(200);
+        const offsetEnd = await route.evaluate((el) => getComputedStyle(el).strokeDashoffset);
+        assert(parseFloat(offsetStart) > parseFloat(offsetEnd), 'revealed route did not draw between samples');
+        await page.waitForTimeout(1550);
+        const point = page.locator('#map .current-route .march-point');
+        const pointStart = await point.evaluate((el) => getComputedStyle(el).offsetDistance);
+        await page.waitForTimeout(240);
+        const pointEnd = await point.evaluate((el) => getComputedStyle(el).offsetDistance);
+        assert(pointStart !== pointEnd, 'march point did not actually advance');
+        await page.getByRole('button', { name: '暂停动画', exact: true }).click({ timeout: 5000 });
+        const terminal = await page.evaluate(() => ({
+          offset: getComputedStyle(document.querySelector('.current-route .march-line')).strokeDashoffset,
+          point: getComputedStyle(document.querySelector('.current-route .march-point')).offsetDistance,
+          cloud: getComputedStyle(document.querySelector('.map-clouds')).transform,
+          active: document.getAnimations().filter((a) => a.playState === 'running').length,
+          opacity: getComputedStyle(document.querySelector('#chapter-detail')).opacity,
+        }));
+        await page.waitForTimeout(200);
+        const stopped = await point.evaluate((el) => getComputedStyle(el).offsetDistance);
+        assert(parseFloat(terminal.offset) === 0 && terminal.point === '100%' && stopped === terminal.point && terminal.active === 0 && terminal.opacity === '1', `pause incomplete: ${JSON.stringify(terminal)}`);
+        await shot('390-motion-paused-terminal');
+        await page.getByRole('button', { name: '开启动画', exact: true }).click({ timeout: 5000 });
+        assert(await page.locator('body').getAttribute('data-motion') === 'on', 'motion restart failed');
+        return { emblem, cloudStart, cloudEnd, offsetStart, offsetEnd, pointStart, pointEnd, terminal };
+      } finally { await page.emulateMedia({ reducedMotion: null }); }
+    });
+    await check('actual silent audio decode, opt-in playtime, pause, visibility pause and error retry', async () => {
+      await openApp();
+      let invalidURL;
+      const music = page.locator('#background-music');
+      try {
+        const initial = await music.evaluate((audio) => ({ paused: audio.paused, time: audio.currentTime, autoplay: audio.autoplay }));
+        assert(initial.paused && initial.time === 0 && !initial.autoplay, 'audio must start off');
+        // Muting this element is an extra precaution; the dedicated browser stays host-muted.
+        await music.evaluate((audio) => { audio.muted = true; audio.preload = 'auto'; audio.load(); });
+        await page.waitForFunction(() => document.querySelector('#background-music').readyState >= 2, null, { timeout: 12000 });
+        const decoded = await music.evaluate((audio) => ({ duration: audio.duration, ready: audio.readyState, error: audio.error?.code ?? null }));
+        assert(decoded.ready >= 2 && decoded.duration > 75 && decoded.duration < 82 && !decoded.error, `decode failed: ${JSON.stringify(decoded)}`);
+        await start().click({ timeout: 5000 });
+        assert(await music.evaluate((audio) => audio.paused && audio.currentTime === 0), 'start reading triggered playback');
+        await page.getByRole('button', { name: '播放音乐', exact: true }).click({ timeout: 5000 });
+        await page.waitForFunction(() => { const a = document.querySelector('#background-music'); return !a.paused && a.currentTime > 0.15; }, null, { timeout: 8000 });
+        const playing = await music.evaluate((audio) => ({ time: audio.currentTime, paused: audio.paused, muted: audio.muted }));
+        assert(playing.muted, 'test audio must remain muted');
+        await page.getByRole('button', { name: '暂停音乐', exact: true }).click({ timeout: 5000 });
+        const pausedTime = await music.evaluate((audio) => audio.currentTime);
+        await page.waitForTimeout(180);
+        assert(await music.evaluate((audio, time) => audio.paused && Math.abs(audio.currentTime - time) < 0.04, pausedTime), 'pause did not stop playback time');
+        await page.getByRole('button', { name: '播放音乐', exact: true }).click({ timeout: 5000 });
+        await page.waitForFunction(() => !document.querySelector('#background-music').paused, null, { timeout: 5000 });
+        const hidden = await page.evaluate(() => {
+          const descriptor = Object.getOwnPropertyDescriptor(document, 'hidden');
+          try {
+            Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+            document.dispatchEvent(new Event('visibilitychange'));
+            return { paused: document.querySelector('#background-music').paused, pressed: document.querySelector('#music-toggle').getAttribute('aria-pressed') };
+          } finally { if (descriptor) Object.defineProperty(document, 'hidden', descriptor); else delete document.hidden; }
+        });
+        assert(hidden.paused && hidden.pressed === 'false', 'visibility did not pause audio');
+        invalidURL = await music.evaluate((audio) => {
+          const url = URL.createObjectURL(new Blob(['deliberately invalid encoded audio'], { type: 'audio/mpeg' }));
+          audio.src = url; audio.load(); return url;
+        });
+        await page.waitForFunction(() => document.querySelector('#background-music').error !== null, null, { timeout: 5000 });
+        assert(await page.getByRole('button', { name: '重试音乐', exact: true }).getAttribute('aria-pressed') === 'false', 'error button falsely claims playback');
+        const errorCode = await music.evaluate((audio) => audio.error.code);
+        await music.evaluate((audio) => { audio.src = './public/internationale.mp3'; });
+        await page.getByRole('button', { name: '重试音乐', exact: true }).click({ timeout: 5000 });
+        await page.waitForFunction(() => { const a = document.querySelector('#background-music'); return !a.error && !a.paused && a.currentTime > 0.1; }, null, { timeout: 10000 });
+        return { initial, decoded, playing, pausedTime, hidden, actualInvalidAudioErrorCode: errorCode, retry: 'real asset decoded and playback time advanced' };
+      } finally {
+        await music.evaluate((audio) => { audio.pause(); audio.currentTime = 0; });
+        if (invalidURL) await page.evaluate((url) => URL.revokeObjectURL(url), invalidURL);
+        await openApp();
+      }
     });
     await check('genuinely disabled scripting: sandboxed same-origin iframe exposes full noscript narrative', async () => {
       phase = 'noscript';
@@ -295,7 +420,8 @@ async (page) => {
         for (const value of Object.values(story.epilogue)) assert(await frame.getByText(value, { exact: true }).isVisible(), 'no-script epilogue missing');
         for (const source of story.sources) assert(await frame.getByRole('link', { name: source.title, exact: true }).getAttribute('href') === source.url, 'no-script source missing');
         assert(!await frame.getByRole('button', { name: '开始阅读', exact: true }).first().isVisible(), 'sandbox unexpectedly executed app');
-        const dimensions = await frame.locator('body').evaluate((body) => ({ width: body.ownerDocument.documentElement.clientWidth, scrollWidth: body.scrollWidth, textSize: getComputedStyle(body).fontSize }));
+        assert(!await frame.locator('body').evaluate((el) => /戴诗旭|Jason Dai/i.test(el.textContent)), 'personal identity in no-script copy');
+         const dimensions = await frame.locator('body').evaluate((body) => ({ width: body.ownerDocument.documentElement.clientWidth, scrollWidth: body.scrollWidth, textSize: getComputedStyle(body).fontSize }));
         assert(dimensions.scrollWidth <= dimensions.width + 1 && parseFloat(dimensions.textSize) >= 16, `no-script layout ${JSON.stringify(dimensions)}`);
         const fullHeight = await frame.locator('body').evaluate((body) => body.ownerDocument.documentElement.scrollHeight);
         await page.locator('iframe').evaluate((el, height) => { el.style.height = `${height + 20}px`; }, fullHeight);
@@ -311,7 +437,10 @@ async (page) => {
     checks.push({ name: 'harness setup/execution', pass: false, error: String(error.message).slice(0, 1200) });
   } finally {
     // No context/page is created or closed. Remove every listener and media override we own.
-    try { await page.emulateMedia({ reducedMotion: null }); }
+    try {
+       await page.locator('audio').evaluateAll((nodes) => nodes.forEach((audio) => audio.pause()));
+       await page.emulateMedia({ reducedMotion: null });
+     }
     finally {
       page.off('console', consoleListener);
       page.off('pageerror', pageErrorListener);

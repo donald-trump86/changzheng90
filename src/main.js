@@ -1,6 +1,7 @@
 import { chapters, sources, epilogue, questions, initialState, transition } from './story.js';
 import { createMap } from './map.js';
 import { createShareCard } from './share.js';
+import { createMediaControls } from './media.js';
 
 const $ = (selector) => document.querySelector(selector);
 let state = initialState();
@@ -10,6 +11,8 @@ let sourceTrigger;
 const map = createMap($('#map'));
 const chapterButtons = [...document.querySelectorAll('[data-chapter]')];
 const dialog = $('#sources-dialog');
+createMediaControls({ audio: $('#background-music'), musicButton: $('#music-toggle'), motionButton: $('#motion-toggle'), root: document.body });
+$('.media-controls').hidden = false;
 
 // Progress is intentionally not restored from a hash or local storage.
 // Any hash navigation returns to the cover, including an unknown hash.

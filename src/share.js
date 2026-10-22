@@ -8,9 +8,9 @@ export async function createShareCard() {
   canvas.height = 1440;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas is unavailable');
-  const ink = '#163c35';
-  const ground = '#eef1ee';
-  const accent = '#9b3036';
+  const ink = '#fff4df';
+  const ground = '#a51c27';
+  const accent = '#fdcf30';
   const sans = '"PingFang SC", "Microsoft YaHei", sans-serif';
   const serif = '"Songti SC", "STSong", "SimSun", serif';
   ctx.fillStyle = ground;
@@ -24,14 +24,14 @@ export async function createShareCard() {
   text('四渡赤水', 50, 305, 238, serif);
   text('为什么这样走', 66, 374, 42, serif);
   // Original simplified landscape: one river crossed four times.
-  ctx.fillStyle = '#d8dfda';
+  ctx.fillStyle = '#7e1420';
   ctx.beginPath();
   ctx.moveTo(0, 668);
   for (const [x, y] of [[90, 510], [205, 607], [300, 450], [425, 624], [535, 509], [675, 650], [790, 470], [921, 620], [1080, 532], [1080, 920], [0, 920]]) ctx.lineTo(x, y);
   ctx.closePath();
   ctx.fill();
   const river = new Path2D('M600 420C750 510 420 535 537 656S750 737 610 906');
-  ctx.strokeStyle = '#8faea9';
+  ctx.strokeStyle = '#e5ab63';
   ctx.lineWidth = 34;
   ctx.lineCap = 'round';
   ctx.stroke(river);
@@ -62,7 +62,7 @@ export async function createShareCard() {
     text(chapter.date, 185, y, 31);
     text(chapter.direction === 'west' ? '西渡 ←' : '东渡 →', 840, y, 31, sans, accent);
   });
-  text('作品作者：戴诗旭', 66, 1313, 28);
+  text('长征主题历史互动作品', 66, 1313, 28);
   text('changzheng90.luvch1nabest.me', 66, 1370, 28);
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('PNG export failed')), 'image/png');
