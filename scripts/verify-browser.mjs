@@ -385,18 +385,16 @@ async (page) => {
       let invalidURL;
       const music = page.locator('#background-music');
       try {
-        const initial = await music.evaluate((audio) => ({ paused: audio.paused, time: audio.currentTime, autoplay: audio.autoplay }));
-        assert(initial.paused && initial.time === 0 && !initial.autoplay, 'audio must start off');
+        const initial = await music.evaluate((audio) => ({ paused: audio.paused, time: audio.currentTime, autoplay: audio.autoplay, preload: audio.preload }));
+        assert(initial.paused && initial.time === 0 && !initial.autoplay && initial.preload === 'none', 'audio must start off without eager loading');
         // Muting this element is an extra precaution; the dedicated browser stays host-muted.
-        markMediaCancellation('explicit initial audio load resets the preload-none resource');
-        await music.evaluate((audio) => { audio.muted = true; audio.preload = 'auto'; audio.load(); });
-        await page.waitForFunction(() => document.querySelector('#background-music').readyState >= 2, null, { timeout: 12000 });
-        const decoded = await music.evaluate((audio) => ({ duration: audio.duration, ready: audio.readyState, error: audio.error?.code ?? null }));
-        assert(decoded.ready >= 2 && decoded.duration > 75 && decoded.duration < 82 && !decoded.error, `decode failed: ${JSON.stringify(decoded)}`);
+        await music.evaluate((audio) => { audio.muted = true; });
         await start().click({ timeout: 5000 });
         assert(await music.evaluate((audio) => audio.paused && audio.currentTime === 0), 'start reading triggered playback');
         await page.getByRole('button', { name: '播放音乐', exact: true }).click({ timeout: 5000 });
-        await page.waitForFunction(() => { const a = document.querySelector('#background-music'); return !a.paused && a.currentTime > 0.15; }, null, { timeout: 8000 });
+        await page.waitForFunction(() => { const a = document.querySelector('#background-music'); return a.readyState >= 2 && !a.paused && a.currentTime > 0.15; }, null, { timeout: 12000 });
+        const decoded = await music.evaluate((audio) => ({ duration: audio.duration, ready: audio.readyState, error: audio.error?.code ?? null }));
+        assert(decoded.ready >= 2 && decoded.duration > 75 && decoded.duration < 82 && !decoded.error, `decode failed: ${JSON.stringify(decoded)}`);
         const playing = await music.evaluate((audio) => ({ time: audio.currentTime, paused: audio.paused, muted: audio.muted }));
         assert(playing.muted, 'test audio must remain muted');
         await page.getByRole('button', { name: '暂停音乐', exact: true }).click({ timeout: 5000 });
@@ -417,8 +415,9 @@ async (page) => {
         markMediaCancellation('replace decoded real MP3 with deliberately invalid audio Blob');
         invalidURL = await music.evaluate((audio) => {
           const url = URL.createObjectURL(new Blob(['deliberately invalid encoded audio'], { type: 'audio/mpeg' }));
-          audio.src = url; audio.load(); return url;
+          audio.src = url; return url;
         });
+        await page.getByRole('button', { name: '播放音乐', exact: true }).click({ timeout: 5000 });
         await page.waitForFunction(() => document.querySelector('#background-music').error !== null, null, { timeout: 5000 });
         assert(await page.getByRole('button', { name: '重试音乐', exact: true }).getAttribute('aria-pressed') === 'false', 'error button falsely claims playback');
         const errorCode = await music.evaluate((audio) => audio.error.code);
