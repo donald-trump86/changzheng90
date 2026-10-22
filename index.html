@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163c35">
+  <meta name="description" content="沿四次渡河，读懂中央红军如何从被动转向主动。原创静态历史互动作品，纪念红军长征胜利90周年。">
+  <title>四渡赤水 · 为什么这样走</title>
+  <link rel="icon" type="image/svg+xml" href="./public/favicon.svg">
+  <link rel="stylesheet" href="./src/styles.css">
+  <script type="module" src="./src/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#reading">跳到阅读正文</a>
+  <header class="masthead frame">
+    <p>纪念红军长征胜利90周年</p>
+    <button class="text-button" type="button" data-open-sources hidden>史料来源 <span aria-hidden="true">↗</span></button>
+  </header>
+  <main class="frame" id="reading">
+    <div class="title-block"><h1>四渡赤水</h1><div class="title-meta"><p class="subtitle">为什么这样走</p><button id="cover-start" class="primary" type="button" data-event="START" hidden>开始阅读 <span aria-hidden="true">→</span></button></div></div>
+    <div id="experience" hidden>
+      <nav class="chapter-nav" aria-label="选择渡河章节">
+        <button type="button" data-chapter="1">一渡<span>西渡</span></button>
+        <button type="button" data-chapter="2">二渡<span>东渡</span></button>
+        <button type="button" data-chapter="3">三渡<span>西渡</span></button>
+        <button type="button" data-chapter="4">四渡<span>东渡</span></button>
+      </nav>
+      <div class="story-stage">
+        <figure class="landscape" data-ui>
+          <div id="map"></div>
+          <figcaption><span id="map-caption">西渡、东渡，在变化中寻找主动。</span><span>路线为概略示意</span></figcaption>
+        </figure>
+        <article id="narrative" class="narrative" aria-labelledby="chapter-heading">
+          <div id="cover">
+            <h2 id="cover-heading">沿四次渡河，<br>看懂一次次调整。</h2>
+            <p>沿四次渡河，读懂中央红军如何从被动转向主动。</p>
+            <p>先看局势，再展开路线。约3分钟，沿四次渡河读下去。</p>
+            <button class="primary" type="button" data-event="START">开始阅读 <span aria-hidden="true">→</span></button>
+          </div>
+          <div id="chapter" hidden>
+            <p id="chapter-date" class="chapter-date"></p>
+            <h2 id="chapter-heading" tabindex="-1"></h2>
+            <div class="prose-block"><h3>局势</h3><p id="situation"></p></div>
+            <button id="reveal" class="primary" type="button" data-event="REVEAL" aria-expanded="false" aria-controls="chapter-detail">展开路线 <span aria-hidden="true">↗</span></button>
+            <div id="chapter-detail" hidden>
+              <div class="prose-block"><h3>行动</h3><p id="action"></p></div>
+              <div class="prose-block"><h3>结果</h3><p id="result"></p></div>
+              <p id="insight" class="interpretation"></p>
+              <button type="button" class="text-button" id="chapter-sources" data-open-sources>本章史料 ↗</button>
+            </div>
+            <div class="reading-controls"><button type="button" data-event="PREV" id="prev">上一渡</button><button type="button" data-event="NEXT" id="next">下一渡 →</button></div>
+          </div>
+          <div id="epilogue" hidden>
+            <h2 id="epilogue-heading" tabindex="-1"></h2>
+            <p id="epilogue-body"></p><p id="reflection" class="interpretation"></p>
+            <div class="epilogue-controls"><button type="button" data-event="START">回看全程</button><button type="button" class="primary" id="make-card">制作纪念卡 ↗</button></div>
+          </div>
+        </article>
+      </div>
+      <p id="announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+      <section class="quiz" id="quiz" aria-labelledby="quiz-heading" hidden><h2 id="quiz-heading">想一想</h2><p>选择后可查看解释，也可重新选择。</p><div id="questions"></div></section>
+      <section class="share-section" id="share-section" aria-labelledby="share-heading" hidden>
+        <h2 id="share-heading">四渡赤水纪念卡</h2><p id="share-status" role="status">图片在本机生成。可下载图片；也可打开图片后长按保存。</p>
+        <div id="share-result" hidden><img id="share-preview" alt="四渡赤水纪念卡：四次渡河日期与方向、原创概略路线图、作者与作品域名" width="1080" height="1440"><div class="share-actions"><a id="download-card" class="button primary" download="四渡赤水纪念卡.png">下载纪念卡</a><a id="open-card" class="button" target="_blank" rel="noopener">打开图片 ↗</a></div></div>
+        <button id="retry-card" type="button" hidden>重新生成图片</button>
+      </section>
+      <footer class="footer"><p>文字整理、交互设计与示意图创作：戴诗旭</p><div><button class="text-button" type="button" data-open-sources>史料来源 ↗</button><button class="text-button" type="button" data-event="RESTART">重新开始 ↑</button></div></footer>
+    </div>
+    <noscript>
+      <div class="noscript-text">
+        <p>当前未启用 JavaScript，以下可阅读四次渡河全文与史料来源。</p>
+        <p>沿四次渡河，读懂中央红军如何从被动转向主动。</p>
+        <section><h2>一渡：先脱离堵追</h2><p>1935年1月29日拂晓 · 西渡</p>
+          <h3>局势</h3><p>遵义会议后，中央红军原拟北渡长江。土城战斗未能取得预期战果，继续在这里作战面临被堵追的危险。</p>
+          <h3>行动</h3><p>中央红军调整行动，从土城、元厚等渡口西渡赤水河，向川南转移。</p>
+          <h3>结果</h3><p>红军脱离土城一带的堵追，随后到达川滇边的扎西地区，并进行整编。</p>
+          <p>作者解读：发现原来的行动难以奏效，及时调整，才能保留继续行动的空间。</p></section>
+        <section><h2>二渡：回到黔北寻找战机</h2><p>1935年2月18—21日 · 东渡</p>
+          <h3>局势</h3><p>敌军被吸引到川滇边境，黔北兵力相对空虚；川滇敌军又向扎西逼近，北渡长江的计划暂缓执行。</p>
+          <h3>行动</h3><p>中央红军从太平渡、二郎滩等渡口东渡赤水河，回师黔北，向桐梓方向前进。</p>
+          <h3>结果</h3><p>红军随后攻取桐梓、娄山关，再占遵义，取得遵义战役的胜利。</p>
+          <p>作者解读：行动方向要根据形势判断，回到走过的地方，也可能找到新的机会。</p></section>
+        <section><h2>三渡：转向河西，寻求机动</h2><p>1935年3月16—17日 · 西渡</p>
+          <h3>局势</h3><p>遵义战役后，敌军重新组织围攻，企图把中央红军围在遵义、鸭溪一带。红军需要跳出新的合围。</p>
+          <h3>行动</h3><p>中央红军转兵西进，从茅台及其附近地区西渡赤水河，再入川南，寻求新的机动。</p>
+          <h3>结果</h3><p>敌方判断红军又要北渡长江，调动重兵围堵，敌军再次向赤水河以西地区集中。</p>
+          <p>作者解读：看清围堵的变化，主动改变位置，才能争取下一步选择。</p></section>
+        <section><h2>四渡：折返东岸，迅速南下</h2><p>1935年3月21—22日 · 东渡</p>
+          <h3>局势</h3><p>敌军再次向赤水河以西地区集中。中央红军决定隐蔽、迅速地折返东岸，争取新的机动机会。</p>
+          <h3>行动</h3><p>中央红军从太平渡、二郎滩、九溪口等渡口东渡赤水河，随后迅速转向南方。</p>
+          <h3>结果</h3><p>红军重回黔北并向南行动。之后的南渡乌江、威逼贵阳、巧渡金沙江，继续改变了围追堵截的局面。</p>
+          <p>作者解读：每次调整都要回应眼前的形势；四次渡河的过程，不能理解为事先排好的四步计划。</p></section>
+        <section><h2>渡过赤水，路还在前方</h2><p>四渡赤水结束，不等于长征结束，也不意味着红军在渡河当天就完全摆脱了所有围堵。此后，中央红军南渡乌江、威逼贵阳，继而向云南机动，并于5月初巧渡金沙江，逐步跳出敌军的包围。</p><p>作者解读：读这段历史，我更关注每次调整的依据。学习和做事时，目标需要坚持，方法也要随实际情况检验、调整。</p></section>
+        <section><h2>史料来源</h2><ul><li><a href="https://www.news.cn/politics/2016-10/02/c_129309668.htm">【镜头·长征路上】四渡赤水出奇兵</a>，新华网（来源：中央纪委监察部网站）。</li><li><a href="https://www.dswxyjy.org.cn/BIG5/n1/2026/0930/c244516-40808291.html">四渡赤水，以少胜多的光辉典范</a>，中共中央党史和文献研究院网站（来源：《光明日报》）。</li></ul><p>地图为原创概略示意，只帮助理解四次渡河的方向、渡口与先后关系。线条不代表精确行军轨迹，山形不代表真实地形。一渡、三渡西渡，二渡、四渡东渡。</p><p>文字整理、交互设计与示意图创作：戴诗旭。本作品不代表史料发布机构的制作、授权或背书。</p></section>
+      </div>
+    </noscript>
+  </main>
+  <dialog id="sources-dialog" aria-labelledby="sources-heading"><div class="dialog-header"><h2 id="sources-heading">史料来源</h2><button type="button" id="close-sources" autofocus>关闭<span class="sr-only">史料来源</span> ×</button></div><p id="source-context"></p><ul id="sources-list"></ul><h3>关于这张地图</h3><p>地图为原创概略示意，只帮助理解四次渡河的方向、渡口与先后关系。线条不代表精确行军轨迹，山形不代表真实地形。西渡、东渡以文字和路线箭头共同标明；一渡、三渡西渡，二渡、四渡东渡。</p><p>历史叙述据新华网与中共中央党史和文献研究院网站所载材料整理，详细来源可点击查看。章节中的“作者解读”与尾声感想为作者的理解。</p><p>文字整理、交互设计与示意图创作：戴诗旭。本作品不代表史料发布机构的制作、授权或背书。</p></dialog>
+</body>
+</html>
