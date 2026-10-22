@@ -1,42 +1,33 @@
-# 发布提案
+# GitHub Pages 发布准备
 
-状态：本地准备，尚未发布。以下命令只供用户看过最终内容并确认后执行，本任务没有运行任何远端写入命令。预定公开仓库为 `donald-trump86/changzheng90`，专用域名为 `changzheng90.luvch1nabest.me`。若仓库名称冲突，先停止并重新确认目标。
+状态：用户已明确要求创建并推送公开源码仓库，目标为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。独立本地仓库位于 `~/changzheng90`，远端名为 `origin`。源码推送已经执行；GitHub Pages、域名和 DNS 尚未配置，仍需用户看过最终内容并确认。以下是后续站点发布步骤，不要重复新建仓库。
 
-## 已有只读证据
+## 已有证据
 
-控制器于 2026-10-22 核对：`gh` 登录账号为 `donald-trump86`；Cloudflare 区域 `luvch1nabest.me` 的 ID 为 `0c40b3634891e2ac5d69cf5040e0fc56`；按专用域名查询 DNS 记录返回 `[]`。没有修改记录。该结果仅代表核对当时，未来创建前必须再次检查。
+控制器于 2026-10-22 核对：`gh` 登录账号为 `donald-trump86`；Cloudflare 区域 `luvch1nabest.me` 的 ID 为 `0c40b3634891e2ac5d69cf5040e0fc56`；按专用域名查询 DNS 记录返回 `[]`。没有修改记录。该 DNS 结果仅代表核对当时，创建前必须再次检查。
 
 CLI 帮助已确认 Cloudflare 创建语法是 `cf dns records create --zone <zone> --body '<raw JSON>'`。创建不支持独立的 `--type`、`--name` 参数。下文保留实际支持的 JSON 形式。
 
 ## 发布前核对
 
-先完成 [verification.md](verification.md) 中的浏览器验收、截图复核和审查，再由用户确认最终内容与公开发布。以下命令从项目根目录执行。检查当前分支及工作区，确认准备发布的提交；不要把未审查的临时更改一起推出去。
+先查看 [verification.md](verification.md) 中的当前版本验收和独立审查，再由用户确认最终站点内容。以下命令从 `~/changzheng90` 执行。核对准备发布的提交与工作区，不把临时更改推到站点分支。代码未改变时可复用已记录的测试和构建结果，无需为了发布重复整套验收。
 
 ```sh
 git status --short
 git log -1 --oneline
-node --version
-npm test
-npm run build
-gh auth status
+git remote get-url origin
+git ls-remote origin refs/heads/main refs/heads/gh-pages
 gh api user --jq .login
 gh repo view donald-trump86/changzheng90
 ```
 
-账号必须仍是 `donald-trump86`。最后一条若显示已有仓库，停止，不覆盖；只有确认是“仓库不存在”，而非鉴权或网络错误，才继续创建。构建产物清单由包装测试检查，只有 HTML、四个模块、样式、图标、根目录 `CNAME` 与 `.nojekyll`。
+账号应为 `donald-trump86`，`origin` 应为 `https://github.com/donald-trump86/changzheng90.git`。若目标、提交或远端历史不符，停止核对，不覆盖。构建产物共12个文件：HTML、五个模块、样式、原创图标、标准党徽、音频、根目录 `CNAME` 与 `.nojekyll`；不发布源码文档或私有验收材料。
 
-## 新建仓库与两个分支
+## 源码与站点分支
 
-用户批准后，创建新的公开仓库，不自动推送。先确认本地没有名为 `publication` 的远端；有则停止核对，不能改写已有远端。
+`main` 存放源码，已按用户要求推送。后续源码更新沿用 `origin`，正常快进推送，不另建 `publication` 远端或使用强制推送。
 
-```sh
-gh repo create donald-trump86/changzheng90 --public --description '四渡赤水：为什么这样走；原创静态互动叙事 H5'
-git remote -v
-git remote add publication https://github.com/donald-trump86/changzheng90.git
-git push publication HEAD:main
-```
-
-`main` 存放审查过的源码。另建一个临时本地仓库，仅把构建资源推到新的 `gh-pages` 分支。下面不切换当前工作树，不包含源码文档或私有验收材料，不使用强制推送。临时目录留待发布人员核对后清理。
+用户批准站点发布后，另建一个临时本地仓库，仅把最终 `dist/` 推到新的 `gh-pages` 分支。下面不切换当前工作树。先确认远端没有该分支；临时目录留待发布人员核对后清理。
 
 ```sh
 publish_dir="$(mktemp -d "${TMPDIR:-/tmp}/chishui-pages.XXXXXX")"
