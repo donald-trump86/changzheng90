@@ -1,7 +1,7 @@
 async (page, { phase: selectedPhase = 'all' } = {}) => {
-  // MCP calls use one bounded phase; aggregate all five phases for full 15-group coverage.
-  if (!['all', '390', '768', '1440', '320', 'extras'].includes(selectedPhase)) throw new Error(`Unknown QA phase: ${selectedPhase}`);
-  const expectedChecks = selectedPhase === 'all' ? 15 : selectedPhase === 'extras' ? 7 : 2;
+  // Six bounded phases cover 17 distinct groups; extras retains its original seven.
+  if (!['all', '390', '768', '1440', '320', 'extras', 'gallery'].includes(selectedPhase)) throw new Error(`Unknown QA phase: ${selectedPhase}`);
+  const expectedChecks = selectedPhase === 'all' ? 17 : selectedPhase === 'extras' ? 7 : 2;
   // Run only through the controller's dedicated Brave MCP, using its supplied page.
   // Browser policy permits only this temporary QA output root (no deliverable claim).
   const artifacts = '/tmp/dsh-browser-output/brave-agent';
@@ -76,11 +76,58 @@ async (page, { phase: selectedPhase = 'all' } = {}) => {
     assert(!evidence.badText.length && !evidence.badControls.length, `${label}: ${JSON.stringify(evidence)}`);
     return evidence;
   }
+  async function noAuthorParts(scope = page) {
+    assert(await scope.locator('#insight, #reflection, .interpretation, .emblem-figure figcaption').count() === 0, 'removed opinion or emblem caption node remains');
+    assert(!await scope.locator('body').evaluate((el) => /作者解读/.test(el.textContent)), 'author interpretation remains in page text');
+  }
+  const expectedPhotos = [
+    { file: 'long-march-gathering.jpg', width: 585, height: 310, caption: '红军集会 · 1930年代', source: 'https://commons.wikimedia.org/wiki/File:Long-march.jpg', licenses: ['https://commons.wikimedia.org/wiki/Template:PD-China', 'https://commons.wikimedia.org/wiki/Template:PD-1996'], hash: 'dcc1807e93537afdd8bc02978996cd52410a11e8e3009d50be9c68a01569ec8c' },
+    { file: 'sixth-army-1935.jpg', width: 698, height: 357, caption: '红六军团在湖南新化 · 1935年11月29日', source: 'https://commons.wikimedia.org/wiki/File:Hongerliujuntuan.jpg', licenses: ['https://commons.wikimedia.org/wiki/Template:PD-China'], hash: 'ee2238bfcdf45a50af86302091cb9799de73b40e647b0cc99b51a9dc781e049f' },
+    { file: 'luding-bridge-museum.jpg', width: 1280, height: 853, caption: '泸定桥影像 · 四川博物院展陈，2010年摄', source: 'https://commons.wikimedia.org/wiki/File:Long_March_Through_Sichuan_Luding_Bridge_(9958483594).jpg', licenses: ['https://creativecommons.org/publicdomain/zero/1.0/'], hash: '9055b4a386f3692686907b9f98db1685e0b4c2f6128a40a6a7b8a6bae961d257' },
+    { file: 'luding-chain-museum.jpg', width: 1280, height: 853, caption: '泸定桥铁索 · 四川博物院藏，2010年摄', source: 'https://commons.wikimedia.org/wiki/File:Long_March_Through_Sichuan_Chain_from_Luding_Bridge_(9958484584).jpg', licenses: ['https://creativecommons.org/publicdomain/zero/1.0/'], hash: '68150c8b6d5bb3cda6e5ff4689d9f6af2c128dac51989cb2c7adceb03560a5ac' },
+  ];
+  async function galleryEvidence(scope = page) {
+    const gallery = scope.locator('#history-gallery');
+    assert(await gallery.count() === 1 && await gallery.isVisible(), 'single ending gallery missing');
+    assert(await gallery.getByRole('heading', { name: '回望长征', exact: true }).isVisible(), 'gallery heading missing');
+    assert(await gallery.locator('img').count() === 4 && await gallery.locator('.history-credits li').count() === 4, 'four images and individual credits required');
+    const evidence = [];
+    for (const [index, photo] of expectedPhotos.entries()) {
+      const image = gallery.locator('img').nth(index);
+      // Gallery scrolling is normal reading; route checks never call this before drawing.
+      await image.scrollIntoViewIfNeeded({ timeout: 5000 });
+      const decoded = await image.evaluate(async (img) => {
+        await img.decode();
+        const response = await fetch(img.currentSrc);
+        const bytes = await response.arrayBuffer();
+        const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map((n) => n.toString(16).padStart(2, '0')).join('');
+        const r = img.getBoundingClientRect();
+        return { width: img.naturalWidth, height: img.naturalHeight, declaredWidth: Number(img.getAttribute('width')), declaredHeight: Number(img.getAttribute('height')), alt: img.alt, loading: img.loading,
+          src: img.currentSrc, type: response.headers.get('content-type'), status: response.status, bytes: bytes.byteLength, hash, left: r.left, right: r.right, viewportWidth: innerWidth };
+      });
+      assert(decoded.width === photo.width && decoded.height === photo.height && decoded.declaredWidth === photo.width && decoded.declaredHeight === photo.height, `photo geometry ${JSON.stringify(decoded)}`);
+      assert(decoded.src === new URL(`public/history/${photo.file}`, base).href && decoded.status === 200 && decoded.type === 'image/jpeg' && decoded.hash === photo.hash && decoded.alt && decoded.loading === 'lazy', `local image invalid ${JSON.stringify(decoded)}`);
+      assert(decoded.left >= -1 && decoded.right <= decoded.viewportWidth + 1, `photo overflows ${JSON.stringify(decoded)}`);
+      assert(await gallery.locator('figcaption').nth(index).textContent() === photo.caption, 'photo dates/caption changed');
+      const credit = gallery.locator('.history-credits li').nth(index);
+      const hrefs = await credit.locator('a').evaluateAll((links) => links.map((link) => link.href));
+      assert(hrefs.includes(photo.source) && photo.licenses.every((url) => hrefs.includes(url)), `source/license missing for ${photo.file}`);
+      evidence.push({ ...decoded, caption: photo.caption, source: photo.source, licenses: photo.licenses });
+    }
+    const credits = gallery.locator('details');
+    if (await credits.getAttribute('open') === null) await credits.locator('summary').click({ timeout: 5000 });
+    assert(await gallery.getByText(/1993年/).isVisible(), 'original publication is missing');
+    assert(await gallery.getByText(/原影像年代未详/).isVisible(), 'museum rephotograph uncertainty is missing');
+    assert(await gallery.getByText(/Gary Todd/).count() === 2, 'museum photographer credits missing');
+    return evidence;
+  }
   async function chapterState(chapter, revealed) {
     await page.getByRole('heading', { name: chapter.title, exact: true }).waitFor({ state: 'visible', timeout: 3000 });
     assert(await page.locator('#chapter-date').textContent() === `${chapter.date} · ${chapter.direction === 'west' ? '西渡' : '东渡'}`, 'rendered shared date/direction mismatch');
     assert(await page.getByText(chapter.situation, { exact: true }).isVisible(), 'situation missing');
-    for (const key of ['action', 'result', 'insight']) assert(await page.getByText(chapter[key], { exact: true }).isVisible() === revealed, `${key}: stale or missing reveal`);
+    await noAuthorParts();
+    assert(!await page.locator('#history-gallery').isVisible(), 'gallery leaked into a chapter');
+    for (const key of ['action', 'result']) assert(await page.getByText(chapter[key], { exact: true }).isVisible() === revealed, `${key}: stale or missing reveal`);
     const routes = await page.locator('#map [data-route]').evaluateAll((nodes) => nodes.map((node) => ({ id: Number(node.dataset.route), visible: !node.hasAttribute('hidden'), current: node.classList.contains('current-route') })));
     assert(routes.length === 4 && routes.every((route) => route.visible === (route.id < chapter.id || (route.id === chapter.id && revealed))), `route visibility ${JSON.stringify(routes)}`);
     assert(routes.find((route) => route.id === chapter.id)?.current, 'current route marker missing');
@@ -103,13 +150,17 @@ async (page, { phase: selectedPhase = 'all' } = {}) => {
       const head = group.querySelector('.march-point');
       const actualHead = new DOMPoint(Number(head.getAttribute('cx')), Number(head.getAttribute('cy'))).matrixTransform(path.getScreenCTM());
       const drawnHead = screenPoint(length * (1 - offset));
+      const ancestorMotion = [];
+      for (let node = path.parentElement; node; node = node.parentElement) {
+        if (getComputedStyle(node).transform !== 'none' || node.getAnimations().length) ancestorMotion.push(node.tagName);
+      }
       return { time: performance.now(), offset, length, drawnLength: length * (1 - offset), stroke: style.stroke,
         dasharray: style.strokeDasharray, marker: style.markerEnd, display: style.display,
         visible: !group.hasAttribute('hidden') && path.checkVisibility(), drawing: group.classList.contains('is-drawing'),
         map: { top: map.top, bottom: map.bottom, height: map.height, wholeInViewport: map.top >= 0 && map.bottom <= innerHeight },
         start: screenPoint(0), end: screenPoint(length), drawnHead,
         headError: Math.hypot(actualHead.x - drawnHead.x, actualHead.y - drawnHead.y),
-        pointDisplay: getComputedStyle(head).display, pathCount: group.querySelectorAll('path').length };
+        pointDisplay: getComputedStyle(head).display, pathCount: group.querySelectorAll('path').length, ancestorMotion };
     });
   }
   async function actualDraw(label, replay = false) {
@@ -124,7 +175,7 @@ async (page, { phase: selectedPhase = 'all' } = {}) => {
     await page.waitForTimeout(440);
     const middle = await routeSample();
     for (const sample of [early, middle]) {
-      assert(sample.visible && sample.display !== 'none' && sample.stroke !== 'none' && sample.pathCount === 1,
+      assert(sample.visible && sample.display !== 'none' && sample.stroke !== 'none' && sample.pathCount === 1 && sample.ancestorMotion.length === 0,
         `${label}: single rendered stroke missing ${JSON.stringify(sample)}`);
       assert(sample.map.wholeInViewport && sample.start.inViewport && sample.end.inViewport && sample.drawnHead.inViewport,
         `${label}: drawing offscreen ${JSON.stringify(sample)}`);
@@ -187,6 +238,8 @@ async (page, { phase: selectedPhase = 'all' } = {}) => {
         }));
         assert(singlePaths.length === 4 && singlePaths.every((item) => item.paths === 1 && item.moves === 1 && item.continuous), `disjoint/extra crossing paths ${JSON.stringify(singlePaths)}`);
         const coverLayout = await layout('cover');
+        await noAuthorParts();
+        assert(!await page.locator('#history-gallery').isVisible(), 'gallery occupies the cover');
         assert(!await page.locator('body').evaluate((el) => /戴诗旭|Jason Dai/i.test(el.textContent)), 'personal identity in current page');
         await shot(`${width}-cover`);
         await start().click({ timeout: 5000 });
@@ -207,10 +260,11 @@ async (page, { phase: selectedPhase = 'all' } = {}) => {
         }
         await page.getByRole('heading', { name: story.epilogue.title, exact: true }).waitFor({ state: 'visible', timeout: 3000 });
         assert(await page.getByText(story.epilogue.body, { exact: true }).isVisible(), 'epilogue body missing');
-        assert(await page.getByText(story.epilogue.reflection, { exact: true }).isVisible(), 'author interpretation missing');
+        await noAuthorParts();
+        const gallery = await galleryEvidence();
         const epilogueLayout = await layout('epilogue/quiz');
         await shot(`${width}-epilogue`);
-        return { firstAction, opening, singlePaths, draws, coverLayout, chapterLayouts, epilogueLayout };
+        return { firstAction, opening, singlePaths, draws, coverLayout, chapterLayouts, epilogueLayout, gallery };
       });
       await check(`${width}: reverse/direct/rapid navigation, back, reset, reload, unknown hash`, async () => {
         for (const chapter of [...story.chapters].reverse()) {
@@ -247,12 +301,112 @@ async (page, { phase: selectedPhase = 'all' } = {}) => {
         await chapterState(story.chapters[0], false);
         await page.getByRole('button', { name: '重新开始', exact: false }).click({ timeout: 5000 });
         assert(await start().isVisible(), 'restart did not show cover');
+        assert(!await page.locator('#history-gallery').isVisible(), 'restart left gallery visible');
         await jump(story.chapters[3]).click({ timeout: 5000 });
         await page.reload({ waitUntil: 'networkidle' });
         assert(await start().isVisible(), 'reload must start on cover');
         await page.goto(`${base}#unrecognized`, { waitUntil: 'networkidle' });
         assert(await start().isVisible(), 'unknown hash must show cover');
         return { navigation: 'reverse jumps/reveal/back, six immediate jumps, restart, reload and unknown hash passed', beforeCancel, cancelled, pendingReplayReset: true };
+      });
+    }
+    if (selectedPhase === 'all' || selectedPhase === 'gallery') {
+      await check('gallery: four widths, decoded local photographs, exact sources/licenses and ending-only visibility', async () => {
+        const widths = [];
+        for (const viewport of viewports) {
+          await page.setViewportSize(viewport);
+          await openApp();
+          await noAuthorParts();
+          assert(!await page.locator('#history-gallery').isVisible(), 'gallery visible before epilogue');
+          await jump(story.chapters[3]).click({ timeout: 5000 });
+          assert(!await page.locator('#history-gallery').isVisible(), 'gallery visible in fourth chapter');
+          await page.getByRole('button', { name: '阅读尾声 →', exact: true }).click({ timeout: 5000 });
+          const photos = await galleryEvidence();
+          const placement = await page.locator('#history-gallery').evaluate((el) => ({ inExperience: el.parentElement.id === 'experience', beforeFooter: el.nextElementSibling?.classList.contains('footer'), afterShare: Boolean(el.previousElementSibling?.id === 'share-section') }));
+          assert(placement.inExperience && placement.beforeFooter && placement.afterShare, `ending placement ${JSON.stringify(placement)}`);
+          await noAuthorParts();
+          const geometry = await layout(`${viewport.width} gallery and open credits`);
+          await shot(`${viewport.width}-history-gallery`);
+          await page.getByRole('button', { name: '回看全程', exact: true }).click({ timeout: 5000 });
+          assert(!await page.locator('#history-gallery').isVisible(), 'gallery remains after returning to chapters');
+          widths.push({ width: viewport.width, photos, placement, geometry });
+        }
+        return { widths, decodedCount: widths.reduce((sum, item) => sum + item.photos.length, 0) };
+      });
+      await check('gallery motion: actual reading/river/photo progression, visible pause and live reduced completion', async () => {
+        const sample = (selector) => page.locator(selector).evaluate((el) => {
+          const style = getComputedStyle(el), r = el.getBoundingClientRect();
+          return { time: performance.now(), opacity: Number(style.opacity), transform: style.transform, offset: parseFloat(style.strokeDashoffset),
+            running: el.getAnimations().filter((animation) => animation.playState === 'running').map((animation) => ({ time: Number(animation.currentTime), duration: animation.effect.getTiming().duration })),
+            visible: el.checkVisibility(), inViewport: r.bottom > 0 && r.top < innerHeight, top: r.top, bottom: r.bottom };
+        });
+        const terminal = () => page.evaluate(() => ({ motion: document.body.dataset.motion, reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
+          running: document.getAnimations().filter((animation) => animation.playState === 'running').length,
+          photos: [...document.querySelectorAll('#history-gallery img')].map((img) => ({ opacity: getComputedStyle(img).opacity, transform: getComputedStyle(img).transform, visible: img.checkVisibility() })),
+          captions: [...document.querySelectorAll('#history-gallery figcaption')].map((el) => ({ opacity: getComputedStyle(el).opacity, transform: getComputedStyle(el).transform, animations: el.getAnimations().length })),
+          drawing: document.querySelectorAll('#map .is-drawing').length }));
+        const complete = (value) => value.motion === 'off' && value.running === 0 && value.drawing === 0 && value.photos.length === 4 && value.photos.every((photo) => photo.visible && photo.opacity === '1' && photo.transform === 'none') && value.captions.every((caption) => caption.opacity === '1' && caption.transform === 'none' && caption.animations === 0);
+        const reachEpilogue = async () => {
+          await jump(story.chapters[3]).click({ timeout: 5000 });
+          await page.getByRole('button', { name: '阅读尾声 →', exact: true }).click({ timeout: 5000 });
+        };
+        const enterPhoto = async (selector) => {
+          await page.locator(selector).evaluate((img) => img.scrollIntoView({ block: 'center', behavior: 'instant' }));
+          await page.waitForFunction((selector) => {
+            const img = document.querySelector(selector);
+            return img.getAnimations().some((animation) => animation.playState === 'running') && Number(getComputedStyle(img).opacity) < .98;
+          }, selector, { timeout: 2500 });
+          const early = await sample(selector);
+          await page.waitForTimeout(110);
+          const middle = await sample(selector);
+          assert(early.inViewport && middle.inViewport && early.running.length && middle.running.length && middle.opacity > early.opacity && middle.transform !== early.transform, `photo did not visibly progress ${JSON.stringify({ early, middle })}`);
+          return { early, middle };
+        };
+        try {
+          await page.setViewportSize({ width: 390, height: 844 });
+          await page.emulateMedia({ reducedMotion: 'no-preference' });
+          await openApp();
+          await start().click({ timeout: 5000 });
+          const readingEarly = await sample('#chapter-heading'), riverEarly = await sample('.river-flow');
+          await page.waitForTimeout(100);
+          const readingMiddle = await sample('#chapter-heading'), riverMiddle = await sample('.river-flow');
+          assert(readingEarly.running.length && readingMiddle.opacity > readingEarly.opacity && readingMiddle.transform !== readingEarly.transform, `reading entrance did not progress ${JSON.stringify({ readingEarly, readingMiddle })}`);
+          assert(riverEarly.running.length && riverMiddle.running.length && Math.abs(riverMiddle.offset - riverEarly.offset) > .001, `river did not progress ${JSON.stringify({ riverEarly, riverMiddle })}`);
+          const independent = await page.locator('.river-flow').evaluate((el) => !el.closest('.routes') && !el.closest('[data-route]'));
+          assert(independent, 'ambient flow entered route geometry');
+          await page.waitForFunction(() => { const el = document.querySelector('#chapter-heading'); return getComputedStyle(el).opacity === '1' && getComputedStyle(el).transform === 'none' && !el.getAnimations().length; }, null, { timeout: 1500 });
+          await reachEpilogue();
+          const firstPhoto = '#history-gallery .history-photo:first-child img';
+          const beforeEntry = await sample(firstPhoto);
+          assert(!beforeEntry.inViewport && !beforeEntry.running.length && beforeEntry.opacity === 1 && beforeEntry.transform === 'none', `offscreen photo was hidden or animated ${JSON.stringify(beforeEntry)}`);
+          const photo = await enterPhoto(firstPhoto);
+          // Focus with preventScroll, then use a real keyboard activation to keep the gallery visible.
+          await page.locator('#motion-toggle').evaluate((button) => button.focus({ preventScroll: true }));
+          await page.keyboard.press('Space');
+          await page.waitForFunction(() => document.body.dataset.motion === 'off');
+          const pausedPhoto = await sample(firstPhoto), paused = await terminal(), pausedRiver = await sample('.river-flow');
+          await page.waitForTimeout(120);
+          const stablePhoto = await sample(firstPhoto), stableRiver = await sample('.river-flow');
+          assert(pausedPhoto.inViewport && stablePhoto.inViewport && complete(paused) && pausedPhoto.opacity === 1 && pausedPhoto.transform === 'none' && stablePhoto.opacity === 1 && stablePhoto.transform === 'none', `visible pause incomplete ${JSON.stringify({ pausedPhoto, stablePhoto, paused })}`);
+          assert(stableRiver.offset === pausedRiver.offset && !pausedRiver.running.length, 'paused river still advances');
+          await shot('390-gallery-paused-complete');
+          await page.keyboard.press('Space');
+          await page.waitForFunction(() => document.body.dataset.motion === 'on');
+          const resumedPhoto = await sample(firstPhoto);
+          assert(!resumedPhoto.running.length && resumedPhoto.opacity === 1 && resumedPhoto.transform === 'none' && await page.locator('#map .is-drawing').count() === 0, 'resume replayed a photo or route');
+          // A fresh document gives the live-reduce fixture an unentered final photograph.
+          await openApp();
+          await reachEpilogue();
+          const lastPhoto = '#history-gallery .history-photo:last-child img';
+          const beforeReduce = await enterPhoto(lastPhoto);
+          await page.emulateMedia({ reducedMotion: 'reduce' });
+          await page.waitForFunction(() => document.body.dataset.motion === 'off');
+          const reducedPhoto = await sample(lastPhoto), reduced = await terminal();
+          assert(reducedPhoto.inViewport && reduced.reduced && complete(reduced), `live reduce incomplete ${JSON.stringify({ reducedPhoto, reduced })}`);
+          await shot('390-gallery-reduced-complete');
+          await noAuthorParts();
+          return { readingEarly, readingMiddle, riverEarly, riverMiddle, independent, beforeEntry, photo, pausedPhoto, stablePhoto, paused, resumedPhoto, beforeReduce, reducedPhoto, reduced };
+        } finally { await page.emulateMedia({ reducedMotion: null }); }
       });
     }
     if (selectedPhase === 'all' || selectedPhase === 'extras') {
@@ -448,9 +602,10 @@ async (page, { phase: selectedPhase = 'all' } = {}) => {
             standard: text.includes('viewBox="1 1 32 32"') && /#fdcf30/i.test(text),
             animated: img.getAnimations({ subtree: true }).length, transform: getComputedStyle(img).transform,
             background: getComputedStyle(document.body).backgroundColor,
-            caption: img.closest('figure').querySelector('figcaption').textContent };
+            alt: img.alt, caption: img.closest('figure').querySelector('figcaption')?.textContent ?? '',
+            ancestorMotion: (() => { const bad = []; for (let node = img.parentElement; node; node = node.parentElement) if (getComputedStyle(node).transform !== 'none' || node.getAnimations().length) bad.push(node.tagName); return bad; })() };
         });
-        assert(emblem.width === 320 && emblem.height === 320 && emblem.bytes === 420 && emblem.standard && emblem.animated === 0 && emblem.transform === 'none' && emblem.caption.includes('中国共产党党徽'), `emblem changed: ${JSON.stringify(emblem)}`);
+        assert(emblem.width === 320 && emblem.height === 320 && emblem.bytes === 420 && emblem.standard && emblem.animated === 0 && emblem.transform === 'none' && emblem.alt === '中国共产党党徽' && emblem.caption === '' && emblem.ancestorMotion.length === 0, `emblem changed: ${JSON.stringify(emblem)}`);
         assert(emblem.background === 'rgb(165, 28, 39)', 'default page is not red');
         assert(await page.locator('.opening-landscape').count() === 0, 'redundant mountain banner remains');
         await start().click({ timeout: 5000 });
@@ -546,20 +701,22 @@ async (page, { phase: selectedPhase = 'all' } = {}) => {
         await frame.getByText('当前未启用 JavaScript，以下可阅读四次渡河全文与史料来源。', { exact: true }).waitFor({ state: 'visible', timeout: 5000 });
         for (const chapter of story.chapters) {
           assert(await frame.getByRole('heading', { name: chapter.title, exact: true }).isVisible(), 'no-script heading missing');
-          for (const key of ['situation', 'action', 'result', 'insight']) assert(await frame.getByText(chapter[key], { exact: true }).isVisible(), `no-script ${key} missing`);
+          for (const key of ['situation', 'action', 'result']) assert(await frame.getByText(chapter[key], { exact: true }).isVisible(), `no-script ${key} missing`);
           assert(await frame.getByText(`${chapter.date} · ${chapter.direction === 'west' ? '西渡' : '东渡'}`, { exact: true }).isVisible(), 'no-script date/direction missing');
         }
         for (const value of Object.values(story.epilogue)) assert(await frame.getByText(value, { exact: true }).isVisible(), 'no-script epilogue missing');
         for (const source of story.sources) assert(await frame.getByRole('link', { name: source.title, exact: true }).getAttribute('href') === source.url, 'no-script source missing');
         assert(!await frame.getByRole('button', { name: '开始阅读', exact: true }).first().isVisible(), 'sandbox unexpectedly executed app');
         assert(!await frame.locator('body').evaluate((el) => /戴诗旭|Jason Dai/i.test(el.textContent)), 'personal identity in no-script copy');
+         await noAuthorParts(frame);
+         const gallery = await galleryEvidence(frame);
          const dimensions = await frame.locator('body').evaluate((body) => ({ width: body.ownerDocument.documentElement.clientWidth, scrollWidth: body.scrollWidth, textSize: getComputedStyle(body).fontSize }));
         assert(dimensions.scrollWidth <= dimensions.width + 1 && parseFloat(dimensions.textSize) >= 16, `no-script layout ${JSON.stringify(dimensions)}`);
         const fullHeight = await frame.locator('body').evaluate((body) => body.ownerDocument.documentElement.scrollHeight);
         await page.locator('iframe').evaluate((el, height) => { el.style.height = `${height + 20}px`; }, fullHeight);
         await page.screenshot({ path: `${artifacts}/390-noscript-full-narrative.png`, fullPage: true, animations: 'disabled' });
         screenshots.push(`${artifacts}/390-noscript-full-narrative.png`);
-        return { chapters: story.chapters.length, dimensions, semantics: 'iframe sandbox allows same origin and deliberately omits allow-scripts' };
+        return { chapters: story.chapters.length, dimensions, gallery, semantics: 'iframe sandbox allows same origin and deliberately omits allow-scripts' };
       } finally {
         await openApp();
         phase = 'app';

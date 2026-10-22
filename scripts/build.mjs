@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const projectRoot = await realpath(fileURLToPath(new URL('../', import.meta.url)));
 const dist = resolve(projectRoot, 'dist');
 const sourceFiles = new Set(['src/styles.css', 'src/main.js', 'src/story.js', 'src/map.js', 'src/share.js', 'src/media.js']);
-const assetFiles = new Set(['public/favicon.svg', 'public/party-emblem.svg', 'public/internationale.mp3', 'public/CNAME']);
+const assetFiles = new Set(['public/favicon.svg', 'public/party-emblem.svg', 'public/internationale.mp3', 'public/CNAME', 'public/history/long-march-gathering.jpg', 'public/history/sixth-army-1935.jpg', 'public/history/luding-bridge-museum.jpg', 'public/history/luding-chain-museum.jpg']);
 const files = ['index.html'];
 
 async function inventory(directory, allowed) {

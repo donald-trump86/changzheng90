@@ -1,6 +1,28 @@
 # 验证记录
 
-## 第三版地图优先修订：Node 21/21，浏览器15/15及最终CSS专项4/4
+## 本轮历史影像结尾：Node22/22，浏览器待控制器执行
+
+2026-10-22。实施基线 `da62624c0df4e00690f6bc7c4fa7beab77217813`，运行时基线 `a6108d0af8291f62791e64b83cf5743bb8d82865`。本轮移除可见党徽身份图注、四章 insight 和尾声 reflection 的数据／显示／无脚本副本，加入四张本地历史影像与有限阅读／照片入场、独立河面流线。历史事实字段、问题、来源、标准党徽／音乐字节及PNG模块保持原样。
+
+| 实际检查 | 结果 |
+| --- | --- |
+| 聚焦 RED：`node --test --test-name-pattern='agreed content contract|epilogue separates|deployment contains|historical JPEGs|built HTML assets' tests/story.test.js tests/site.test.js` | 实际5/5失败，211.310458ms：旧数据仍带 insight／reflection；构建清单12→16不符；JPEG ENOENT；HTML资源数5→9不符。 |
+| 相同聚焦 GREEN | 5/5通过，253.088958ms；包含实际JPEG文件、部署逐字节和仓库子路径HTTP／MIME检查。 |
+| 最终 `npm test`，完整套件仅一次 | **22/22**通过，0失败／取消／跳过，331.965375ms；测试仅用自有临时端口，并在 finally 关闭。 |
+| 最终 `npm run build` | **16个静态文件**写入dist；四张JPEG实际纳入白名单构建。 |
+| 7个变更JavaScript的 `node --check`、supplied-page表达式编译 | 全部退出0；只解析／编译，没有浏览器执行。用空page测试未知phase会抛出 `Unknown QA phase: unknown`。 |
+| 基线模块结构比较 | 四章仅删除insight，尾声仅删除reflection；剩余章节数据、epilogue.body、questions和sources均与BASE相等。 |
+| `git diff --check`、白名单审计 | 退出0；main／BASE正确，17个授权改动路径精确匹配；无关模块、素材、规格和计划未改。 |
+| `node /Users/jasondai/.dsh/skills/design-taste-frontend/scripts/lint.mjs index.html src --json` | 退出0，7文件，**0 FAIL／1 WARN**；仍是6处历史日期范围横线，未使用 `--app`。 |
+| 本地8文件素材测量 | 两张原样复制；两张仅用系统sips按比例缩至1280px宽、quality80，无裁切。生产图总计635474bytes，尺寸／原图及生产图哈希见[素材清单](assets.md)。 |
+
+[浏览器表达式](../scripts/verify-browser.mjs)保留原有15组实质检查，更新删除字段和无图注断言；新增有界 `gallery` 阶段2组。六阶段分别为 `{ phase: '390' }`、`'768'`、`'1440'`、`'320'`、`'gallery'`（各2组）及 `'extras'`（原7组）；全模式17组。未知阶段显式拒绝。控制器必须收齐**17个不同检查名称**，各阶段无意外错误，才可声称本轮浏览器通过；各阶段成功不能单独替代全覆盖。
+
+新增检查准备覆盖四宽度实际图片解码／本地HTTP内容与SHA-256、逐图出处／许可／年代、尾声独有且仅一份图库、无可见党徽图注／作者解读，以及阅读文字、独立河面和视口内照片的真实时间进度。可见图库内暂停使用 preventScroll 聚焦现有按钮后真实Space激活，不把该聚焦fixture用作键盘可达性证据；原键盘遍历组继续独立存在。暂停／系统reduce检查所有照片立即完整、河流停止且恢复不重播照片或路线。真实禁脚本sandbox复用同一图库检查。原路线组仍使用原生点击，绘制前不由测试滚动地图；原真实静音音频／错误重试、PNG签名／1080×1440／原生下载与打开、焦点和finally恢复保留。
+
+**浏览器状态：PENDING。** 实现者未启动浏览器、客户端或CDP，未执行验收表达式、未生成本轮截图，也未操作控制器4173预览任务。没有把下文旧版15/15或截图评分移用于新界面。缺少IntersectionObserver时的基础可读性已由实现保护，浏览器中的该降级路径尚未单独实测。真实微信、内地网络、主观听感、线上DNS/TLS仍未实测；Pages／DNS没有执行。
+
+## 历史记录：第三版地图优先修订，Node21/21、浏览器15/15及最终CSS专项4/4
 
 2026-10-22。当前本地仓库为 `~/changzheng90`，公开源码为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。用户要求的仓库创建和首次源码推送已完成；Pages与DNS仍待最终内容确认。
 

@@ -33,16 +33,16 @@ test('four chronological chapters carry the exact dates and alternating directio
 });
 
 test('each chapter supplies the agreed content contract and real crossing names', () => {
-  const keys = ['id', 'date', 'dateISO', 'title', 'situation', 'action', 'result', 'insight', 'crossings', 'direction', 'sourceIds'];
+  const keys = ['id', 'date', 'dateISO', 'title', 'situation', 'action', 'result', 'crossings', 'direction', 'sourceIds'];
   chapters.forEach((chapter) => {
     assert.deepEqual(Object.keys(chapter).sort(), keys.toSorted());
-    for (const field of ['title', 'situation', 'action', 'result', 'insight']) {
+    for (const field of ['title', 'situation', 'action', 'result']) {
       assert.equal(typeof chapter[field], 'string');
       assert.ok(chapter[field].trim().length > 0);
     }
     assert.ok(chapter.crossings.length > 0);
     assert.ok(chapter.crossings.every((name) => typeof name === 'string' && name.length > 0));
-    assert.match(chapter.insight, /^作者解读：/);
+    assert.equal(Object.hasOwn(chapter, 'insight'), false);
   });
   assert.ok(chapters[0].crossings.includes('土城'));
   assert.ok(chapters[0].crossings.includes('元厚'));
@@ -79,11 +79,11 @@ test('chapters and their nested data are immutable', () => {
 });
 
 test('epilogue separates later actions from the end of the fourth crossing', () => {
-  assert.deepEqual(Object.keys(epilogue).sort(), ['title', 'body', 'reflection'].toSorted());
+  assert.deepEqual(Object.keys(epilogue).sort(), ['title', 'body'].toSorted());
   assert.match(epilogue.body, /四渡赤水.*不等于.*长征结束/);
   for (const action of ['南渡乌江', '贵阳', '金沙江']) assert.ok(epilogue.body.includes(action));
   assert.match(epilogue.body, /随后|此后|之后/);
-  assert.match(epilogue.reflection, /^作者解读：/);
+  assert.equal(Object.hasOwn(epilogue, 'reflection'), false);
 });
 
 test('two comprehension questions offer valid answers and useful explanations', () => {

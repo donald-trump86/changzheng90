@@ -21,6 +21,7 @@ export function createMap(container) {
     <g class="map-clouds" aria-hidden="true"><path d="M20 105q85-30 170 0t170 0"/><path d="M410 180q80-30 160 0t160 0"/></g>
     <path class="river-bank" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
     <path class="river" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
+    <path class="river-flow" pathLength="1" aria-hidden="true" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
     <g class="land-labels"><text x="42" y="52">西岸 · 川南方向</text><text x="475" y="52">东岸 · 黔北方向</text><text class="river-name" x="440" y="127" transform="rotate(-24 440 127)">赤水河</text></g>
     <g class="places">
       <g><circle cx="400" cy="80" r="5"/><text x="418" y="89">元厚</text></g>

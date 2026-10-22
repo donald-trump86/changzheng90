@@ -12,6 +12,7 @@ import { createStaticServer } from '../scripts/serve.mjs';
 const root = await realpath(fileURLToPath(new URL('../', import.meta.url)));
 const dist = join(root, 'dist');
 const domain = 'changzheng90.luvch1nabest.me\n';
+const historyImages = ['long-march-gathering.jpg', 'sixth-army-1935.jpg', 'luding-bridge-museum.jpg', 'luding-chain-museum.jpg'];
 before(() => execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root }));
 
 function get(port, path, options = {}) {
@@ -60,7 +61,16 @@ test('custom domain is exact in source and deployment root', async () => {
 test('deployment contains only the public site, no source tooling or private artifacts', async () => {
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', 'public/internationale.mp3', 'public/party-emblem.svg', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css']);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css'].sort());
+});
+
+test('historical JPEGs have actual encoded bytes and identical deployment copies', async () => {
+  for (const name of historyImages) {
+    const original = await readFile(join(root, 'public/history', name));
+    assert.deepEqual([...original.subarray(0, 3)], [255, 216, 255], name);
+    assert.ok(original.length > 10000, `${name}: real photograph, not a placeholder`);
+    assert.deepEqual(await readFile(join(dist, 'public/history', name)), original, name);
+  }
 });
 
 test('built HTML assets and recursive module imports resolve over HTTP under a repository prefix', async () => {
@@ -71,7 +81,7 @@ test('built HTML assets and recursive module imports resolve over HTTP under a r
       const html = await get(port, base.pathname);
       assert.equal(html.status, 200);
       const refs = [...html.body.matchAll(/<(?:script|link|img|audio)\b[^>]*\b(?:src|href)="([^"]+)"/g)].map((match) => match[1]);
-      assert.equal(refs.length, 5, 'module, stylesheet, favicon, emblem and audio');
+      assert.equal(refs.length, 9, 'module, stylesheet, favicon, emblem, audio and four historical photographs');
       const visited = new Set();
       async function visit(reference, from) {
         assert.match(reference, /^\.\.?\//, 'resources use relative URLs');
@@ -87,10 +97,13 @@ test('built HTML assets and recursive module imports resolve over HTTP under a r
           for (const match of response.body.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)) await visit(match[1], url);
         } else if (url.pathname.endsWith('.css')) assert.match(response.type, /^text\/css/);
         else if (url.pathname.endsWith('.mp3')) assert.equal(response.type, 'audio/mpeg');
-        else assert.match(response.type, /^image\/svg\+xml/);
+        else if (url.pathname.endsWith('.jpg')) {
+          assert.equal(response.type, 'image/jpeg');
+          assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
+        } else assert.match(response.type, /^image\/svg\+xml/);
       }
       for (const ref of refs) await visit(ref, base);
-      assert.equal(visited.size, 9, 'five modules, stylesheet, favicon, emblem and audio all fetched');
+      assert.equal(visited.size, 13, 'five modules, stylesheet, favicon, emblem, audio and four JPEGs all fetched');
     });
   });
 });

@@ -31,7 +31,6 @@ export const chapters = deepFreeze([
     situation: '遵义会议后，中央红军原拟北渡长江。土城战斗未能取得预期战果，继续在这里作战面临被堵追的危险。',
     action: '中央红军调整行动，从土城、元厚等渡口西渡赤水河，向川南转移。',
     result: '红军脱离土城一带的堵追，随后到达川滇边的扎西地区，并进行整编。',
-    insight: '作者解读：发现原来的行动难以奏效，及时调整，才能保留继续行动的空间。',
     crossings: ['土城', '元厚'],
     direction: 'west',
     sourceIds: ['xinhua-2016', 'dswxyjy-2026'],
@@ -44,7 +43,6 @@ export const chapters = deepFreeze([
     situation: '敌军被吸引到川滇边境，黔北兵力相对空虚；川滇敌军又向扎西逼近，北渡长江的计划暂缓执行。',
     action: '中央红军从太平渡、二郎滩等渡口东渡赤水河，回师黔北，向桐梓方向前进。',
     result: '红军随后攻取桐梓、娄山关，再占遵义，取得遵义战役的胜利。',
-    insight: '作者解读：行动方向要根据形势判断，回到走过的地方，也可能找到新的机会。',
     crossings: ['太平渡', '二郎滩'],
     direction: 'east',
     sourceIds: ['xinhua-2016', 'dswxyjy-2026'],
@@ -57,7 +55,6 @@ export const chapters = deepFreeze([
     situation: '遵义战役后，敌军重新组织围攻，企图把中央红军围在遵义、鸭溪一带。红军需要跳出新的合围。',
     action: '中央红军转兵西进，从茅台及其附近地区西渡赤水河，再入川南，寻求新的机动。',
     result: '敌方判断红军又要北渡长江，调动重兵围堵，敌军再次向赤水河以西地区集中。',
-    insight: '作者解读：看清围堵的变化，主动改变位置，才能争取下一步选择。',
     crossings: ['茅台'],
     direction: 'west',
     sourceIds: ['xinhua-2016', 'dswxyjy-2026'],
@@ -70,7 +67,6 @@ export const chapters = deepFreeze([
     situation: '敌军再次向赤水河以西地区集中。中央红军决定隐蔽、迅速地折返东岸，争取新的机动机会。',
     action: '中央红军从太平渡、二郎滩、九溪口等渡口东渡赤水河，随后迅速转向南方。',
     result: '红军重回黔北并向南行动。之后的南渡乌江、威逼贵阳、巧渡金沙江，继续改变了围追堵截的局面。',
-    insight: '作者解读：每次调整都要回应眼前的形势；四次渡河的过程，不能理解为事先排好的四步计划。',
     crossings: ['太平渡', '二郎滩', '九溪口'],
     direction: 'east',
     sourceIds: ['xinhua-2016', 'dswxyjy-2026'],
@@ -80,7 +76,6 @@ export const chapters = deepFreeze([
 export const epilogue = deepFreeze({
   title: '渡过赤水，路还在前方',
   body: '四渡赤水结束，不等于长征结束，也不意味着红军在渡河当天就完全摆脱了所有围堵。此后，中央红军南渡乌江、威逼贵阳，继而向云南机动，并于5月初巧渡金沙江，逐步跳出敌军的包围。',
-  reflection: '作者解读：读这段历史，我更关注每次调整的依据。学习和做事时，目标需要坚持，方法也要随实际情况检验、调整。',
 });
 
 export const questions = deepFreeze([

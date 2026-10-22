@@ -14,6 +14,52 @@ const dialog = $('#sources-dialog');
 createMediaControls({ audio: $('#background-music'), musicButton: $('#music-toggle'), motionButton: $('#motion-toggle'), root: document.body });
 $('.media-controls').hidden = false;
 
+// The same static gallery follows the full text without JavaScript.
+const historyGallery = $('#history-gallery');
+$('#experience .footer').before(historyGallery);
+historyGallery.hidden = true;
+const entranceAnimations = new Set();
+let entranceGeneration = 0;
+const motionAllowed = () => document.body.dataset.motion === 'on' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+function completeEntrances() {
+  entranceGeneration++;
+  for (const animation of entranceAnimations) animation.cancel();
+  entranceAnimations.clear();
+}
+function enter(element, keyframes, duration) {
+  if (!motionAllowed() || typeof element.animate !== 'function') return;
+  const animation = element.animate(keyframes, { duration, easing: 'ease-out' });
+  entranceAnimations.add(animation);
+  animation.onfinish = animation.oncancel = () => entranceAnimations.delete(animation);
+}
+function enterReading(elements) {
+  elements.forEach((element, index) => enter(element, [
+    { opacity: .4, transform: 'translateY(8px)' },
+    { opacity: 1, transform: 'translateY(0)' },
+  ], index % 2 ? 360 : 320));
+}
+// An observer enhances images already readable in their base state; it never hides them.
+if (typeof IntersectionObserver === 'function') {
+  const photoObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting || historyGallery.hidden) continue;
+      const image = entry.target;
+      photoObserver.unobserve(image);
+      const token = entranceGeneration;
+      image.decode().then(() => {
+        const bounds = image.getBoundingClientRect();
+        if (token !== entranceGeneration || historyGallery.hidden || bounds.bottom <= 0 || bounds.top >= innerHeight) return;
+        enter(image, [{ opacity: .6, transform: 'scale(1.025)' }, { opacity: 1, transform: 'scale(1)' }], 720);
+      }).catch(() => { /* A failed image still exposes its alt and caption. */ });
+    }
+  }, { threshold: .12 });
+  historyGallery.querySelectorAll('img').forEach((image) => photoObserver.observe(image));
+}
+const entranceMotionObserver = new MutationObserver(() => { if (!motionAllowed()) completeEntrances(); });
+entranceMotionObserver.observe(document.body, { attributes: true, attributeFilter: ['data-motion'] });
+document.addEventListener('visibilitychange', () => { if (document.hidden) completeEntrances(); });
+window.addEventListener('pagehide', completeEntrances);
+
 // Progress is intentionally not restored from a hash or local storage.
 // Any hash navigation returns to the cover, including an unknown hash.
 function clearHash() {
@@ -37,6 +83,7 @@ function render() {
   $('#chapter').hidden = !onChapter;
   $('#epilogue').hidden = !onEpilogue;
   $('#quiz').hidden = !onEpilogue;
+  historyGallery.hidden = !onEpilogue;
   $('#narrative').setAttribute('aria-labelledby', onChapter ? 'chapter-heading' : onEpilogue ? 'epilogue-heading' : 'cover-heading');
   chapterButtons.forEach((button) => {
     const active = Number(button.dataset.chapter) === state.chapter;
@@ -52,7 +99,7 @@ function render() {
       span.textContent = part;
       return span;
     }));
-    for (const key of ['situation', 'action', 'result', 'insight']) $(`#${key}`).textContent = chapter[key];
+    for (const key of ['situation', 'action', 'result']) $(`#${key}`).textContent = chapter[key];
     $('#chapter-detail').hidden = !state.revealed;
     $('#reveal').setAttribute('aria-expanded', String(state.revealed));
     $('#reveal').textContent = state.revealed ? '重播路线 ↻' : '展开路线 ↗';
@@ -78,8 +125,16 @@ function dispatch(event) {
   }
   const previousChapter = state.chapter;
   const wasRevealed = state.revealed;
+  completeEntrances();
   state = transition(state, event);
   render();
+  if (state.chapter !== previousChapter || event.type === 'GOTO' || event.type === 'RESTART') {
+    enterReading(state.chapter === 0 ? [...$('#cover').children]
+      : state.chapter === 5 ? [$('#epilogue-heading'), $('#epilogue-body')]
+        : [$('#chapter-date'), $('#chapter-heading'), $('#situation').closest('.prose-block')]);
+  } else if (event.type === 'REVEAL' && !wasRevealed && state.revealed) {
+    enterReading([$('#action').closest('.prose-block'), $('#result').closest('.prose-block')]);
+  }
   if (event.type === 'REVEAL' && !wasRevealed && state.revealed) map.play();
   if (state.chapter !== previousChapter) {
     const heading = state.chapter === 5 ? $('#epilogue-heading') : state.chapter === 0 ? $('#cover-heading') : $('#chapter-heading');
@@ -92,7 +147,6 @@ document.querySelectorAll('[data-event]').forEach((button) => button.addEventLis
 chapterButtons.forEach((button) => button.addEventListener('click', () => dispatch({ type: 'GOTO', chapter: Number(button.dataset.chapter) })));
 $('#epilogue-heading').textContent = epilogue.title;
 $('#epilogue-body').textContent = epilogue.body;
-$('#reflection').textContent = epilogue.reflection;
 
 for (const [index, question] of questions.entries()) {
   const fieldset = document.createElement('fieldset');
@@ -200,3 +254,4 @@ window.addEventListener('pagehide', (event) => {
 });
 render();
 $('#experience').hidden = false;
+enterReading([$('h1'), $('.subtitle'), ...$('#cover').children]);
