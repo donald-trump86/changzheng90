@@ -151,9 +151,9 @@ body:not([data-motion="on"]) .march-point { display: none; }
   .emblem-figure { gap: 8px; }
   .emblem-figure img { width: 44px; height: 44px; }
   .emblem-figure figcaption { width: 88px; font-size: 16px; line-height: 1.45; }
-  .opening-controls { gap: 10px; }
-  .opening-controls > button { flex: 1 0 max-content; white-space: nowrap; }
-  .media-controls { flex: 2; gap: 8px; }
+  .opening-controls { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .opening-controls > button { width: 100%; white-space: nowrap; }
+  .media-controls { gap: 8px; }
   .media-controls button { flex: 1; padding-inline: 10px; white-space: nowrap; }
   .media-controls p { flex-basis: 100%; }
   .chapter-nav { margin-bottom: 18px; }
