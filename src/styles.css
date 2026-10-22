@@ -152,7 +152,7 @@ body:not([data-motion="on"]) .march-point { display: none; }
   .emblem-figure img { width: 44px; height: 44px; }
   .emblem-figure figcaption { width: 88px; font-size: 16px; line-height: 1.45; }
   .opening-controls { gap: 10px; }
-  .opening-controls > button { flex: 1; }
+  .opening-controls > button { flex: 1 0 max-content; white-space: nowrap; }
   .media-controls { flex: 2; gap: 8px; }
   .media-controls button { flex: 1; padding-inline: 10px; white-space: nowrap; }
   .media-controls p { flex-basis: 100%; }
