@@ -1,0 +1,55 @@
+/* Complete static content is the baseline; only the loaded module reveals controls. */
+.motion-control {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 14px;
+  background: var(--toolbar);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.motion-control:hover { background: var(--ink); color: var(--surface); }
+.motion-control[aria-disabled="true"] { cursor: default; }
+.site-nav { align-items: center; }
+#replay-route { margin-top: 12px; background: var(--surface); }
+#replay-route:hover { background: var(--ink); color: var(--surface); }
+#march-head { fill: var(--accent); stroke: var(--map-paper); stroke-width: 3; }
+.river-flow {
+  fill: none;
+  stroke: var(--surface);
+  stroke-width: 2;
+  stroke-dasharray: 13 27;
+  stroke-linecap: round;
+  opacity: .65;
+}
+.reading-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 4px;
+  z-index: 12;
+  pointer-events: none;
+}
+.reading-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+@media (max-width: 650px) {
+  .site-nav { gap: 4px 18px; }
+  #motion-toggle { margin-left: auto; padding-inline: 10px; }
+}
+@media (max-width: 360px) {
+  .site-nav { gap: 4px 12px; }
+  #motion-toggle { padding-inline: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-art img { transform: none !important; }
+}
+@media (forced-colors: active) {
+  .motion-control { outline: 1px solid ButtonText; }
+  #march-head { fill: LinkText; stroke: Canvas; }
+  .river-flow { stroke: Canvas; }
+  .reading-progress span { background: Highlight; }
+}
