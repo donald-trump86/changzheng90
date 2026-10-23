@@ -43,3 +43,16 @@
 ## 原创本地图形
 
 开场山川、云水、SVG 地图、路线、行军点与纪念卡均为代码绘制的原创概略图形，不表现为历史影像、真实地形或精确行军轨迹。金黄色党徽是上文单独标明来源的标准素材，不归入原创图形声明。正文史实依据仍见 [史料说明](sources.md)。
+
+## 根首页阅读动效：Anime.js v4.5.0（2026-10-23）
+
+本轮仅从 `juliangarnier/anime` 固定标签 `v4.5.0` 下载以下两个文件，使用 Python `urllib.request` 访问 `https://api.github.com/repos/juliangarnier/anime/contents/<path>?ref=v4.5.0`，将 contents JSON 的 base64 `content` 解码为原始文件字节。标签对应提交 `2c9cf8ea00329f6768c7d7902252ed977d75ce42`。无 npm 安装、CDN 或新增运行时外站请求；两个文件按原始字节随站点托管。
+
+| 本地文件 | 上游固定来源 | raw bytes | SHA-256 | GitHub contents blob SHA／本地 `git hash-object` |
+| --- | --- | ---: | --- | --- |
+| [anime-4.5.0.esm.min.js](../public/vendor/anime-4.5.0.esm.min.js) | [dist/bundles/anime.esm.min.js @ v4.5.0](https://github.com/juliangarnier/anime/blob/v4.5.0/dist/bundles/anime.esm.min.js) | 118678 | `a19015a1a92d52025a2fb6703b6d67eadd1cc2aeaf880770e96e04cf6aa07be1` | `c278b15616623e2b32ef499bbb1020b181324d59` |
+| [ANIME-LICENSE.txt](../public/vendor/ANIME-LICENSE.txt) | [LICENSE.md @ v4.5.0](https://github.com/juliangarnier/anime/blob/v4.5.0/LICENSE.md) | 1075 | `3f3e835a9952cfc2a6ca836fb95b3257c981f24fa3ef51249055acb09931897b` | `f999fa58ebdda6d8d0f3ae581ebdfe821f09603a` |
+
+两项 GitHub blob SHA 均与本地 `git hash-object` 一致。MIT 许可完整保留，原文署名 `Copyright (c) 2025 Julian Garnier`；这是库的许可署名，不进入作品界面的个人署名。
+
+[动效模块](../src/editorial-motion.js) 实际导入 `animate`、`stagger`，以库驱动的数值进度设置路线 stroke offset、移动头点、流线、原创图轻微漂移、分组入场和阅读进度。约1.8秒路线只在整图进入可见区域后启动，完成时才补上终点箭头。历史照片仅作透明度入场；本轮没有改动历史原图、原创图像文件或既有来源文字。

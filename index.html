@@ -435,6 +435,7 @@
       .river-bank { stroke: Canvas; }
     }
   </style>
+  <link rel="stylesheet" href="./src/editorial-motion.css">
 </head>
 <body data-direction="archive">
   <a class="skip-link" href="#main">跳到正文</a>
@@ -444,6 +445,7 @@
       <a href="#crossings">四渡阅读</a>
       <a href="#continuation">后续历程</a>
       <a href="#archives">档案原图</a>
+      <button type="button" id="motion-toggle" class="motion-control" aria-pressed="false" hidden>暂停动画</button>
     </nav>
   </header>
   <aside class="study-toolbar" data-js-only aria-label="设计方向对照">
@@ -456,6 +458,7 @@
       </div>
     </div>
   </aside>
+  <div class="reading-progress" id="reading-progress" role="progressbar" aria-label="页面阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span></span></div>
   <main id="main" class="frame">
     <noscript><p class="noscript-note">当前为行军档案版式。四章内容完整展开，可用渡次链接定位阅读。</p></noscript>
     <section class="opening" aria-labelledby="page-title">
@@ -511,6 +514,7 @@
           <div class="route-text">
             <div class="route-head"><h3 id="map-heading">四渡赤水概略示意</h3><p class="route-direction" id="route-direction">一渡 · 西渡</p></div>
             <p class="route-date" id="route-date">1935年1月29日拂晓</p>
+            <button type="button" id="replay-route" class="motion-control" hidden>重播路线</button>
           </div>
           <div class="map-canvas">
             <svg viewBox="0 0 720 580" role="img" aria-labelledby="map-title map-description" xmlns="http://www.w3.org/2000/svg">
@@ -519,8 +523,10 @@
               <defs><marker id="route-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--accent)"/></marker></defs>
               <path class="river-bank" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
               <path class="river" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
+              <path class="river-flow" aria-hidden="true" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
               <path id="current-route" class="march-line" d="M480 176C425 155 365 155 320 177S217 210 187 260S130 338 104 385" marker-end="url(#route-arrow)"/>
               <circle id="march-start" class="march-start" cx="480" cy="176" r="7"/>
+              <circle id="march-head" cx="104" cy="385" r="7" aria-hidden="true" visibility="hidden"/>
             </svg>
             <div class="map-bank-labels" aria-hidden="true"><span>西岸 · 川南方向</span><span>东岸 · 黔北方向</span></div>
             <span class="river-name" aria-hidden="true">赤水河</span>
@@ -711,7 +717,7 @@
         if (!expanded && state.body.contains(document.activeElement)) state.summary.focus({ preventScroll: true });
         state.body.inert = !expanded;
         state.body.setAttribute('aria-hidden', String(!expanded));
-        if (!animate || reducedMotion.matches || document.hidden || state.details.closest('[hidden]')) {
+        if (!animate || reducedMotion.matches || body.dataset.motion === 'off' || document.hidden || state.details.closest('[hidden]')) {
           finishDisclosure(state);
           return;
         }
@@ -760,6 +766,7 @@
         next.disabled = number === 4;
         document.getElementById('pager-count').textContent = names[number - 1] + ' / 四渡';
         if (speak) announce(names[number - 1] + '，' + date + '，' + direction + '。正文与概略路线已同步。');
+        document.dispatchEvent(new CustomEvent('chishui:chapter', { detail: { number } }));
       }
 
       document.querySelectorAll('[data-disclosure]').forEach((details, index) => {
@@ -785,6 +792,7 @@
           body.dataset.direction = direction;
           directionButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
           announce('已切换到' + directionNames[direction] + '。当前仍为' + names[currentChapter - 1] + '。');
+          document.dispatchEvent(new CustomEvent('chishui:layout', { detail: { direction } }));
         });
       });
       chapterLinks.forEach((link) => link.addEventListener('click', (event) => {
@@ -839,6 +847,7 @@
       window.addEventListener('pagehide', () => { settleAllDisclosures(); clearPressed(); });
       document.addEventListener('visibilitychange', () => { if (document.hidden) { settleAllDisclosures(); clearPressed(); } });
       window.addEventListener('resize', settleAllDisclosures);
+      document.addEventListener('chishui:motion', () => { if (body.dataset.motion === 'off') settleAllDisclosures(); });
       function motionPreferenceChanged() { if (reducedMotion.matches) settleAllDisclosures(); }
       if (typeof reducedMotion.addEventListener === 'function') reducedMotion.addEventListener('change', motionPreferenceChanged);
       else if (typeof reducedMotion.addListener === 'function') reducedMotion.addListener(motionPreferenceChanged);
@@ -849,5 +858,6 @@
       document.documentElement.classList.add('enhanced');
     })();
   </script>
+  <script type="module" src="./src/editorial-motion.js"></script>
 </body>
 </html>

@@ -62,7 +62,8 @@ test('deployment contains only the public site, no source tooling or private art
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
   const studyFiles = ['design-study/index.html', 'design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css', ...studyFiles].sort());
+  assert.equal(entries.length, 24);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css', ...studyFiles].sort());
 });
 
 test('published design study resolves local images under a repository prefix without private research', async () => {
@@ -113,6 +114,36 @@ test('new homepage is served at root with working images under a repository pref
       const base = new URL(`http://127.0.0.1:${port}/repository/index.html`);
       const html = await get(port, base.pathname);
       assert.equal(html.status, 200);
+      const modules = [...html.body.matchAll(/<script\b[^>]*\btype="module"[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]);
+      const styles = [...html.body.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
+      assert.deepEqual(modules, ['./src/editorial-motion.js']);
+      assert.deepEqual(styles, ['./src/editorial-motion.css']);
+      const visited = new Set();
+      async function resource(ref, parent, type) {
+        assert.match(ref, /^\.\.?\//, 'resources use local relative URLs');
+        const url = new URL(ref, parent);
+        assert.equal(url.origin, base.origin);
+        assert.ok(url.pathname.startsWith('/repository/'), url.pathname);
+        if (visited.has(url.pathname)) return;
+        visited.add(url.pathname);
+        const response = await get(port, url.pathname);
+        assert.equal(response.status, 200, url.pathname);
+        assert.match(response.type, type, url.pathname);
+        const original = await readFile(join(root, url.pathname.slice('/repository/'.length)));
+        assert.deepEqual(response.bytes, original, url.pathname);
+        if (url.pathname.endsWith('.js')) {
+          for (const match of response.body.matchAll(/\b(?:import|export)\s+(?:[^;'"\n]*?\s+from\s*)?['"]([^'"]+)['"]/g)) {
+            await resource(match[1], url, /^(?:text|application)\/javascript(?:;|$)/);
+          }
+        }
+        return response;
+      }
+      for (const ref of styles) await resource(ref, base, /^text\/css(?:;|$)/);
+      for (const ref of modules) await resource(ref, base, /^(?:text|application)\/javascript(?:;|$)/);
+      assert.ok(visited.has('/repository/public/vendor/anime-4.5.0.esm.min.js'), 'follow actual module import to bundled Anime');
+      const license = await resource('./public/vendor/ANIME-LICENSE.txt', base, /^text\/plain(?:;|$)/);
+      assert.match(license.body, /MIT License[\s\S]*Copyright[\s\S]*Permission is hereby granted[\s\S]*THE SOFTWARE IS PROVIDED "AS IS"/);
+      assert.equal((await get(port, '/repository/public/vendor/anime-4.5.0.esm.min.js')).bytes.length, 118678);
       const refs = new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]));
       assert.deepEqual([...refs].sort(), ['./design-study/chishui-valley-study.png', './design-study/long-march-gathering.jpg', './design-study/sixth-army-1935.jpg']);
       for (const ref of refs) {
