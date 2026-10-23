@@ -62,8 +62,8 @@ test('deployment contains only the public site, no source tooling or private art
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
   const studyFiles = ['design-study/index.html', 'design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
-  assert.equal(entries.length, 24);
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css', ...studyFiles].sort());
+  assert.equal(entries.length, 28);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css', ...studyFiles].sort());
 });
 
 test('published design study resolves local images under a repository prefix without private research', async () => {
@@ -117,7 +117,7 @@ test('new homepage is served at root with working images under a repository pref
       const modules = [...html.body.matchAll(/<script\b[^>]*\btype="module"[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]);
       const styles = [...html.body.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
       assert.deepEqual(modules, ['./src/editorial-motion.js']);
-      assert.deepEqual(styles, ['./src/editorial-motion.css']);
+      assert.deepEqual(styles, ['./src/editorial-motion.css', './src/print-atlas.css']);
       const visited = new Set();
       async function resource(ref, parent, type) {
         assert.match(ref, /^\.\.?\//, 'resources use local relative URLs');
@@ -138,7 +138,26 @@ test('new homepage is served at root with working images under a repository pref
         }
         return response;
       }
-      for (const ref of styles) await resource(ref, base, /^text\/css(?:;|$)/);
+      for (const ref of styles) {
+        const sheet = await resource(ref, base, /^text\/css(?:;|$)/);
+        if (ref.endsWith('/print-atlas.css')) {
+          const urls = [...sheet.body.matchAll(/url\(['"]?([^)'"\s]+)['"]?\)/g)].map((match) => match[1]);
+          assert.deepEqual(urls.sort(), ['../public/atlas-paper.png', '../public/fonts/chishui-atlas-display.woff2']);
+          const sheetURL = new URL(ref, base);
+          for (const asset of urls) {
+            const font = asset.endsWith('.woff2');
+            const result = await resource(asset, sheetURL, font ? /^font\/woff2(?:;|$)/ : /^image\/png(?:;|$)/);
+            if (font) {
+              assert.equal(result.bytes.subarray(0, 4).toString('ascii'), 'wOF2');
+              assert.ok(result.bytes.length <= 500 * 1024, 'display subset stays within 500KiB');
+              assert.equal(result.bytes.readUInt32BE(8), result.bytes.length, 'WOFF2 encoded length matches');
+            } else assert.deepEqual([...result.bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+          }
+          const ofl = await resource('./public/fonts/ZHUQUE-OFL.txt', base, /^text\/plain(?:;|$)/);
+          assert.match(ofl.body, /SIL OPEN FONT LICENSE Version 1\.1[\s\S]*PREAMBLE[\s\S]*DEFINITIONS[\s\S]*PERMISSION & CONDITIONS[\s\S]*TERMINATION[\s\S]*DISCLAIMER/);
+          assert.match(ofl.body, /Copyright \(c\) 2023, Zhejiang JadeFoci/);
+        }
+      }
       for (const ref of modules) await resource(ref, base, /^(?:text|application)\/javascript(?:;|$)/);
       assert.ok(visited.has('/repository/public/vendor/anime-4.5.0.esm.min.js'), 'follow actual module import to bundled Anime');
       const license = await resource('./public/vendor/ANIME-LICENSE.txt', base, /^text\/plain(?:;|$)/);

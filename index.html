@@ -117,12 +117,6 @@
     .river { fill: none; stroke: var(--river); stroke-width: 14; stroke-linecap: round; }
     .march-line { fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
     .march-start { fill: var(--map-paper); stroke: var(--accent); stroke-width: 4; }
-    .map-bank-labels { position: absolute; inset: 2% 0 auto; display: flex; justify-content: space-between; gap: 20px; font-size: 16px; line-height: 1.5; }
-    .map-bank-labels span { max-width: 45%; }
-    .river-name { position: absolute; left: 62%; top: 13%; font-family: var(--serif); font-size: 18px; line-height: 1.45; writing-mode: vertical-rl; color: var(--ink); }
-    .map-crossing, .map-destination { position: absolute; background: var(--map-paper); font-size: 16px; line-height: 1.5; padding: 2px 5px; max-width: 44%; }
-    .map-crossing { left: 46%; top: 25%; }
-    .map-destination { left: 3%; top: 67%; }
     .map-caption { padding-top: 8px; font-size: 16px; color: var(--muted); }
     .reader { background: var(--surface); padding: 32px 36px 24px; min-width: 0; }
     .chapter-panel + .chapter-panel { margin-top: 48px; }
@@ -339,9 +333,6 @@
       .route-direction { display: inline; margin-top: 0; }
       .route-date { margin-top: 4px; }
       .map-canvas { margin-block: 16px 6px; }
-      .map-bank-labels { font-size: 16px; top: 0; }
-      .river-name { font-size: 17px; top: 14%; }
-      .map-crossing, .map-destination { padding-inline: 3px; }
       .map-caption { font-size: 16px; }
       .reader { padding: 26px 22px 22px; }
       .chapter-panel h3 { font-size: 28px; }
@@ -414,7 +405,6 @@
       .reader-footer { gap: 8px; }
       .pager-button { padding-inline: 10px; }
       .pager-count { font-size: 16px; }
-      .map-crossing, .map-destination { max-width: 46%; font-size: 16px; }
       [data-direction="landscape"] .opening-copy { padding: 22px 18px 26px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -436,6 +426,7 @@
     }
   </style>
   <link rel="stylesheet" href="./src/editorial-motion.css">
+  <link rel="stylesheet" href="./src/print-atlas.css">
 </head>
 <body data-direction="archive">
   <a class="skip-link" href="#main">跳到正文</a>
@@ -517,21 +508,28 @@
             <button type="button" id="replay-route" class="motion-control" hidden>重播路线</button>
           </div>
           <div class="map-canvas">
-            <svg viewBox="0 0 720 580" role="img" aria-labelledby="map-title map-description" xmlns="http://www.w3.org/2000/svg">
+            <svg id="route-map" viewBox="0 -130 720 940" role="img" aria-labelledby="map-title map-description" xmlns="http://www.w3.org/2000/svg">
               <title id="map-title">一渡赤水，向西转移</title>
               <desc id="map-description">1935年1月29日拂晓，中央红军从土城、元厚等渡口西渡赤水河，向川南转移，随后到达扎西地区。此图只表达概略关系，不代表测绘地形或精确行军轨迹。</desc>
-              <defs><marker id="route-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--accent)"/></marker></defs>
+              <defs><marker id="route-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="32" markerHeight="32" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--accent)"/></marker></defs>
+              <g class="map-type map-bank-labels" aria-hidden="true" font-size="42">
+                <text x="28" y="-72"><tspan x="28">西岸</tspan><tspan x="28" dy="1.3em">川南方向</tspan></text>
+                <text x="692" y="-72" text-anchor="end"><tspan x="692">东岸</tspan><tspan x="692" dy="1.3em">黔北方向</tspan></text>
+              </g>
+              <text class="map-type river-name" x="492" y="64" font-size="42" aria-hidden="true">赤水河</text>
               <path class="river-bank" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
               <path class="river" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
               <path class="river-flow" aria-hidden="true" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
               <path id="current-route" class="march-line" d="M480 176C425 155 365 155 320 177S217 210 187 260S130 338 104 385" marker-end="url(#route-arrow)"/>
               <circle id="march-start" class="march-start" cx="480" cy="176" r="7"/>
               <circle id="march-head" cx="104" cy="385" r="7" aria-hidden="true" visibility="hidden"/>
+              <g class="map-callouts" aria-hidden="true">
+                <path id="crossing-leader" class="map-leader" d="M350 166L50 550V592"/>
+                <path id="destination-leader" class="map-leader" d="M104 385L590 568V592"/>
+                <text class="map-type map-crossing" id="map-crossing" x="28" y="646" font-size="42"><tspan x="28">土城、元厚</tspan></text>
+                <text class="map-type map-destination" id="map-destination" x="452" y="646" font-size="42"><tspan x="452">扎西方向</tspan></text>
+              </g>
             </svg>
-            <div class="map-bank-labels" aria-hidden="true"><span>西岸 · 川南方向</span><span>东岸 · 黔北方向</span></div>
-            <span class="river-name" aria-hidden="true">赤水河</span>
-            <span class="map-crossing" id="map-crossing" aria-hidden="true">土城、元厚</span>
-            <span class="map-destination" id="map-destination" aria-hidden="true">扎西方向</span>
           </div>
           <figcaption class="map-caption">示意仅表达渡河方向与地名关系，不是测绘地图。未启用脚本时，此处为一渡；其余各渡的方向见完整正文。</figcaption>
         </figure>
@@ -663,18 +661,55 @@
       const mapDescription = document.getElementById('map-description');
       const crossingLabel = document.getElementById('map-crossing');
       const destinationLabel = document.getElementById('map-destination');
+      const mapSVG = document.getElementById('route-map');
+      const crossingLeader = document.getElementById('crossing-leader');
+      const destinationLeader = document.getElementById('destination-leader');
+      const routeArrow = document.getElementById('route-arrow');
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       const disclosureStates = new Map();
       const names = ['一渡', '二渡', '三渡', '四渡'];
       const directionNames = { archive: '行军档案', catalogue: '长征图录', landscape: '山河长卷' };
       const routeData = [
-        { path: 'M480 176C425 155 365 155 320 177S217 210 187 260S130 338 104 385', start: [480, 176], crossing: '土城、元厚', crossingAt: [46, 25], destination: '扎西方向', destinationAt: [3, 67], summary: '从土城、元厚等渡口西渡赤水河，向川南转移，随后到达扎西地区。' },
-        { path: 'M104 385C150 350 193 306 253 276S338 269 381 277S495 312 560 345', start: [104, 385], crossing: '太平渡、二郎滩', crossingAt: [47, 42], destination: '桐梓方向', destinationAt: [71, 60], summary: '从太平渡、二郎滩等渡口东渡赤水河，回师黔北，向桐梓方向前进。' },
-        { path: 'M572 464C512 480 454 474 403 449S310 420 275 377S224 285 207 235', start: [572, 464], crossing: '茅台', crossingAt: [57, 76], destination: '川南方向', destinationAt: [18, 34], summary: '从茅台及其附近地区西渡赤水河，再入川南，寻求新的机动。' },
-        { path: 'M207 235C244 235 285 273 321 315S391 340 445 355S526 454 542 548', start: [207, 235], crossing: '太平渡、二郎滩、九溪口', crossingAt: [51, 43], destination: '向南行动', destinationAt: [65, 90], summary: '从太平渡、二郎滩、九溪口等渡口东渡赤水河，重回黔北，随后迅速向南行动。' }
+        { path: 'M480 176C425 155 365 155 320 177S217 210 187 260S130 338 104 385', start: [480, 176], crossing: '土城、元厚', crossingAt: [350, 166], destination: '扎西方向', destinationAt: [104, 385], summary: '从土城、元厚等渡口西渡赤水河，向川南转移，随后到达扎西地区。' },
+        { path: 'M104 385C150 350 193 306 253 276S338 269 381 277S495 312 560 345', start: [104, 385], crossing: '太平渡、二郎滩', crossingAt: [381, 277], destination: '桐梓方向', destinationAt: [560, 345], summary: '从太平渡、二郎滩等渡口东渡赤水河，回师黔北，向桐梓方向前进。' },
+        { path: 'M572 464C512 480 454 474 403 449S310 420 275 377S224 285 207 235', start: [572, 464], crossing: '茅台', crossingAt: [403, 449], destination: '川南方向', destinationAt: [207, 235], summary: '从茅台及其附近地区西渡赤水河，再入川南，寻求新的机动。' },
+        { path: 'M207 235C244 235 285 273 321 315S391 340 445 355S526 454 542 548', start: [207, 235], crossing: '太平渡、二郎滩、九溪口', crossingAt: [385, 338], destination: '向南行动', destinationAt: [542, 548], summary: '从太平渡、二郎滩、九溪口等渡口东渡赤水河，重回黔北，随后迅速向南行动。' }
       ];
       let currentChapter = 1;
       let activeImageTrigger = null;
+
+      // The entire map, including its annotation margin, uses the original route coordinates.
+      // A 42-unit static fallback remains legible at the narrowest supported map width.
+      function fitMapLabels() {
+        const matrix = mapSVG.getScreenCTM();
+        const scale = matrix ? Math.hypot(matrix.a, matrix.b) : 0;
+        if (!scale) return;
+        const size = Math.max(24, 14.5 / scale);
+        mapSVG.querySelectorAll('.map-type').forEach((label) => label.setAttribute('font-size', String(size)));
+        const arrowSize = Math.max(24, 11 / scale);
+        routeArrow.setAttribute('markerWidth', String(arrowSize));
+        routeArrow.setAttribute('markerHeight', String(arrowSize));
+      }
+      function renderMapLabels(data) {
+        // Four or five characters per line retain names and punctuation without shrinking type.
+        const crossings = data.crossing === '太平渡、二郎滩、九溪口'
+          ? ['太平渡、', '二郎滩、', '九溪口']
+          : data.crossing === '太平渡、二郎滩' ? ['太平渡、', '二郎滩']
+          : data.crossing === '土城、元厚' ? ['土城、', '元厚'] : [data.crossing];
+        crossingLabel.replaceChildren(...crossings.map((line, index) => {
+          const span = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+          span.setAttribute('x', '28');
+          if (index) span.setAttribute('dy', '1.3em');
+          span.textContent = line;
+          return span;
+        }));
+        destinationLabel.textContent = data.destination;
+        crossingLeader.setAttribute('d', `M${data.crossingAt.join(' ')}L50 550V592`);
+        const [x, y] = data.destinationAt;
+        // The destination leader begins beyond the arrow, leaving its head unobscured.
+        destinationLeader.setAttribute('d', `M${x + 28} ${y + 18}L670 568V592`);
+        fitMapLabels();
+      }
 
       function announce(message) { status.textContent = message; }
 
@@ -756,12 +791,7 @@
         routeDirection.textContent = names[number - 1] + ' · ' + direction;
         mapTitle.textContent = names[number - 1] + '赤水，' + direction;
         mapDescription.textContent = date + '，' + data.summary + '此图只表达概略关系，不代表测绘地形或精确行军轨迹。';
-        crossingLabel.textContent = data.crossing;
-        crossingLabel.style.left = data.crossingAt[0] + '%';
-        crossingLabel.style.top = data.crossingAt[1] + '%';
-        destinationLabel.textContent = data.destination;
-        destinationLabel.style.left = data.destinationAt[0] + '%';
-        destinationLabel.style.top = data.destinationAt[1] + '%';
+        renderMapLabels(data);
         previous.disabled = number === 1;
         next.disabled = number === 4;
         document.getElementById('pager-count').textContent = names[number - 1] + ' / 四渡';
@@ -790,6 +820,7 @@
           const direction = button.dataset.directionChoice;
           settleAllDisclosures();
           body.dataset.direction = direction;
+          fitMapLabels();
           directionButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
           announce('已切换到' + directionNames[direction] + '。当前仍为' + names[currentChapter - 1] + '。');
           document.dispatchEvent(new CustomEvent('chishui:layout', { detail: { direction } }));
@@ -846,7 +877,9 @@
       window.addEventListener('blur', clearPressed);
       window.addEventListener('pagehide', () => { settleAllDisclosures(); clearPressed(); });
       document.addEventListener('visibilitychange', () => { if (document.hidden) { settleAllDisclosures(); clearPressed(); } });
-      window.addEventListener('resize', settleAllDisclosures);
+      window.addEventListener('resize', () => { settleAllDisclosures(); fitMapLabels(); });
+      if (typeof ResizeObserver === 'function') new ResizeObserver(fitMapLabels).observe(mapSVG);
+      if (document.fonts) document.fonts.ready.then(fitMapLabels).catch(() => {});
       document.addEventListener('chishui:motion', () => { if (body.dataset.motion === 'off') settleAllDisclosures(); });
       function motionPreferenceChanged() { if (reducedMotion.matches) settleAllDisclosures(); }
       if (typeof reducedMotion.addEventListener === 'function') reducedMotion.addEventListener('change', motionPreferenceChanged);

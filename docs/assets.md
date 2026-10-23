@@ -1,5 +1,21 @@
 # 本地素材清单
 
+## 印刷图册新资源（2026-10-23）
+
+| 生产文件 | 内容／来源 | bytes | SHA-256 |
+| --- | --- | ---: | --- |
+| [atlas-paper.png](../public/atlas-paper.png) | 原创384×384静态RGBA纸纤维，Python标准库生成，无历史图像内容 | 81926 | `f51ce5bb33e2a9f43a9920b66e019b30ede6dbc63790df073ed0ae2108174422` |
+| [chishui-atlas-display.woff2](../public/fonts/chishui-atlas-display.woff2) | 朱雀仿宋v0.212重命名显示子集，内部family为ChishuiAtlasDisplay Regular | 176028 | `4730141ccd0b8deaad3da699137a1baa65619efd55215e8ff9967dd063afd0ea` |
+| [ZHUQUE-OFL.txt](../public/fonts/ZHUQUE-OFL.txt) | 固定来源完整原始SIL OFL 1.1，未删改 | 4389 | `66cc01ad4df62fca6936431a426104cb32a52ce8da49de9a7d643e02d7659043` |
+
+纸纹由固定随机种子19350129产生低透明度颗粒与短纤维，PNG编码使用标准库struct/zlib；只作为静态材料平铺，不修改历史照片或原创河谷图字节。[图册样式](../src/print-atlas.css)为自写CSS，参考赫蹏的中文行距节律与Tufte图版/旁注关系，没有复制或部署整套第三方CSS。
+
+字体固定至[TrionesType/zhuque v0.212](https://github.com/TrionesType/zhuque/releases/tag/v0.212)，提交`803217b9663d1c6e1402e91acc94e4f572713d73`。[原始发行ZIP](https://github.com/TrionesType/zhuque/releases/download/v0.212/ZhuqueFangsong-v0.212.zip)为5743932bytes，SHA-256为`bb8b661a7643d2296a72d9d10530a00949419c4e527fb61783f73c2ba1a8c062`；其中ZhuqueFangsong-Regular.ttf为8824084bytes，SHA-256为`558c62730844fe54ba220146ed62f859d4e2880188d92d985f8921c6e3743bc4`。完整TTF、ZIP、FontTools与Brotli仅留ignored研究目录，不在28文件部署包中。
+
+[固定版本原始许可](https://raw.githubusercontent.com/TrionesType/zhuque/803217b9663d1c6e1402e91acc94e4f572713d73/LICENSE.txt)实际声明为`Copyright (c) 2023, Zhejiang JadeFoci Techonology Co. LTD`及`https://www.jadefoci.com/`；嵌入字体的`Copyright 2023 JadeFoci`与原作者、厂商、许可记录保持。未以current-main README的2025年声明替换。衍生字体只做字符子集化、格式转换和内部名称更换，保留原字形与原有版权；OFL允许随软件修改、嵌入和分发，并要求保留完整版权与许可、字体继续以OFL授权，不单独售卖字体或暗示作者背书。发布版为技术预览，上游说明尚未达到正式发行质量，并请求第三方修改版不要在正式版本前大量传播；这些上游提示不等于额外的许可条款。
+
+资产工作者使用隔离FontTools 4.67.0与Brotli 1.2.1，真实重开并解编产物全部表，核实内部family、原通知、597个Unicode／492个CJK覆盖与完整OFL字节；输入唯一不支持的是无需可见字形的换行控制字符。运行时只给题字、章名、时间与地图题签使用该字族，正文使用系统宋体；字体失败时系统后备继续显示文字。新的字体、PNG、CSS与OFL已通过真实仓库前缀GET、类型和原始字节回归；实际页面排字仍待控制器Brave。
+
 核查与下载日期：2026-10-22。运行时只读取站点自己的相对路径，不热链、不请求第三方服务。本清单保留素材创作者、上传者与许可来源；作品界面和纪念卡不附个人署名。
 
 ## 标准金黄色中国共产党党徽
@@ -56,3 +72,21 @@
 两项 GitHub blob SHA 均与本地 `git hash-object` 一致。MIT 许可完整保留，原文署名 `Copyright (c) 2025 Julian Garnier`；这是库的许可署名，不进入作品界面的个人署名。
 
 [动效模块](../src/editorial-motion.js) 实际导入 `animate`、`stagger`，以库驱动的数值进度设置路线 stroke offset、移动头点、流线、原创图轻微漂移、分组入场和阅读进度。约1.8秒路线只在整图进入可见区域后启动，完成时才补上终点箭头。历史照片仅作透明度入场；本轮没有改动历史原图、原创图像文件或既有来源文字。
+
+## 印刷图册新资源（2026-10-23）
+
+标题、章名和地图题签使用自托管朱雀仿宋显示子集，内部字族为`ChishuiAtlasDisplay`。来源为[TrionesType/zhuque v0.212](https://github.com/TrionesType/zhuque/releases/tag/v0.212)，固定提交`803217b9663d1c6e1402e91acc94e4f572713d73`。它复刻1932年南宋印刷字型；本站只做显示字符子集与格式转换，未重新设计字形。正文仍有宋体/系统后备。
+
+| 部署资源 | 字节 | SHA-256 |
+| --- | ---: | --- |
+| [显示字体](../public/fonts/chishui-atlas-display.woff2) | 176028 | `4730141ccd0b8deaad3da699137a1baa65619efd55215e8ff9967dd063afd0ea` |
+| [完整OFL](../public/fonts/ZHUQUE-OFL.txt) | 4389 | `66cc01ad4df62fca6936431a426104cb32a52ce8da49de9a7d643e02d7659043` |
+| [原创纸纤维](../public/atlas-paper.png) | 81926 | `f51ce5bb33e2a9f43a9920b66e019b30ede6dbc63790df073ed0ae2108174422` |
+
+官方ZIP为5743932字节，SHA-256`bb8b661a7643d2296a72d9d10530a00949419c4e527fb61783f73c2ba1a8c062`；其中原TTF8824084字节，SHA-256`558c62730844fe54ba220146ed62f859d4e2880188d92d985f8921c6e3743bc4`。原TTF、ZIP和开发工具不部署。子集覆盖597个Unicode码点（492个CJK），仅针对当前页面与地图用字；后加文字可用后备字体，不能据此声称完整字库。
+
+许可为[SIL OFL1.1固定原文](https://github.com/TrionesType/zhuque/blob/803217b9663d1c6e1402e91acc94e4f572713d73/LICENSE.txt)。标签中的实际版权为`Copyright (c) 2023, Zhejiang JadeFoci Techonology Co. LTD`，不是当前主分支README的2025文字。完整许可字节与原嵌入版权/许可记录保留，派生内部主名称改为ChishuiAtlasDisplay；Latin及符号来自Alegreya的Juan Pablo del Peral／Huerta Tipográfica，其原记录同样保留。
+
+上游v0.212是技术预览版，并提示不适合直接用于生产，建议暂不大规模传播第三方修改。本站依OFL使用未改字形的小型子集；覆盖、文件完整性与本机浏览器加载已核实，不据此保证所有平台排印质量。显示字体失败时仍用后备字体完整阅读。
+
+纸纤维由本项目用Python标准库生成，384×384 RGBA、种子19350129；低透明度纸面纹理，既不冒充历史纸张扫描，也不施加到老照片像素。图册CSS由本项目编写，仅参考[赫蹏](https://sivan.github.io/heti/)的中文节律与[Tufte CSS](https://edwardtufte.github.io/tufte-css/)的图版/旁注关系，未复制整套样式。

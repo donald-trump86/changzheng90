@@ -2,7 +2,9 @@
 
 将四渡赤水放回1934—1936年的长征进程，以原创河谷示意、历史老照片与四章叙事组织阅读。首页默认“行军档案”，可切换“长征图录”“山河长卷”；交互支持中途反向、减少动态与无脚本全文。
 
-本地本轮加入分层开篇、约1.8秒的路线描绘与移动头点、分章入场、河面流线、原创河谷图的轻微视差和阅读进度。页首“暂停动画”控制全部阅读动效，地图旁“重播路线”可重看当前一渡；手机点击渡次、行动展开或重播时，页面先把整张地图带入视口。系统减少动态、页面隐藏或暂停时显示完整终态，恢复不续播旧章节。历史照片只作透明度入场，保留完整画面与原始字节。本轮已由控制器完成本地Brave验收，未发现产品缺陷；实际范围和设备、生命周期等限制见[验证记录](docs/verification.md#2026-10-23-根首页阅读动效本轮实现记录)。发布由控制器处理。
+当前根首页采用“民国印刷图册＋少量行军批注”的统一视觉：自托管朱雀仿宋显示子集用于题字、章名与题签，宋体正文配合静态原创纸纹、灰蓝河道和暗朱红路线。三种阅读布局共用同一套纸墨与文字层级。地图地名、渡口和引线放在同一SVG坐标系中，长地名分行；移动头点只在约1.8秒的实际描绘中出现，静态和完成时显示箭头。
+
+原有分层开篇、分章入场、河面流线、原创河谷图轻微视差、阅读进度和全局暂停保留。减少动态、页面隐藏或暂停时立即完成静态终态，恢复不续播旧章节；原图保持完整画面与原始字节。本轮完整Node检查23/23通过、构建28文件；实际Brave通过四宽度×三布局、48个渡次地图，以及描画、重播、阅读交互与四类静态降级检查，详见[验证记录](docs/verification.md#2026-10-23-印刷图册修订)。此前阅读动效的浏览器通过记录仅属于历史基线。
 
 **在线首页：[https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)**。新版直接发布在根路径，入口通过Cloudflare代理，静态源站和源码仍在GitHub。
 
@@ -32,7 +34,7 @@ PORT=4174 npm run dev -- --root dist
 
 ## 文件分工
 
-当前首页的基础样式、历史内容和阅读交互内嵌在 [index.html](index.html)，独立动效由 [editorial-motion.js](src/editorial-motion.js) 和 [editorial-motion.css](src/editorial-motion.css) 增强，图片放在 [design-study](design-study/)。前版应用实现仍保留，便于追溯。
+当前首页的历史内容和阅读交互内嵌在 [index.html](index.html)，统一图册视觉由 [print-atlas.css](src/print-atlas.css) 提供；独立动效由 [editorial-motion.js](src/editorial-motion.js) 和 [editorial-motion.css](src/editorial-motion.css) 增强，图片放在 [design-study](design-study/)。自托管显示字体与完整OFL、原创纸纹的固定来源、字节和SHA-256见[素材清单](docs/assets.md#印刷图册新资源2026-10-23)。前版应用实现仍保留，便于追溯。
 
 Anime.js v4.5.0 的原始 ESM 包和完整 MIT 许可随站点同源托管：[库文件](public/vendor/anime-4.5.0.esm.min.js)、[许可](public/vendor/ANIME-LICENSE.txt)。无需 npm 安装，不请求 CDN；固定来源、大小与校验值见[素材清单](docs/assets.md)。模块、库或观察器不可用时，HTML 保留可读内容与完整静态路线。
 

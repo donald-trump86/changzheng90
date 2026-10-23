@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const projectRoot = await realpath(fileURLToPath(new URL('../', import.meta.url)));
 const dist = resolve(projectRoot, 'dist');
-const sourceFiles = new Set(['src/editorial-motion.js', 'src/editorial-motion.css', 'src/styles.css', 'src/main.js', 'src/story.js', 'src/map.js', 'src/share.js', 'src/media.js']);
-const assetFiles = new Set(['public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/favicon.svg', 'public/party-emblem.svg', 'public/internationale.mp3', 'public/CNAME', 'public/history/long-march-gathering.jpg', 'public/history/sixth-army-1935.jpg', 'public/history/luding-bridge-museum.jpg', 'public/history/luding-chain-museum.jpg']);
+const sourceFiles = new Set(['src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/styles.css', 'src/main.js', 'src/story.js', 'src/map.js', 'src/share.js', 'src/media.js']);
+const assetFiles = new Set(['public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/favicon.svg', 'public/party-emblem.svg', 'public/internationale.mp3', 'public/CNAME', 'public/history/long-march-gathering.jpg', 'public/history/sixth-army-1935.jpg', 'public/history/luding-bridge-museum.jpg', 'public/history/luding-chain-museum.jpg']);
 const studyFiles = ['design-study/index.html', 'design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
 const files = ['index.html', ...studyFiles];
 
