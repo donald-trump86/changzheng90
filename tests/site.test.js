@@ -100,37 +100,30 @@ test('historical JPEGs have actual encoded bytes and identical deployment copies
   }
 });
 
-test('built HTML assets and recursive module imports resolve over HTTP under a repository prefix', async () => {
+test('new homepage is served at root with working images under a repository prefix', async () => {
+  await withServer(dist, async (port) => {
+    const home = await get(port, '/');
+    assert.equal(home.status, 200);
+    assert.match(home.body, /<title>长征路上，四渡赤水<\/title>/);
+    assert.deepEqual(home.bytes, await readFile(join(root, 'index.html')));
+  });
   await withFixture(async (fixture) => {
     await cp(dist, join(fixture, 'repository'), { recursive: true });
     await withServer(fixture, async (port) => {
       const base = new URL(`http://127.0.0.1:${port}/repository/index.html`);
       const html = await get(port, base.pathname);
       assert.equal(html.status, 200);
-      const refs = [...html.body.matchAll(/<(?:script|link|img|audio)\b[^>]*\b(?:src|href)="([^"]+)"/g)].map((match) => match[1]);
-      assert.equal(refs.length, 9, 'module, stylesheet, favicon, emblem, audio and four historical photographs');
-      const visited = new Set();
-      async function visit(reference, from) {
-        assert.match(reference, /^\.\.?\//, 'resources use relative URLs');
-        const url = new URL(reference, from);
+      const refs = new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]));
+      assert.deepEqual([...refs].sort(), ['./design-study/chishui-valley-study.png', './design-study/long-march-gathering.jpg', './design-study/sixth-army-1935.jpg']);
+      for (const ref of refs) {
+        const url = new URL(ref, base);
         assert.equal(url.origin, base.origin);
-        assert.ok(url.pathname.startsWith('/repository/'), url.pathname);
-        if (visited.has(url.href)) return;
-        visited.add(url.href);
+        assert.ok(url.pathname.startsWith('/repository/design-study/'));
         const response = await get(port, url.pathname);
         assert.equal(response.status, 200, url.pathname);
-        if (url.pathname.endsWith('.js')) {
-          assert.match(response.type, /^text\/javascript/);
-          for (const match of response.body.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)) await visit(match[1], url);
-        } else if (url.pathname.endsWith('.css')) assert.match(response.type, /^text\/css/);
-        else if (url.pathname.endsWith('.mp3')) assert.equal(response.type, 'audio/mpeg');
-        else if (url.pathname.endsWith('.jpg')) {
-          assert.equal(response.type, 'image/jpeg');
-          assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
-        } else assert.match(response.type, /^image\/svg\+xml/);
+        assert.equal(response.type, ref.endsWith('.png') ? 'image/png' : 'image/jpeg');
+        assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
       }
-      for (const ref of refs) await visit(ref, base);
-      assert.equal(visited.size, 13, 'five modules, stylesheet, favicon, emblem, audio and four JPEGs all fetched');
     });
   });
 });
