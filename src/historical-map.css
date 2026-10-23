@@ -5,24 +5,50 @@
   aspect-ratio: 1.22;
   max-height: calc(100svh - 130px);
   margin: 18px auto 8px;
-  background: var(--map-paper);
+  background: var(--paper, #F0E8D8); /* Paper surface on the page ground; no gradients. */
 }
 .map-canvas #route-map { width: 100%; height: 100%; }
 .map-relief { opacity: .82; pointer-events: none; }
 #route-map .river-bank { stroke-width: 14; vector-effect: non-scaling-stroke; opacity: .72; }
 #route-map .river { stroke-width: 5; vector-effect: non-scaling-stroke; }
 #route-map .river-flow { stroke-width: 1.2; vector-effect: non-scaling-stroke; }
-#route-map .march-line { stroke-width: 3; vector-effect: non-scaling-stroke; }
-#route-map .march-start { stroke-width: 2; vector-effect: non-scaling-stroke; }
-.map-previous-route {
+/* The selected route: low-saturation vermilion, the one loud line on the map. */
+#route-map .march-line {
+  stroke: #9B302B;
+  stroke-width: 3;
   fill: none;
-  stroke: var(--muted);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 5;
-  opacity: .32;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
-.map-place { fill: var(--ink); stroke: var(--map-paper); stroke-width: 1; vector-effect: non-scaling-stroke; }
+#route-map .march-start {
+  fill: var(--paper, #F0E8D8);
+  stroke: #9B302B;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+/* Earlier legs recede in gray; in all-routes mode the other three legs read bronze. */
+.map-previous-route {
+  fill: none;
+  stroke: #67635C;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+  opacity: .38;
+  vector-effect: non-scaling-stroke;
+}
+.map-previous-route.is-all-route {
+  stroke: #A98D64;
+  stroke-width: 2;
+  stroke-dasharray: none;
+  opacity: .55;
+}
+#route-map .map-crossing-dot {
+  fill: var(--paper, #F0E8D8);
+  stroke: #A98D64;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.map-place { fill: var(--ink); stroke: var(--paper, #F0E8D8); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .map-ford {
   fill: var(--river-bank);
   fill-opacity: .3;
@@ -32,13 +58,13 @@
   vector-effect: non-scaling-stroke;
 }
 .map-ford.is-current-ford { stroke: var(--accent); stroke-width: 2; fill-opacity: .6; }
-.map-maneuver-area { fill: var(--map-paper); fill-opacity: .4; stroke: var(--muted); stroke-dasharray: 5 5; vector-effect: non-scaling-stroke; }
+.map-maneuver-area { fill: var(--paper, #F0E8D8); fill-opacity: .4; stroke: var(--muted); stroke-dasharray: 5 5; vector-effect: non-scaling-stroke; }
 #route-map .map-type {
   font-family: var(--display);
   font-size: 55px;
   fill: var(--ink);
   paint-order: stroke fill;
-  stroke: var(--map-paper);
+  stroke: var(--paper, #F0E8D8);
   stroke-width: 4;
   stroke-linejoin: round;
 }
@@ -88,6 +114,10 @@
 .map-details p + p, .map-details ul { margin-top: 12px; }
 .map-details ul { padding-left: 1.2em; }
 .map-details li + li { margin-top: 8px; }
+.map-all-routes { margin-top: 16px; font-size: 16px; line-height: 1.85; }
+.map-all-routes > summary { min-height: 44px; padding-block: 8px; font-family: var(--sans); cursor: pointer; }
+.map-all-routes ol { padding-left: 1.2em; margin-top: 12px; }
+.map-all-routes li + li { margin-top: 8px; }
 .map-credit { color: var(--muted); font-size: 14px; }
 .map-credit a { display: inline; text-underline-offset: .2em; }
 @media (max-width: 900px) and (min-width: 651px) {
@@ -110,4 +140,6 @@
   #route-map .map-type { stroke: Canvas; fill: CanvasText; }
   .map-place { fill: CanvasText; }
   .map-ford { stroke: CanvasText; fill: none; }
+  #route-map .march-line, #route-map .march-start, .map-previous-route, #route-map .map-crossing-dot { stroke: CanvasText; }
+  #route-map .march-start, #route-map .map-crossing-dot { fill: Canvas; }
 }
