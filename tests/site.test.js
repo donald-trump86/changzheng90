@@ -62,8 +62,8 @@ test('deployment contains only the public site, no source tooling or private art
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
   const studyFiles = ['design-study/index.html', 'design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
-  assert.equal(entries.length, 28);
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css', ...studyFiles].sort());
+  assert.equal(entries.length, 32);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css', ...studyFiles].sort());
 });
 
 test('published design study resolves local images under a repository prefix without private research', async () => {
@@ -117,7 +117,9 @@ test('new homepage is served at root with working images under a repository pref
       const modules = [...html.body.matchAll(/<script\b[^>]*\btype="module"[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]);
       const styles = [...html.body.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
       assert.deepEqual(modules, ['./src/editorial-motion.js']);
-      assert.deepEqual(styles, ['./src/editorial-motion.css', './src/print-atlas.css']);
+      assert.deepEqual(styles, ['./src/editorial-motion.css', './src/print-atlas.css', './src/historical-map.css']);
+      const classics = [...html.body.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1]);
+      assert.deepEqual(classics, ['./src/historical-map-data.js', './src/historical-map.js']);
       const visited = new Set();
       async function resource(ref, parent, type) {
         assert.match(ref, /^\.\.?\//, 'resources use local relative URLs');
@@ -158,7 +160,13 @@ test('new homepage is served at root with working images under a repository pref
           assert.match(ofl.body, /Copyright \(c\) 2023, Zhejiang JadeFoci/);
         }
       }
-      for (const ref of modules) await resource(ref, base, /^(?:text|application)\/javascript(?:;|$)/);
+      for (const ref of [...classics, ...modules]) await resource(ref, base, /^(?:text|application)\/javascript(?:;|$)/);
+      const reliefRef = [...html.body.matchAll(/<image\b[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
+      assert.deepEqual(reliefRef, ['./public/map/region-relief.png']);
+      const relief = await resource(reliefRef[0], base, /^image\/png(?:;|$)/);
+      assert.deepEqual([...relief.bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+      assert.equal(relief.bytes.readUInt32BE(16), 600);
+      assert.equal(relief.bytes.readUInt32BE(20), 492);
       assert.ok(visited.has('/repository/public/vendor/anime-4.5.0.esm.min.js'), 'follow actual module import to bundled Anime');
       const license = await resource('./public/vendor/ANIME-LICENSE.txt', base, /^text\/plain(?:;|$)/);
       assert.match(license.body, /MIT License[\s\S]*Copyright[\s\S]*Permission is hereby granted[\s\S]*THE SOFTWARE IS PROVIDED "AS IS"/);

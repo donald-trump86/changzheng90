@@ -1,5 +1,26 @@
 # 本地素材清单
 
+## 地理地图数据与粗采样地形（2026-10-23）
+
+| 新增部署资源 | 内容 | bytes | SHA-256 |
+| --- | --- | ---: | --- |
+| [historical-map-data.js](../src/historical-map-data.js) | 十个现代代表点、来源与许可、概略关系、阶段节点和完整90点高程 | 10840 | `08b7372dc9183b7530c8b9c2cb42bbb4846ef6e329d762ca16dc9561ac88a4b9` |
+| [historical-map.js](../src/historical-map.js) | 自写稳定节点渲染器、两视图、实际字框适配 | 9833 | `7c5010926f2436a68143ca9a681b6825d21231667134398b3226dae21ab3ffee` |
+| [historical-map.css](../src/historical-map.css) | 自写地图分层、语义说明与视口样式 | 4615 | `106cd1cb73b3e15309b04683e7ca0684d3001768f40bdacfb80608ef0972c1a1` |
+| [region-relief.png](../public/map/region-relief.png) | 本项目由Open-Meteo完整网格生成，600×492 RGB PNG | 16556 | `03101e4aa6212fcb67b9f9fe8db9867a278b1ac9df39ad905a271eb7c9d5f423` |
+
+十个点只用于现代方位参照，不能视为1935年浮桥、渡口或城心测点。元厚、土城、太平、二郎、茅台、扎西、遵义七点来自**维基百科贡献者／GeoData，CC BY-SA 4.0**；[本次研究实际API请求](https://zh.wikipedia.org/w/api.php?action=query&format=json&prop=coordinates&titles=%E5%9C%9F%E5%9F%8E%E9%95%87+%28%E4%B9%A0%E6%B0%B4%E5%8E%BF%29%7C%E5%85%83%E5%8E%9A%E9%95%87%7C%E5%A4%AA%E5%B9%B3%E9%95%87+%28%E5%8F%A4%E8%94%BA%E5%8E%BF%29%7C%E4%BA%8C%E9%83%8E%E9%95%87+%28%E5%8F%A4%E8%94%BA%E5%8E%BF%29%7C%E8%8C%85%E5%8F%B0%E9%95%87%7C%E9%81%B5%E4%B9%89%E5%B8%82%7C%E6%A1%90%E6%A2%93%E5%8E%BF%7C%E6%89%8E%E8%A5%BF%E9%95%87%7C%E5%8F%A4%E8%94%BA%E5%8E%BF%7C%E4%B9%A0%E6%B0%B4%E5%8E%BF%7C%E5%A8%84%E5%B1%B1%E5%85%B3%7C%E8%B5%A4%E6%B0%B4%E6%B2%B3&colimit=max&redirects=1&meta=siteinfo&siprop=rightsinfo)于2026-10-23读取，返回rightsinfo为[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)，无误差半径。数据文件内保留等价的七点查询入口、实际原值及现代代表点标记；没有将这些点写成CC0或OSM数据。
+
+习水Q531259、古蔺Q1342169、桐梓Q1200607来自[Wikidata实际实体API](https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q531259%7CQ1342169%7CQ109350269%7CQ1200607&props=claims%7Clabels&languages=zh)，2026-10-23读取P625，precision和altitude为null。结构化数据依[Wikidata CC0政策](https://www.wikidata.org/wiki/Wikidata:Licensing)。娄山关实体P625为空，未补坐标；只按桐梓南、遵义北放置明确标为概略的关系节点。古蔺县点不意味着三渡进入县城。
+
+历史依据包括[贵州省委党史研究室2022资料](https://www.zggzswdsyjs.cn/yjddesdslzk/202210/t20221017_76757074.html)、[党史和文献研究院2026资料](https://www.dswxyjy.org.cn/BIG5/n1/2026/0930/c244516-40808291.html)、[中央网信办所载《四渡赤水出奇兵》](https://www.cac.gov.cn/2016-08/22/c_1119430867.htm)、[四川省情网渡口资料](http://scdfz.sc.gov.cn/ztzl/hjczzsc/zztp/hjzzzlz/content_20517)与[汇川区娄山关资料](https://zyhc.gov.cn/hmzc/rwhc/lyjd/201906/t20190612_2682987.html)。九溪口只保留“太平渡上游约5千米”的关系说明，二渡、四渡共用；不沿任意曲线反算假坐标。太平渡口与现代镇政府约1.8千米、二郎滩渡口约550米，区域符号不是精确历史点。河道为依据这些关系绘制的原创概化，未取得OSM几何，不使用误导性OSM署名或精密比例尺；2011图册只作文字参考，未复制其图形。
+
+高程来源：**Open-Meteo elevation API / Copernicus GLO-90**，2026-10-23取得完整10列×9行共90个值，范围[104.85,27.4,107.15,29.05]，210—1845米。经纬度请求、完整数值、采样范围与加工说明全部随[数据文件](../src/historical-map-data.js)保存。原值JSON数字序列SHA-256为`459895dcfd12754008296c53afdaaf0f6dc01e7e342285dfea6edcb03ace345d`。地形图用Python标准库struct/zlib编码，双线性插值为低对比色面并按粗网格坡度作轻微晕渲；没有随机山纹、精细等高线、补造缺失点或图像软件依赖。使用完整网格，不使用残缺SRTM或432点试验。
+
+实际读取的[Open-Meteo官方README Data License](https://github.com/open-meteo/open-meteo#data-license)明确API数据为[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)，要求署名、许可链接与修改说明。README代码AGPL条款与API数据不同；本轮只加工数据，未复制服务端代码。图边保留Open-Meteo／Copernicus GLO-90署名、许可链接和粗采样插值修改说明。GLO-90是上游数据集名称，这张90点晕渲**不是90米分辨率地图**，也不复原1935年地表。
+
+现代点、关系、概化河道与地形组成的本项目派生地图数据和自绘图形，以**CC BY-SA 4.0**提供，保留GeoData、Wikidata与Open-Meteo分别适用的来源和许可。原有历史照片、原创河谷图、字体/OFL、Anime/MIT、音乐和党徽仍依原许可；本轮30个受保护文件与四章HTML均保持字节一致。白名单部署共32项，不含研究原始文件、临时生成脚本或开发工具。真实浏览器验收状态见[验证记录](verification.md#2026-10-23-地理地图修订)。
+
 ## 印刷图册新资源（2026-10-23）
 
 | 生产文件 | 内容／来源 | bytes | SHA-256 |

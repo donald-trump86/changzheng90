@@ -427,6 +427,7 @@
   </style>
   <link rel="stylesheet" href="./src/editorial-motion.css">
   <link rel="stylesheet" href="./src/print-atlas.css">
+  <link rel="stylesheet" href="./src/historical-map.css">
 </head>
 <body data-direction="archive">
   <a class="skip-link" href="#main">跳到正文</a>
@@ -503,35 +504,97 @@
       <div class="reading-workspace">
         <figure class="route-sheet" aria-labelledby="map-heading">
           <div class="route-text">
-            <div class="route-head"><h3 id="map-heading">四渡赤水概略示意</h3><p class="route-direction" id="route-direction">一渡 · 西渡</p></div>
+            <div class="route-head"><h3 id="map-heading">四渡赤水区域图</h3><p class="route-direction" id="route-direction">一渡 · 西渡</p></div>
             <p class="route-date" id="route-date">1935年1月29日拂晓</p>
+            <div class="map-view-controls" role="group" aria-label="地图视图" hidden>
+              <button type="button" data-map-view="overview" aria-pressed="true">区域总览</button>
+              <button type="button" data-map-view="detail" aria-pressed="false">渡河细看</button>
+            </div>
+            <p class="map-view-note" id="map-view-note">阶段行军概括连线</p>
             <button type="button" id="replay-route" class="motion-control" hidden>重播路线</button>
           </div>
           <div class="map-canvas">
-            <svg id="route-map" viewBox="0 -130 720 940" role="img" aria-labelledby="map-title map-description" xmlns="http://www.w3.org/2000/svg">
-              <title id="map-title">一渡赤水，向西转移</title>
-              <desc id="map-description">1935年1月29日拂晓，中央红军从土城、元厚等渡口西渡赤水河，向川南转移，随后到达扎西地区。此图只表达概略关系，不代表测绘地形或精确行军轨迹。</desc>
-              <defs><marker id="route-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="32" markerHeight="32" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--accent)"/></marker></defs>
-              <g class="map-type map-bank-labels" aria-hidden="true" font-size="42">
-                <text x="28" y="-72"><tspan x="28">西岸</tspan><tspan x="28" dy="1.3em">川南方向</tspan></text>
-                <text x="692" y="-72" text-anchor="end"><tspan x="692">东岸</tspan><tspan x="692" dy="1.3em">黔北方向</tspan></text>
-              </g>
-              <text class="map-type river-name" x="492" y="64" font-size="42" aria-hidden="true">赤水河</text>
-              <path class="river-bank" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
-              <path class="river" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
-              <path class="river-flow" aria-hidden="true" d="M432-20C480 66 360 69 329 149S418 224 384 281 337 341 377 401 420 442 430 502 393 559 413 610"/>
-              <path id="current-route" class="march-line" d="M480 176C425 155 365 155 320 177S217 210 187 260S130 338 104 385" marker-end="url(#route-arrow)"/>
-              <circle id="march-start" class="march-start" cx="480" cy="176" r="7"/>
-              <circle id="march-head" cx="104" cy="385" r="7" aria-hidden="true" visibility="hidden"/>
-              <g class="map-callouts" aria-hidden="true">
-                <path id="crossing-leader" class="map-leader" d="M350 166L50 550V592"/>
-                <path id="destination-leader" class="map-leader" d="M104 385L590 568V592"/>
-                <text class="map-type map-crossing" id="map-crossing" x="28" y="646" font-size="42"><tspan x="28">土城、元厚</tspan></text>
-                <text class="map-type map-destination" id="map-destination" x="452" y="646" font-size="42"><tspan x="452">扎西方向</tspan></text>
+            <svg id="route-map" viewBox="0 220 1000 600" role="img" aria-labelledby="map-title map-description" xmlns="http://www.w3.org/2000/svg">
+              <title id="map-title">一渡赤水 · 区域总览</title>
+              <desc id="map-description">土城、猿猴场（今元厚）地区分路西渡，随后向川南和扎西地区机动。现代地点只作方位参照，渡口区域、河道和阶段连线经原创概化，不代表1935年精确测绘。</desc>
+              <defs><marker id="route-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="42" markerHeight="42" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--accent)"/></marker></defs>
+              <image class="map-relief" href="./public/map/region-relief.png" x="0" y="0" width="1000" height="820" preserveAspectRatio="none" aria-hidden="true"/>
+              <g aria-hidden="true">
+                <path class="river-bank" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/>
+                <path class="river" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/>
+                <path class="river-flow" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/>
+                <ellipse id="map-maneuver-area" class="map-maneuver-area" cx="390" cy="430" rx="80" ry="55" style="display:none"/>
+                <ellipse data-ford="yuanhou" class="map-ford is-current-ford" cx="470" cy="345" rx="25" ry="15.0"/>
+                <ellipse data-ford="tucheng" class="map-ford is-current-ford" cx="497" cy="390" rx="27" ry="16.2"/>
+                <ellipse data-ford="taiping" class="map-ford" cx="520" cy="458" rx="26" ry="15.6"/>
+                <ellipse data-ford="erlang" class="map-ford" cx="575" cy="455" rx="25" ry="15.0"/>
+                <ellipse data-ford="maotai" class="map-ford" cx="650" cy="600" rx="28" ry="16.8"/>
+                <path class="map-previous-route" data-previous-route="1" d="M550 381L497 390L250 480L84.822 599.239" style="display:none"/>
+                <path class="map-previous-route" data-previous-route="2" d="M550 381L497 390L250 480L84.822 599.239" style="display:none"/>
+                <path class="map-previous-route" data-previous-route="3" d="M550 381L497 390L250 480L84.822 599.239" style="display:none"/>
+                <path id="current-route" class="march-line" d="M550 381L497 390L250 480L84.822 599.239" marker-end="url(#route-arrow)"/>
+                <circle id="march-start" class="march-start" cx="550" cy="381" r="15"/>
+                <circle id="march-head" cx="84.822" cy="599.239" r="15" visibility="hidden"/>
+                <circle class="map-place" data-map-point="yuanhou" cx="471.722" cy="338.968" r="9"/>
+                <circle class="map-place" data-map-point="tucheng" cx="496.983" cy="380.793" r="9"/>
+                <circle class="map-place" data-map-point="taiping" cx="516.465" cy="452.496" r="9"/>
+                <circle class="map-place" data-map-point="erlang" cx="573.97" cy="447.73" r="9"/>
+                <circle class="map-place" data-map-point="maotai" cx="659.796" cy="594.112" r="9"/>
+                <circle class="map-place" data-map-point="zaxi" cx="84.822" cy="599.36" r="9"/>
+                <circle class="map-place" data-map-point="gulin" cx="416.739" cy="499.922" r="9"/>
+                <circle class="map-place" data-map-point="xishui" cx="590.809" cy="362.828" r="9"/>
+                <circle class="map-place" data-map-point="tongzi" cx="858.152" cy="453.614" r="9"/>
+                <circle class="map-place" data-map-point="zunyi" cx="903.217" cy="658.236" r="9"/>
+                <text class="map-type" data-map-label="yuanhou" x="489.722" y="320.968">元厚</text>
+                <text class="map-type" data-map-label="tucheng" x="514.983" y="362.793">土城</text>
+                <text class="map-type" data-map-label="taiping" x="534.465" y="434.496">太平</text>
+                <text class="map-type" data-map-label="erlang" x="591.97" y="429.73">二郎</text>
+                <text class="map-type" data-map-label="maotai" x="677.796" y="576.112">茅台</text>
+                <text class="map-type" data-map-label="zaxi" data-static-label x="30" y="690">扎西地区</text>
+                <text class="map-type" data-map-label="gulin" x="434.739" y="481.922">古蔺</text>
+                <text class="map-type" data-map-label="xishui" x="608.809" y="344.828">习水</text>
+                <text class="map-type" data-map-label="tongzi" x="876.152" y="435.614">桐梓</text>
+                <text class="map-type" data-map-label="zunyi" x="921.217" y="640.236">遵义</text>
+                <text class="map-type" data-map-label="ford:yuanhou" data-static-label x="270" y="300">元厚一带</text>
+                <text class="map-type" data-map-label="ford:tucheng" data-static-label x="560" y="380">土城一带</text>
+                <text class="map-type" data-map-label="ford:taiping" x="520" y="458">太平渡一带</text>
+                <text class="map-type" data-map-label="ford:erlang" x="575" y="455">二郎滩一带</text>
+                <text class="map-type" data-map-label="ford:maotai" x="650" y="600">茅台渡河区</text>
+                <text class="map-type" data-map-label="loushan" x="875" y="535">娄山关（概略）</text>
+                <text class="map-type" data-map-label="chuannan" x="390" y="430">川南机动区</text>
+                <text class="map-type" data-map-label="south" x="730" y="770">向南机动</text>
+                <text id="map-river-label" class="map-type river-name" x="660" y="285">赤水河</text>
+                <g id="map-north" class="map-north" transform="translate(920 280)"><text class="map-type" x="0" y="0" text-anchor="middle">北</text><path d="M0 30v65m-12-48 12-17 12 17"/></g>
+                <g hidden><path id="crossing-leader"/><path id="destination-leader"/><text id="map-crossing">土城、元厚地区</text><text id="map-destination">扎西地区</text></g>
               </g>
             </svg>
           </div>
-          <figcaption class="map-caption">示意仅表达渡河方向与地名关系，不是测绘地图。未启用脚本时，此处为一渡；其余各渡的方向见完整正文。</figcaption>
+          <figcaption class="map-caption">第一渡静态区域图。现代地点作方位参照；渡河区域、河道与连线经概化。其余各渡见完整正文。</figcaption>
+          <div class="map-notes">
+            <ul class="map-legend" aria-label="地图图例">
+              <li><span class="map-key place" aria-hidden="true"></span>现代地点参照</li><li><span class="map-key ford" aria-hidden="true"></span>渡河区域</li>
+              <li><span class="map-key water" aria-hidden="true"></span>概化河流</li><li><span class="map-key current" aria-hidden="true"></span>本阶段概括线</li>
+              <li><span class="map-key previous" aria-hidden="true"></span>此前阶段</li>
+            </ul>
+            <p id="map-stage-note" class="map-stage-note">1月29日西渡；2月上旬向扎西集中。</p>
+            <p id="map-stage-summary" class="map-stage-summary">土城、猿猴场（今元厚）地区分路西渡，向川南机动，随后在扎西地区集中。连线概括阶段顺序，不是1月29日当天全程。</p>
+            <p id="map-relation" class="map-relation" hidden><strong>太平河段关系</strong>：太平渡上游约5千米为九溪口，二渡、四渡均涉及这一渡口组。此处只列关系；九溪口绝对坐标未核。太平渡、二郎滩是并列渡口，不是沿红线依次到访。</p>
+            <details class="map-details" open>
+              <summary>地点、河段与行军线怎样阅读</summary>
+              <p>图中十个实点是现代参照：元厚、土城、太平、二郎、茅台、扎西、古蔺、习水、桐梓、遵义。空心区域表示渡河的大致地区，不是1935年浮桥或渡口测点。太平渡口与现代镇政府相距约1.8千米，二郎滩渡口约550米；图上不将镇点当作历史渡口。</p>
+              <ul>
+                <li>一渡：土城南北、猿猴场（今元厚）地区西渡，向川南转移，随后在川滇边扎西地区集中。</li>
+                <li>二渡：太平渡、二郎滩、九溪口等分路东渡；2月24日桐梓，25—26日娄山关战斗，28日再占遵义。</li>
+                <li>三渡：遵义地区西进，茅台及附近西渡，再向镇龙山、大村、铁厂等川南地区机动。“川南机动区”是宽泛区域，不表示进入古蔺县城。</li>
+                <li>四渡：从川南折返，经太平渡、二郎滩、九溪口等东渡，随后向南；3月31日南渡乌江属于后续行动。</li>
+              </ul>
+              <p>九溪口在太平渡上游约5千米，未核绝对坐标，未落地理点。娄山关只按桐梓南、遵义北的关系标为概略通道，未核定关口坐标。手机省略的次要标签可在本资料区查阅。</p>
+              <p>赤水河源出镇雄，下游在合江入长江。图上河道是依据现代地点方位及茅台在二郎上游等关系绘制的原创概化线；未取得测绘河线，也不虚构支流汇入口。当地河湾两岸不能永久等同“川南／黔北”。</p>
+              <p>依据：<a href="https://www.zggzswdsyjs.cn/yjddesdslzk/202210/t20221017_76757074.html" target="_blank" rel="noopener noreferrer">贵州党史资料（2022）</a>、<a href="https://www.dswxyjy.org.cn/BIG5/n1/2026/0930/c244516-40808291.html" target="_blank" rel="noopener noreferrer">党史和文献研究院（2026）</a>、<a href="https://www.cac.gov.cn/2016-08/22/c_1119430867.htm" target="_blank" rel="noopener noreferrer">《四渡赤水出奇兵》</a>、<a href="http://scdfz.sc.gov.cn/ztzl/hjczzsc/zztp/hjzzzlz/content_20517" target="_blank" rel="noopener noreferrer">四川省情网渡口资料</a>、<a href="https://zyhc.gov.cn/hmzc/rwhc/lyjd/201906/t20190612_2682987.html" target="_blank" rel="noopener noreferrer">汇川区娄山关资料</a>。</p>
+            </details>
+            <p class="map-credit">地形：<a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo / Copernicus GLO-90</a>，<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>；10×9点粗采样经插值、晕渲修改，210—1845米，不是90米分辨率地图或1935年地表复原。</p>
+            <p class="map-credit">现代参照：<a href="https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=query&amp;prop=coordinates" target="_blank" rel="noopener noreferrer">维基百科贡献者 / GeoData</a>（<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>）、<a href="https://www.wikidata.org/wiki/Wikidata:Licensing" target="_blank" rel="noopener noreferrer">Wikidata（CC0）</a>，2026-10-23读取；现代点不等于历史测点。地图数据与自绘图形经概化，以CC BY-SA 4.0提供；原照片和字体另依各自许可。</p>
+          </div>
         </figure>
         <div class="reader">
           <article id="crossing-one" class="chapter-panel" data-chapter="1" data-direction-label="西渡" aria-labelledby="chapter-one-title">
@@ -643,6 +706,8 @@
     <div class="dialog-bar"><h2 id="dialog-title">完整档案原图</h2><form method="dialog"><button class="dialog-close" type="submit">关闭</button></form></div>
     <figure><img id="dialog-image" alt=""><figcaption id="dialog-caption"></figcaption></figure>
   </dialog>
+  <script src="./src/historical-map-data.js"></script>
+  <script src="./src/historical-map.js"></script>
   <script>
     (() => {
       'use strict';
@@ -653,63 +718,22 @@
       const directionButtons = Array.from(document.querySelectorAll('[data-direction-choice]'));
       const previous = document.getElementById('previous-chapter');
       const next = document.getElementById('next-chapter');
-      const route = document.getElementById('current-route');
-      const routeStart = document.getElementById('march-start');
       const routeDate = document.getElementById('route-date');
       const routeDirection = document.getElementById('route-direction');
-      const mapTitle = document.getElementById('map-title');
-      const mapDescription = document.getElementById('map-description');
-      const crossingLabel = document.getElementById('map-crossing');
-      const destinationLabel = document.getElementById('map-destination');
       const mapSVG = document.getElementById('route-map');
-      const crossingLeader = document.getElementById('crossing-leader');
-      const destinationLeader = document.getElementById('destination-leader');
-      const routeArrow = document.getElementById('route-arrow');
+      let historicalMap = null;
+      try { historicalMap = globalThis.ChishuiHistoricalMap?.create() || null; }
+      catch (error) { console.error('Historical map unavailable; first-stage static map retained.', error); }
+      document.querySelectorAll('[data-map-view]').forEach((button) => {
+        button.addEventListener('click', () => historicalMap?.setView(button.dataset.mapView));
+      });
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       const disclosureStates = new Map();
       const names = ['一渡', '二渡', '三渡', '四渡'];
       const directionNames = { archive: '行军档案', catalogue: '长征图录', landscape: '山河长卷' };
-      const routeData = [
-        { path: 'M480 176C425 155 365 155 320 177S217 210 187 260S130 338 104 385', start: [480, 176], crossing: '土城、元厚', crossingAt: [350, 166], destination: '扎西方向', destinationAt: [104, 385], summary: '从土城、元厚等渡口西渡赤水河，向川南转移，随后到达扎西地区。' },
-        { path: 'M104 385C150 350 193 306 253 276S338 269 381 277S495 312 560 345', start: [104, 385], crossing: '太平渡、二郎滩', crossingAt: [381, 277], destination: '桐梓方向', destinationAt: [560, 345], summary: '从太平渡、二郎滩等渡口东渡赤水河，回师黔北，向桐梓方向前进。' },
-        { path: 'M572 464C512 480 454 474 403 449S310 420 275 377S224 285 207 235', start: [572, 464], crossing: '茅台', crossingAt: [403, 449], destination: '川南方向', destinationAt: [207, 235], summary: '从茅台及其附近地区西渡赤水河，再入川南，寻求新的机动。' },
-        { path: 'M207 235C244 235 285 273 321 315S391 340 445 355S526 454 542 548', start: [207, 235], crossing: '太平渡、二郎滩、九溪口', crossingAt: [385, 338], destination: '向南行动', destinationAt: [542, 548], summary: '从太平渡、二郎滩、九溪口等渡口东渡赤水河，重回黔北，随后迅速向南行动。' }
-      ];
       let currentChapter = 1;
       let activeImageTrigger = null;
-
-      // The entire map, including its annotation margin, uses the original route coordinates.
-      // A 42-unit static fallback remains legible at the narrowest supported map width.
-      function fitMapLabels() {
-        const matrix = mapSVG.getScreenCTM();
-        const scale = matrix ? Math.hypot(matrix.a, matrix.b) : 0;
-        if (!scale) return;
-        const size = Math.max(24, 14.5 / scale);
-        mapSVG.querySelectorAll('.map-type').forEach((label) => label.setAttribute('font-size', String(size)));
-        const arrowSize = Math.max(24, 11 / scale);
-        routeArrow.setAttribute('markerWidth', String(arrowSize));
-        routeArrow.setAttribute('markerHeight', String(arrowSize));
-      }
-      function renderMapLabels(data) {
-        // Four or five characters per line retain names and punctuation without shrinking type.
-        const crossings = data.crossing === '太平渡、二郎滩、九溪口'
-          ? ['太平渡、', '二郎滩、', '九溪口']
-          : data.crossing === '太平渡、二郎滩' ? ['太平渡、', '二郎滩']
-          : data.crossing === '土城、元厚' ? ['土城、', '元厚'] : [data.crossing];
-        crossingLabel.replaceChildren(...crossings.map((line, index) => {
-          const span = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-          span.setAttribute('x', '28');
-          if (index) span.setAttribute('dy', '1.3em');
-          span.textContent = line;
-          return span;
-        }));
-        destinationLabel.textContent = data.destination;
-        crossingLeader.setAttribute('d', `M${data.crossingAt.join(' ')}L50 550V592`);
-        const [x, y] = data.destinationAt;
-        // The destination leader begins beyond the arrow, leaving its head unobscured.
-        destinationLeader.setAttribute('d', `M${x + 28} ${y + 18}L670 568V592`);
-        fitMapLabels();
-      }
+      function fitMapLabels() { historicalMap?.fit(); }
 
       function announce(message) { status.textContent = message; }
 
@@ -781,22 +805,21 @@
           if (Number(link.dataset.chapterChoice) === number) link.setAttribute('aria-current', 'true');
           else link.removeAttribute('aria-current');
         });
-        const data = routeData[number - 1];
         const date = targetPanel.querySelector('time').textContent;
         const direction = targetPanel.dataset.directionLabel;
-        route.setAttribute('d', data.path);
-        routeStart.setAttribute('cx', String(data.start[0]));
-        routeStart.setAttribute('cy', String(data.start[1]));
-        routeDate.textContent = date;
-        routeDirection.textContent = names[number - 1] + ' · ' + direction;
-        mapTitle.textContent = names[number - 1] + '赤水，' + direction;
-        mapDescription.textContent = date + '，' + data.summary + '此图只表达概略关系，不代表测绘地形或精确行军轨迹。';
-        renderMapLabels(data);
+        if (historicalMap) {
+          historicalMap.setChapter(number);
+          routeDate.textContent = date;
+          routeDirection.textContent = names[number - 1] + ' · ' + direction;
+        } else {
+          routeDirection.textContent = '一渡 · 西渡（静态图）';
+          document.querySelector('.map-caption').textContent = '地图增强未加载：此处始终为第一渡静态区域图；当前所读渡次见右侧或下方正文。';
+        }
         previous.disabled = number === 1;
         next.disabled = number === 4;
         document.getElementById('pager-count').textContent = names[number - 1] + ' / 四渡';
-        if (speak) announce(names[number - 1] + '，' + date + '，' + direction + '。正文与概略路线已同步。');
-        document.dispatchEvent(new CustomEvent('chishui:chapter', { detail: { number } }));
+        if (speak) announce(names[number - 1] + '，' + date + '，' + direction + (historicalMap ? '。正文与概略路线已同步。' : '。正文已切换；地图仍为第一渡静态区域图。'));
+        document.dispatchEvent(new CustomEvent('chishui:chapter', { detail: { number, mapReady: Boolean(historicalMap) } }));
       }
 
       document.querySelectorAll('[data-disclosure]').forEach((details, index) => {
@@ -877,7 +900,7 @@
       window.addEventListener('blur', clearPressed);
       window.addEventListener('pagehide', () => { settleAllDisclosures(); clearPressed(); });
       document.addEventListener('visibilitychange', () => { if (document.hidden) { settleAllDisclosures(); clearPressed(); } });
-      window.addEventListener('resize', () => { settleAllDisclosures(); fitMapLabels(); });
+      window.addEventListener('resize', () => { settleAllDisclosures(); document.dispatchEvent(new CustomEvent('chishui:map-before', { detail: { reason: 'resize' } })); fitMapLabels(); });
       if (typeof ResizeObserver === 'function') new ResizeObserver(fitMapLabels).observe(mapSVG);
       if (document.fonts) document.fonts.ready.then(fitMapLabels).catch(() => {});
       document.addEventListener('chishui:motion', () => { if (body.dataset.motion === 'off') settleAllDisclosures(); });
@@ -885,10 +908,10 @@
       if (typeof reducedMotion.addEventListener === 'function') reducedMotion.addEventListener('change', motionPreferenceChanged);
       else if (typeof reducedMotion.addListener === 'function') reducedMotion.addListener(motionPreferenceChanged);
 
-      document.querySelector('.map-caption').textContent = '只显示当前一渡的路线。示意表达渡河方向与地名关系，不代表测绘地形或精确行军轨迹。';
       chooseChapter(1, false);
       chapterFromHash();
       document.documentElement.classList.add('enhanced');
+      fitMapLabels();
     })();
   </script>
   <script type="module" src="./src/editorial-motion.js"></script>

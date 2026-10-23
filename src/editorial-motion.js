@@ -211,12 +211,12 @@ function initMotion() {
     if (off) settle();
     else { renderProgress(readingPosition()); syncAmbient(); }
   }
-  function chapterChanged() {
+  function chapterChanged(event) {
     invalidateRoute();
     cancel('chapter');
     const panel = $('[data-chapter]:not([hidden])');
     if (panel) enter('chapter', all('.chapter-date, h3, .situation', panel), 340, 10, 45);
-    playRoute(true);
+    if (event.detail?.mapReady !== false) playRoute(true);
   }
   function observeScenes() {
     observer.observe(map);
@@ -256,6 +256,11 @@ function initMotion() {
         }
       });
     }), { threshold: [0, .15, 1] });
+    listen(document, 'chishui:map-before', safe(() => {
+      firstRoute = true;
+      invalidateRoute();
+    }));
+    listen(document, 'chishui:map-after', safe(finishRoute));
     listen(document, 'chishui:chapter', safe(chapterChanged));
     listen(document, 'chishui:layout', safe(() => {
       settle();
