@@ -1,7 +1,5 @@
 node_modules/
 dist/
-.taste-skill/inspect/
-.superpowers/
 exports/
 local-exports/
 artifacts/

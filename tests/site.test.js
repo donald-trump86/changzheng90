@@ -12,7 +12,7 @@ import { createStaticServer } from '../scripts/serve.mjs';
 const root = await realpath(fileURLToPath(new URL('../', import.meta.url)));
 const dist = join(root, 'dist');
 const domain = 'changzheng90.luvch1nabest.me\n';
-const historyImages = ['long-march-gathering.jpg', 'sixth-army-1935.jpg', 'luding-bridge-museum.jpg', 'luding-chain-museum.jpg'];
+const historyImages = ['long-march-gathering.jpg', 'sixth-army-1935.jpg'];
 before(() => execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root }));
 
 function get(port, path, options = {}) {
@@ -61,43 +61,17 @@ test('custom domain is exact in source and deployment root', async () => {
 test('deployment contains only the public site, no source tooling or private artifacts', async () => {
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
-  const studyFiles = ['design-study/index.html', 'design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
-  assert.equal(entries.length, 32);
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'index.html', 'public/favicon.svg', ...historyImages.map((name) => `public/history/${name}`), 'public/internationale.mp3', 'public/party-emblem.svg', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/main.js', 'src/map.js', 'src/media.js', 'src/share.js', 'src/story.js', 'src/styles.css', ...studyFiles].sort());
-});
-
-test('published design study resolves local images under a repository prefix without private research', async () => {
-  await withFixture(async (fixture) => {
-    await cp(dist, join(fixture, 'repository'), { recursive: true });
-    await withServer(fixture, async (port) => {
-      const base = new URL(`http://127.0.0.1:${port}/repository/design-study/index.html`);
-      const html = await get(port, base.pathname);
-      assert.equal(html.status, 200);
-      assert.doesNotMatch(html.body, /reference-(?:weiriver|conference-1934)\.jpg|\/Users\/|artifacts\/|context-b\d+|<audio\b/);
-      const refs = new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]));
-      assert.equal(refs.size, 3);
-      for (const ref of refs) {
-        assert.match(ref, /^\.\//);
-        const url = new URL(ref, base);
-        assert.ok(url.pathname.startsWith('/repository/design-study/'));
-        const response = await get(port, url.pathname);
-        assert.equal(response.status, 200, ref);
-        assert.equal(response.type, ref.endsWith('.png') ? 'image/png' : 'image/jpeg');
-        assert.deepEqual(response.bytes, await readFile(join(root, 'design-study', basename(url.pathname))));
-      }
-      for (const name of ['long-march-gathering.jpg', 'sixth-army-1935.jpg']) {
-        assert.deepEqual(await readFile(join(dist, 'design-study', name)), await readFile(join(root, 'public/history', name)));
-      }
-    });
-  });
+  const studyFiles = ['design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
+  assert.equal(entries.length, 25);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/story.js', 'src/audio.js', 'src/history-scroll.js', ...studyFiles].sort());
 });
 
 test('historical JPEGs have actual encoded bytes and identical deployment copies', async () => {
   for (const name of historyImages) {
-    const original = await readFile(join(root, 'public/history', name));
+    const original = await readFile(join(root, 'design-study', name));
     assert.deepEqual([...original.subarray(0, 3)], [255, 216, 255], name);
     assert.ok(original.length > 10000, `${name}: real photograph, not a placeholder`);
-    assert.deepEqual(await readFile(join(dist, 'public/history', name)), original, name);
+    assert.deepEqual(await readFile(join(dist, 'design-study', name)), original, name);
   }
 });
 
@@ -114,6 +88,7 @@ test('new homepage is served at root with working images under a repository pref
       const base = new URL(`http://127.0.0.1:${port}/repository/index.html`);
       const html = await get(port, base.pathname);
       assert.equal(html.status, 200);
+      assert.doesNotMatch(html.body, /reference-(?:weiriver|conference-1934)\.jpg|\/Users\/|artifacts\/|context-b\d+/);
       const modules = [...html.body.matchAll(/<script\b[^>]*\btype="module"[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]);
       const styles = [...html.body.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
       assert.deepEqual(modules, ['./src/editorial-motion.js']);
@@ -134,9 +109,15 @@ test('new homepage is served at root with working images under a repository pref
         const original = await readFile(join(root, url.pathname.slice('/repository/'.length)));
         assert.deepEqual(response.bytes, original, url.pathname);
         if (url.pathname.endsWith('.js')) {
-          for (const match of response.body.matchAll(/\b(?:import|export)\s+(?:[^;'"\n]*?\s+from\s*)?['"]([^'"]+)['"]/g)) {
-            await resource(match[1], url, /^(?:text|application)\/javascript(?:;|$)/);
+          const bindings = new Map([...response.body.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*['"]([^'"]+)['"]/g)].map((match) => [match[1], match[2]]));
+          const specs = [];
+          for (const match of response.body.matchAll(/\b(?:import|export)\s+(?:[^;'"\n]*?\s+from\s*)?['"]([^'"]+)['"]/g)) specs.push(match[1]);
+          for (const match of response.body.matchAll(/\bimport\(\s*([A-Za-z_$][\w$]*)\s*\)/g)) {
+            assert.ok(bindings.has(match[1]), `dynamic import binding stays locally resolvable: ${match[1]}`);
+            specs.push(bindings.get(match[1]));
           }
+          for (const match of response.body.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)) specs.push(match[1]);
+          for (const spec of specs) await resource(spec, url, /^(?:text|application)\/javascript(?:;|$)/);
         }
         return response;
       }
@@ -161,6 +142,9 @@ test('new homepage is served at root with working images under a repository pref
         }
       }
       for (const ref of [...classics, ...modules]) await resource(ref, base, /^(?:text|application)\/javascript(?:;|$)/);
+      for (const match of html.body.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+        await resource(match[1], base, /^(?:text|application)\/javascript(?:;|$)/);
+      }
       const reliefRef = [...html.body.matchAll(/<image\b[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
       assert.deepEqual(reliefRef, ['./public/map/region-relief.png']);
       const relief = await resource(reliefRef[0], base, /^image\/png(?:;|$)/);
@@ -212,10 +196,10 @@ test('a symlink to a real file outside the served root is refused', async () => 
 
 
 test('local audio supports exact GET ranges, suffixes, HEAD and 416', async () => {
-  const original = await readFile(join(root, 'public/internationale.mp3'));
+  const original = await readFile(join(root, 'public/audio/undertow.mp3'));
   assert.ok(original.length > 100000, 'actual encoded instrumental asset');
   await withServer(dist, async (port) => {
-    const path = '/public/internationale.mp3';
+    const path = '/public/audio/undertow.mp3';
     const full = await get(port, path);
     assert.equal(full.type, 'audio/mpeg');
     assert.deepEqual(full.bytes, original);
@@ -243,13 +227,8 @@ test('local audio supports exact GET ranges, suffixes, HEAD and 416', async () =
   });
 });
 
-test('static standard emblem and current deployed copy contain no personal signature', async () => {
-  const emblem = await readFile(join(root, 'public/party-emblem.svg'), 'utf8');
-  assert.equal(Buffer.byteLength(emblem), 420);
-  assert.match(emblem, /viewBox="1 1 32 32"/);
-  assert.match(emblem, /#fdcf30/i);
-  assert.doesNotMatch(emblem, /<(?:script|animate|image|foreignObject)\b|(?:href|src)=/i);
-  for (const file of ['index.html', 'src/main.js', 'src/map.js', 'src/share.js']) {
+test('current deployed pages and modules contain no personal signature', async () => {
+  for (const file of ['index.html', 'audio-credits.html', 'src/story.js', 'src/audio.js', 'src/history-scroll.js', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/print-atlas.css', 'src/historical-map.js', 'src/historical-map.css', 'src/historical-map-data.js']) {
     assert.doesNotMatch(await readFile(join(dist, file), 'utf8'), /戴诗旭|Jason Dai|作品作者：/i, file);
   }
 });

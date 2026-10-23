@@ -4,26 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="纪念长征胜利90周年：沿四渡赤水的日期、渡河方向与历史情势，阅读长征中的这一段。可切换三种阅读版式。">
+  <meta name="description" content="纪念长征胜利90周年：沿四渡赤水的日期、渡河方向与历史情势，阅读长征中的这一段。">
   <title>长征路上，四渡赤水</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23e9e4d8'/%3E%3Cpath d='M20-2C30 8 9 9 16 18S23 26 17 34' fill='none' stroke='%23526b73' stroke-width='5'/%3E%3C/svg%3E">
   <style>
-    :root {
-      --paper: #e9e4d8;
-      --surface: #f5f2ea;
-      --ink: #242925;
-      --muted: #4c574f;
-      --accent: #922e2b;
-      --toolbar: #dce0d6;
-      --map-paper: #dfe3d8;
-      --river: #739099;
-      --river-bank: #c2d1ca;
-      --image-mat: #d5d2c6;
-      --night: #242e29;
-      --frame: clamp(16px, 4vw, 56px);
-      --serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", SimSun, serif;
-      --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    }
     * { box-sizing: border-box; }
     html { scroll-padding-top: 108px; }
     body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.8; -webkit-font-smoothing: antialiased; }
@@ -54,19 +38,9 @@
     .site-nav { display: flex; flex-wrap: wrap; gap: 6px 28px; }
     .site-nav a { min-height: 44px; display: inline-flex; align-items: center; font-size: 16px; text-decoration: none; }
     .site-nav a:hover { text-decoration: underline; }
-    .study-toolbar { position: sticky; top: 0; z-index: 8; background: var(--toolbar); }
-    .toolbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding-block: 12px; }
-    .study-caption { font-size: 16px; line-height: 1.5; flex: 1; }
-    .study-caption span { display: block; color: var(--muted); }
-    .direction-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(100%, 680px); gap: 4px; }
-    .direction-button { padding: 10px 20px; background: transparent; font-size: 17px; line-height: 1.45; }
-    .direction-button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
-    .direction-button:hover:not([aria-pressed="true"]) { background: var(--surface); }
-    .direction-button small { display: block; font-size: 16px; line-height: 1.5; margin-top: 2px; }
     .opening { display: grid; grid-template-columns: minmax(0, .83fr) minmax(0, 1.35fr); align-items: center; gap: 54px; padding-top: 48px; }
     .opening-copy { min-width: 0; padding-block: 12px 24px; }
     h1 { font-size: clamp(44px, 4.3vw, 60px); line-height: 1.22; letter-spacing: .01em; }
-    h1 span { display: block; }
     .opening-meta { font-size: 17px; line-height: 1.7; margin-top: 22px; font-variant-numeric: tabular-nums; }
     .opening-lead { margin-top: 28px; line-height: 1.85; max-width: 30em; }
     .opening-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin-top: 28px; }
@@ -74,14 +48,8 @@
     .primary-action svg { width: 24px; height: 24px; flex: none; }
     .read-time { font-size: 16px; color: var(--muted); }
     .hero-art, .hero-archive { min-width: 0; }
-    .hero-art .art-window { width: 100%; aspect-ratio: 1.43; overflow: hidden; }
-    .hero-art img { width: 100%; height: 100%; object-fit: cover; object-position: 54% center; }
     figcaption { font-size: 16px; line-height: 1.75; }
     .hero-art figcaption { padding-top: 12px; color: var(--muted); }
-    .hero-archive { display: none; }
-    .hero-archive img { width: 100%; height: auto; }
-    .hero-archive figcaption { padding-top: 14px; }
-    .hero-archive figcaption strong { display: block; font-weight: 600; }
     .image-link { display: block; background: var(--image-mat); padding: 10px; cursor: zoom-in; text-decoration: none; }
     .image-link img { width: 100%; height: auto; }
     .image-link:active { transform: none; }
@@ -90,7 +58,7 @@
     .context-intro { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 32px; align-items: start; margin-bottom: 28px; }
     .context h2 { font-size: 29px; }
     .context-intro p { max-width: 39em; }
-    .timeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; list-style: none; padding: 0; }
+    .timeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px; list-style: none; padding: 0; }
     .timeline li { padding-top: 16px; border-top: 4px solid var(--toolbar); }
     .timeline .timeline-focus { border-color: var(--accent); }
     .timeline time { display: block; font-family: var(--serif); font-size: 22px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
@@ -105,7 +73,7 @@
     .chapter-link time { font-size: 16px; font-variant-numeric: tabular-nums; }
     .chapter-link[aria-current="true"] { background: var(--accent); color: var(--surface); }
     .chapter-link:hover:not([aria-current="true"]) { background: var(--surface); }
-    .reading-workspace { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+    .reading-workspace { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: "context map" "crossings map"; gap: 0 40px; align-items: start; }
     .route-sheet { margin: 0; padding: 26px 28px 24px; background: var(--map-paper); min-width: 0; }
     .route-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; align-items: baseline; }
     .route-head h3 { font-family: var(--sans); font-size: 18px; font-weight: 600; }
@@ -120,9 +88,7 @@
     .map-caption { padding-top: 8px; font-size: 16px; color: var(--muted); }
     .reader { background: var(--surface); padding: 32px 36px 24px; min-width: 0; }
     .chapter-panel + .chapter-panel { margin-top: 48px; }
-    .enhanced .chapter-panel + .chapter-panel { margin-top: 0; }
     .chapter-date { font-size: 17px; font-variant-numeric: tabular-nums; line-height: 1.7; margin-bottom: 12px; }
-    .chapter-date span { margin-right: 12px; font-weight: 600; color: var(--accent); }
     .chapter-panel h3 { font-size: 30px; margin-bottom: 24px; }
     .situation h4 { margin-bottom: 6px; }
     .situation p, .disclosure-inner p { font-size: 17px; line-height: 1.85; }
@@ -155,13 +121,9 @@
     .after-route p { font-size: 17px; }
     .archives { margin-top: 96px; scroll-margin-top: 112px; }
     .archives-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 48px; margin-bottom: 32px; align-items: end; }
-    .archives-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 44px; align-items: end; }
     .archives-grid figure { min-width: 0; }
     .archives-grid figcaption { margin-top: 16px; }
     .archives-grid figcaption strong { display: block; font-size: 17px; line-height: 1.7; margin-bottom: 6px; font-weight: 600; }
-    .archive-art-secondary { display: none; }
-    .archive-art-secondary img { width: 100%; height: auto; }
-    .archive-art-secondary figcaption { margin-top: 14px; color: var(--muted); }
     .sources { margin-top: 64px; padding: 28px 36px; background: var(--surface); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 48px; scroll-margin-top: 112px; }
     .sources .disclosure { margin-top: 0; min-width: 0; }
     .sources .disclosure-inner { font-size: 16px; }
@@ -180,52 +142,12 @@
     .dialog-close { background: var(--ink); color: var(--surface); min-width: 72px; padding: 10px 16px; font-size: 16px; flex: none; }
     .image-dialog figure img { width: 100%; height: auto; }
     .image-dialog figcaption { margin-top: 16px; }
-    button:not(:disabled):active, .primary-action:active, .pager-button:not(:disabled)[data-pressed="true"], .direction-button[data-pressed="true"] { transform: translateY(1px); filter: brightness(.88); }
+    button:not(:disabled):active, .primary-action:active, .pager-button:not(:disabled)[data-pressed="true"] { transform: translateY(1px); filter: brightness(.88); }
     summary:active, summary[data-pressed="true"] { background: var(--toolbar); }
     a:not(.image-link):not(.primary-action):active { background: var(--toolbar); }
     .primary-action:hover { background: var(--ink); }
-    body[data-direction="catalogue"] { --paper: #f0efea; --surface: #faf9f4; --toolbar: #e0e1d9; --image-mat: #dedbd0; }
-    [data-direction="catalogue"] .opening { grid-template-columns: minmax(0, .72fr) minmax(0, 1.3fr); align-items: start; gap: 64px; }
-    [data-direction="catalogue"] .opening-copy { padding-top: 34px; }
-    [data-direction="catalogue"] h1 { font-size: clamp(42px, 4.1vw, 58px); }
-    [data-direction="catalogue"] .hero-art { display: none; }
-    [data-direction="catalogue"] .hero-archive { display: block; }
-    [data-direction="catalogue"] .context { background: transparent; padding: 0; margin-top: 72px; }
-    [data-direction="catalogue"] .reading-workspace { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "reader map"; gap: 48px; }
-    [data-direction="catalogue"] .reader { grid-area: reader; padding: 36px 40px 28px; }
-    [data-direction="catalogue"] .route-sheet { grid-area: map; padding: 24px; }
-    [data-direction="catalogue"] .chapter-nav { gap: 0; }
-    [data-direction="catalogue"] .chapter-link[aria-current="true"] { background: var(--ink); }
-    [data-direction="catalogue"] .continuation { background: var(--night); color: var(--surface); padding: 40px; gap: 48px; }
-    [data-direction="catalogue"] .after-route { background: var(--surface); color: var(--ink); }
-    [data-direction="catalogue"] .archives-grid { display: block; }
-    [data-direction="catalogue"] .archive-primary { display: none; }
-    [data-direction="catalogue"] .archive-secondary { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 48px; align-items: center; }
-    [data-direction="catalogue"] .archive-secondary figcaption { margin-top: 0; }
-    [data-direction="catalogue"] .archive-art-secondary { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 48px; align-items: center; margin-top: 48px; }
-    [data-direction="catalogue"] .archive-art-secondary figcaption { margin-top: 0; }
-    body[data-direction="landscape"] { --paper: #e4e8de; --surface: #f4f3eb; --toolbar: #d3ddd2; --map-paper: #d3ddd2; --ink: #202e30; --accent: #87352e; --muted: #44534b; }
-    [data-direction="landscape"] .opening { grid-template-columns: 1fr; gap: 0; padding-top: 32px; }
-    [data-direction="landscape"] .hero-art { grid-column: 1; grid-row: 1; }
-    [data-direction="landscape"] .hero-art .art-window { height: clamp(440px, 45vw, 620px); aspect-ratio: auto; }
-    [data-direction="landscape"] .hero-art img { object-position: 50% 48%; }
-    [data-direction="landscape"] .opening-copy { grid-column: 1; grid-row: 1; position: relative; z-index: 1; align-self: end; width: 90%; margin: 0 auto 76px; padding: 28px 36px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 48px; background: var(--surface); }
-    [data-direction="landscape"] h1 { font-size: clamp(42px, 3.6vw, 52px); }
-    [data-direction="landscape"] .opening-meta { margin-top: 16px; }
-    [data-direction="landscape"] .opening-lead { margin-top: 0; }
-    [data-direction="landscape"] .opening-actions { margin-top: 20px; }
-    [data-direction="landscape"] .context { background: transparent; padding: 0; margin-top: 56px; }
-    [data-direction="landscape"] .crossings { background: var(--toolbar); padding: 36px; }
-    [data-direction="landscape"] .reading-workspace { grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); gap: 24px; }
-    [data-direction="landscape"] .route-sheet { padding: 22px 16px; }
-    [data-direction="landscape"] .chapter-link { background: var(--paper); }
-    [data-direction="landscape"] .chapter-link[aria-current="true"] { background: var(--accent); }
-    [data-direction="landscape"] .reader { padding: 32px; }
-    [data-direction="landscape"] .archives-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
     @media (min-width: 1600px) { .opening { gap: 72px; } }
     @media (max-width: 1100px) {
-      .study-caption span { display: none; }
-      .direction-controls { width: min(100%, 640px); }
       .opening { gap: 32px; }
       .opening-meta { max-width: 18em; }
       .chapter-link { flex-direction: column; align-items: start; gap: 2px; }
@@ -236,31 +158,18 @@
       .after-route { padding: 28px; }
       .after-route ol { flex-direction: column; gap: 6px; }
       .after-route li:not(:last-child)::after { content: " ↓"; }
-      [data-direction="catalogue"] .opening { gap: 40px; }
-      [data-direction="catalogue"] .reading-workspace { gap: 24px; }
-      [data-direction="catalogue"] .reader { padding: 28px; }
-      [data-direction="landscape"] .opening-copy { width: 92%; padding: 26px; gap: 28px; }
-      [data-direction="landscape"] .crossings { padding: 28px; }
-      [data-direction="landscape"] .reader { padding: 26px; }
-      [data-direction="landscape"] .reading-workspace { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 18px; }
     }
     @media (max-width: 900px) {
-      .toolbar-inner { gap: 18px; }
-      .study-caption { display: none; }
-      .direction-controls { width: 100%; }
-      .direction-button { padding-inline: 12px; }
-      .direction-button small { font-size: 16px; }
       .opening { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 28px; padding-top: 32px; }
       h1 { font-size: 46px; }
       .opening-lead { margin-top: 22px; }
       .opening-actions { margin-top: 22px; }
-      .hero-art .art-window { aspect-ratio: .88; }
       .context { padding: 28px; margin-top: 44px; }
       .context-intro { grid-template-columns: 1fr; gap: 14px; }
       .timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 32px; }
       .section-heading { display: block; }
       .section-heading p { margin-top: 14px; max-width: 42em; }
-      .reading-workspace { grid-template-columns: 1fr; gap: 20px; }
+      .reading-workspace { grid-template-columns: 1fr; grid-template-areas: "context" "map" "crossings"; gap: 20px; }
       .route-sheet { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 12px 24px; }
       .route-text { align-self: start; padding-top: 12px; }
       .map-canvas { margin-top: 0; grid-column: 2; grid-row: 1 / span 2; }
@@ -271,28 +180,9 @@
       .reader { padding: 32px; }
       .continuation { gap: 28px; }
       .archives-heading { gap: 28px; grid-template-columns: 1fr; align-items: start; }
-      .archives-grid { gap: 28px; }
       .sources { gap: 28px; padding: 24px 28px; }
-      [data-direction="catalogue"] .opening { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 28px; }
-      [data-direction="catalogue"] .opening-copy { padding-top: 10px; }
-      [data-direction="catalogue"] h1 { font-size: 44px; }
-      [data-direction="catalogue"] .reading-workspace { grid-template-columns: 1fr; grid-template-areas: "map" "reader"; }
-      [data-direction="catalogue"] .route-sheet { grid-area: map; }
-      [data-direction="catalogue"] .reader { padding: 32px; }
-      [data-direction="catalogue"] .continuation { padding: 28px; gap: 24px; }
-      [data-direction="catalogue"] .archive-secondary, [data-direction="catalogue"] .archive-art-secondary { gap: 28px; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
-      [data-direction="landscape"] .opening-copy { width: 92%; gap: 24px; padding: 24px; margin-bottom: 68px; }
-      [data-direction="landscape"] h1 { font-size: 42px; }
-      [data-direction="landscape"] .opening-lead { font-size: 16px; }
-      [data-direction="landscape"] .opening-actions { gap: 8px; }
-      [data-direction="landscape"] .primary-action { padding-inline: 16px; }
-      [data-direction="landscape"] .read-time { display: none; }
-      [data-direction="landscape"] .reading-workspace { grid-template-columns: 1fr; gap: 20px; }
-      [data-direction="landscape"] .route-sheet { padding: 12px 0; }
-      [data-direction="landscape"] .reader { padding: 30px; }
     }
     @media (max-width: 650px) {
-      :root { --frame: 20px; }
       html { scroll-padding-top: 84px; }
       h2 { font-size: 29px; }
       .site-header { display: block; padding-block: 14px 12px; }
@@ -300,21 +190,14 @@
       .site-nav { gap: 4px 24px; }
       .site-nav a { min-height: 44px; }
       .site-nav a:last-child { display: none; }
-      .toolbar-inner { padding-block: 8px; }
-      .direction-controls { gap: 3px; }
-      .direction-button { min-height: 48px; padding: 10px 4px; font-size: 16px; }
-      .direction-button small { display: none; }
       .opening { grid-template-columns: 1fr; gap: 26px; padding-top: 30px; }
       .opening-copy { padding: 0; }
       h1 { font-size: 38px; line-height: 1.24; }
       h1 span { display: inline; }
-      h1 span:first-child::after { content: "，"; }
       .opening-meta { max-width: none; margin-top: 16px; font-size: 16px; }
       .opening-lead { margin-top: 20px; font-size: 17px; line-height: 1.8; max-width: 32em; }
       .opening-actions { gap: 12px 18px; margin-top: 22px; }
       .primary-action { min-height: 50px; padding: 12px 18px; }
-      .hero-art .art-window { aspect-ratio: 1.48; }
-      .hero-art img { object-position: 53% center; }
       .hero-art figcaption { padding-top: 10px; }
       .context { margin-top: 40px; padding: 24px 22px; }
       .context h2 { font-size: 27px; }
@@ -337,7 +220,6 @@
       .reader { padding: 26px 22px 22px; }
       .chapter-panel h3 { font-size: 28px; }
       .chapter-date { font-size: 16px; }
-      .chapter-date span { margin-right: 8px; }
       .chapter-panel h3 { margin-bottom: 20px; }
       .reader-footer { margin-top: 18px; }
       .pager-button { padding: 10px 12px; }
@@ -350,7 +232,6 @@
       .after-route li:not(:last-child)::after { content: " →"; padding: 0 8px; }
       .archives { margin-top: 64px; scroll-margin-top: 84px; }
       .archives-heading { gap: 16px; margin-bottom: 26px; }
-      .archives-grid { grid-template-columns: 1fr; gap: 32px; }
       .image-link { padding: 7px; }
       .sources { grid-template-columns: 1fr; margin-top: 40px; padding: 14px 22px; gap: 8px; scroll-margin-top: 84px; }
       .sources .disclosure > summary { min-height: 62px; }
@@ -359,38 +240,10 @@
       .image-dialog { padding: 16px; }
       .dialog-bar { align-items: start; gap: 14px; }
       .dialog-bar h2 { font-size: 17px; }
-      [data-direction="catalogue"] .opening { grid-template-columns: 1fr; gap: 24px; }
-      [data-direction="catalogue"] .opening-copy { padding-top: 0; }
-      [data-direction="catalogue"] h1 { font-size: 38px; }
-      [data-direction="catalogue"] .hero-archive { margin-inline: -6px; }
-      [data-direction="catalogue"] .hero-archive figcaption { padding-inline: 6px; }
-      [data-direction="catalogue"] .context { margin-top: 44px; }
-      [data-direction="catalogue"] .route-sheet { padding: 22px; }
-      [data-direction="catalogue"] .reader { padding: 26px 22px 22px; }
-      [data-direction="catalogue"] .continuation { margin-inline: calc(var(--frame) * -1); padding: 30px var(--frame); gap: 28px; }
-      [data-direction="catalogue"] .after-route { padding: 24px 22px; }
-      [data-direction="catalogue"] .archive-secondary, [data-direction="catalogue"] .archive-art-secondary { display: block; }
-      [data-direction="catalogue"] .archive-secondary figcaption, [data-direction="catalogue"] .archive-art-secondary figcaption { margin-top: 16px; }
-      [data-direction="landscape"] .opening { display: flex; flex-direction: column; gap: 0; padding-top: 22px; }
-      [data-direction="landscape"] .opening-copy { display: block; width: 100%; margin: 0; padding: 24px 22px 28px; }
-      [data-direction="landscape"] h1 { font-size: 36px; }
-      [data-direction="landscape"] .opening-lead { font-size: 17px; margin-top: 18px; }
-      [data-direction="landscape"] .opening-meta { margin-top: 14px; }
-      [data-direction="landscape"] .opening-actions { margin-top: 22px; }
-      [data-direction="landscape"] .hero-art { width: 100%; }
-      [data-direction="landscape"] .hero-art .art-window { height: auto; aspect-ratio: 1.65; }
-      [data-direction="landscape"] .hero-art figcaption { padding-top: 10px; }
-      [data-direction="landscape"] .context { margin-top: 40px; }
-      [data-direction="landscape"] .crossings { margin-inline: calc(var(--frame) * -1); padding: 28px var(--frame); }
-      [data-direction="landscape"] .route-sheet { padding: 0; }
-      [data-direction="landscape"] .reader { padding: 26px 22px 22px; }
-      [data-direction="landscape"] .archives-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 360px) {
-      :root { --frame: 16px; }
       .site-nav { gap: 4px 20px; }
-      h1, [data-direction="catalogue"] h1 { font-size: 34px; }
-      [data-direction="landscape"] h1 { font-size: 32px; }
+      h1 { font-size: 34px; }
       .opening-meta { max-width: 16em; }
       .opening-actions { gap: 10px 14px; }
       .read-time { font-size: 16px; }
@@ -400,36 +253,49 @@
       .timeline time { font-size: 19px; margin: 0; }
       .chapter-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .chapter-link { flex-direction: row; justify-content: space-between; padding-inline: 12px; min-height: 54px; }
-      .route-sheet, [data-direction="catalogue"] .route-sheet { padding: 20px 16px; }
-      .reader, [data-direction="catalogue"] .reader, [data-direction="landscape"] .reader { padding: 24px 18px 20px; }
+      .route-sheet { padding: 20px 16px; }
+      .reader { padding: 24px 18px 20px; }
       .reader-footer { gap: 8px; }
       .pager-button { padding-inline: 10px; }
       .pager-count { font-size: 16px; }
-      [data-direction="landscape"] .opening-copy { padding: 22px 18px 26px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
-      button:not(:disabled):active, .primary-action:active, .pager-button:not(:disabled)[data-pressed="true"], .direction-button[data-pressed="true"] { transform: none; }
+      button:not(:disabled):active, .primary-action:active, .pager-button:not(:disabled)[data-pressed="true"] { transform: none; }
     }
     @media (prefers-reduced-transparency: reduce) { .image-dialog::backdrop { background: #242e29; } }
     @media (prefers-contrast: more) {
-      :root, body[data-direction] { --paper: #f7f7ef; --surface: #ffffff; --ink: #111711; --muted: #26392c; --accent: #751b19; --toolbar: #d5ddd1; --map-paper: #e0e8db; --river: #365d67; --river-bank: #b8ccbf; --image-mat: #d2d6c9; }
+      :root { --paper: #f7f7ef; --surface: #ffffff; --ink: #111711; --muted: #26392c; --accent: #751b19; --toolbar: #d5ddd1; --map-paper: #e0e8db; --river: #365d67; --river-bank: #b8ccbf; --image-mat: #d2d6c9; }
       .image-dialog::backdrop { background: #111711; }
       .source-list a, .quiet-link, .image-caption-action { text-decoration-thickness: .12em; }
     }
     @media (forced-colors: active) {
-      .direction-button[aria-pressed="true"], .chapter-link[aria-current="true"], .primary-action { outline: 2px solid Highlight; }
+      .chapter-link[aria-current="true"], .primary-action { outline: 2px solid Highlight; }
       .march-line { stroke: LinkText; }
       .march-start { stroke: LinkText; }
       .river { stroke: GrayText; }
       .river-bank { stroke: Canvas; }
     }
+
+    /* Task 1 narrative layout (print-atlas.css refines; never use the
+       grid-template shorthand on .reading-workspace, it wipes these areas) */
+    .reading-workspace { grid-template-areas: "context map" "crossings map"; }
+    .context { grid-area: context; }
+    .crossings { grid-area: crossings; }
+    .route-sheet { grid-area: map; position: sticky; top: 16px; align-self: start; }
+    .chapter-theme { margin: -2px 0 14px; color: var(--muted); font-size: 17px; }
+    .dialog-tools { display: flex; gap: 4px; margin-left: auto; }
+    .dialog-tools button { min-height: 44px; padding: 8px 14px; font-size: 16px; }
+    .audio-controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-bottom: 28px; padding: 18px 20px; background: var(--surface); }
+    .audio-status, .audio-credits { flex-basis: 100%; margin: 0; color: var(--muted); }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
   </style>
   <link rel="stylesheet" href="./src/editorial-motion.css">
   <link rel="stylesheet" href="./src/print-atlas.css">
   <link rel="stylesheet" href="./src/historical-map.css">
 </head>
-<body data-direction="archive">
+<body>
   <a class="skip-link" href="#main">跳到正文</a>
   <header class="site-header frame">
     <a class="site-name" href="#main">纪念长征胜利90周年</a>
@@ -437,27 +303,17 @@
       <a href="#crossings">四渡阅读</a>
       <a href="#continuation">后续历程</a>
       <a href="#archives">档案原图</a>
-      <button type="button" id="motion-toggle" class="motion-control" aria-pressed="false" hidden>暂停动画</button>
+      <button type="button" id="motion-toggle" class="motion-control" data-motion aria-pressed="false" hidden>暂停动画</button>
     </nav>
   </header>
-  <aside class="study-toolbar" data-js-only aria-label="设计方向对照">
-    <div class="toolbar-inner frame">
-      <p class="study-caption">阅读方式<span>同一段历史，三种阅读方式</span></p>
-      <div class="direction-controls" role="group" aria-label="切换版式">
-        <button type="button" class="direction-button" data-direction-choice="archive" aria-pressed="true">行军档案<small>地图与阅读对页</small></button>
-        <button type="button" class="direction-button" data-direction-choice="catalogue" aria-pressed="false">长征图录<small>完整档案原图</small></button>
-        <button type="button" class="direction-button" data-direction-choice="landscape" aria-pressed="false">山河长卷<small>河谷与实色书页</small></button>
-      </div>
-    </div>
-  </aside>
   <div class="reading-progress" id="reading-progress" role="progressbar" aria-label="页面阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span></span></div>
   <main id="main" class="frame">
-    <noscript><p class="noscript-note">当前为行军档案版式。四章内容完整展开，可用渡次链接定位阅读。</p></noscript>
+    <noscript><p class="noscript-note">四章内容完整展开，可用渡次链接定位阅读。</p></noscript>
     <section class="opening" aria-labelledby="page-title">
       <div class="opening-copy">
         <div class="opening-heading">
-          <h1 id="page-title"><span>长征路上</span><span>四渡赤水</span></h1>
-          <p class="opening-meta">1936—2026 · 纪念长征胜利90周年</p>
+          <h1 id="page-title"><span>赤水河，</span><span>为什么要渡四次？</span></h1>
+          <p class="opening-meta">1935 · 川黔滇边<br>纪念中国工农红军长征胜利90周年</p>
         </div>
         <div class="opening-description">
           <p class="opening-lead">1935年1—3月，中央红军在川黔滇边多次调整行动，四次渡过赤水河。从每一次转向的来由，读长征中的这一段。</p>
@@ -468,7 +324,7 @@
         </div>
       </div>
       <figure class="hero-art">
-        <div class="art-window"><img src="./design-study/chishui-valley-study.png" alt="水彩与炭笔绘成的河谷：河水沿山坡与岩岸之间延伸，远山渐隐。" width="1774" height="887" fetchpriority="high"></div>
+        <div class="art-window"><a class="image-link" href="./design-study/chishui-valley-study.png" data-image-view data-image-title="原创河谷场景示意 · 水彩与炭笔" data-image-caption="原创河谷场景示意 · 水彩与炭笔，1774×887 完整原图。水彩与炭笔用于建立沿河阅读的空间；此图不是1935年照片，也不复原任何具体渡口。河谷图为原创生成艺术示意，不作为史料。具体渡口与行军关系见下方概略图。" aria-label="查看完整原图：原创河谷场景示意，水彩与炭笔"><img src="./design-study/chishui-valley-study.png" alt="水彩与炭笔绘成的河谷：河水沿山坡与岩岸之间延伸，远山渐隐。" width="1774" height="887" fetchpriority="high"></a></div>
         <figcaption>原创河谷场景示意 · 水彩与炭笔。具体渡口与行军关系见下方概略图。</figcaption>
       </figure>
       <figure class="hero-archive">
@@ -477,31 +333,21 @@
       </figure>
     </section>
 
+    <div class="reading-workspace">
     <section class="context" aria-labelledby="context-title">
       <div class="context-intro">
         <h2 id="context-title">把四渡放回长征</h2>
-        <p>长征历时1934—1936年。四渡赤水是其中的关键战役；1935年中央红军到达陕北，与1936年红军三大主力会师，是两个不同的历史节点。</p>
+        <p class="context-lead">长征历时1934—1936年。四渡赤水是其中的关键战役；1935年中央红军到达陕北，与1936年红军三大主力会师，是两个不同的历史节点。</p>
       </div>
-      <ol class="timeline" aria-label="长征进程中的四个节点">
-        <li><time datetime="1934-10">1934年10月</time><p>中央红军开始长征。</p></li>
+      <ol class="timeline" aria-label="长征进程中的五个节点">
+        <li><time datetime="1934-10">1934年10月—1935年1月</time><p>中央红军开始长征。</p></li>
         <li class="timeline-focus"><time datetime="1935-01">1935年1—3月</time><p>四渡赤水，在川黔滇边机动作战。</p></li>
+        <li><time datetime="1935-03-31">1935年3月末—5月</time><p>巧渡金沙江，跳出包围。</p></li>
         <li><time datetime="1935-10">1935年10月</time><p>中央红军到达陕北。</p></li>
         <li><time datetime="1936-10">1936年10月</time><p>红军三大主力会师，长征胜利结束。</p></li>
       </ol>
     </section>
 
-    <section id="crossings" class="crossings" aria-labelledby="crossings-title">
-      <div class="section-heading">
-        <h2 id="crossings-title">四次渡河，形势在变</h2>
-        <p>选择一渡至四渡，对照日期和渡河方向，再展开当时的行动与结果。四次渡河是在变化的形势中作出的调整。</p>
-      </div>
-      <nav class="chapter-nav" aria-label="选择四渡赤水章节">
-        <a class="chapter-link" href="#crossing-one" data-chapter-choice="1" aria-current="true"><strong>一渡</strong><time datetime="1935-01-29">1.29</time></a>
-        <a class="chapter-link" href="#crossing-two" data-chapter-choice="2"><strong>二渡</strong><time datetime="1935-02-18">2.18—21</time></a>
-        <a class="chapter-link" href="#crossing-three" data-chapter-choice="3"><strong>三渡</strong><time datetime="1935-03-16">3.16—17</time></a>
-        <a class="chapter-link" href="#crossing-four" data-chapter-choice="4"><strong>四渡</strong><time datetime="1935-03-21">3.21—22</time></a>
-      </nav>
-      <div class="reading-workspace">
         <figure class="route-sheet" aria-labelledby="map-heading">
           <div class="route-text">
             <div class="route-head"><h3 id="map-heading">四渡赤水区域图</h3><p class="route-direction" id="route-direction">一渡 · 西渡</p></div>
@@ -509,9 +355,10 @@
             <div class="map-view-controls" role="group" aria-label="地图视图" hidden>
               <button type="button" data-map-view="overview" aria-pressed="true">区域总览</button>
               <button type="button" data-map-view="detail" aria-pressed="false">渡河细看</button>
+              <button type="button" data-map-all aria-pressed="false">全部路线</button>
+              <button type="button" id="replay-route" class="motion-control" hidden>重播路线</button>
             </div>
             <p class="map-view-note" id="map-view-note">阶段行军概括连线</p>
-            <button type="button" id="replay-route" class="motion-control" hidden>重播路线</button>
           </div>
           <div class="map-canvas">
             <svg id="route-map" viewBox="0 220 1000 600" role="img" aria-labelledby="map-title map-description" xmlns="http://www.w3.org/2000/svg">
@@ -596,10 +443,23 @@
             <p class="map-credit">现代参照：<a href="https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=query&amp;prop=coordinates" target="_blank" rel="noopener noreferrer">维基百科贡献者 / GeoData</a>（<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>）、<a href="https://www.wikidata.org/wiki/Wikidata:Licensing" target="_blank" rel="noopener noreferrer">Wikidata（CC0）</a>，2026-10-23读取；现代点不等于历史测点。地图数据与自绘图形经概化，以CC BY-SA 4.0提供；原照片和字体另依各自许可。</p>
           </div>
         </figure>
+
+    <section id="crossings" class="crossings" aria-labelledby="crossings-title">
+      <div class="section-heading">
+        <h2 id="crossings-title">四次渡河，形势在变</h2>
+        <p>选择一渡至四渡，对照日期和渡河方向，再展开当时的行动与结果。四次渡河是在变化的形势中作出的调整。</p>
+      </div>
+      <nav class="chapter-nav" aria-label="选择四渡赤水章节">
+        <a class="chapter-link" href="#crossing-one" data-chapter-choice="1" aria-current="true"><strong>一渡</strong><time datetime="1935-01-29">1.29</time></a>
+        <a class="chapter-link" href="#crossing-two" data-chapter-choice="2"><strong>二渡</strong><time datetime="1935-02-18">2.18—21</time></a>
+        <a class="chapter-link" href="#crossing-three" data-chapter-choice="3"><strong>三渡</strong><time datetime="1935-03-16">3.16—17</time></a>
+        <a class="chapter-link" href="#crossing-four" data-chapter-choice="4"><strong>四渡</strong><time datetime="1935-03-21">3.21—22</time></a>
+      </nav>
         <div class="reader">
           <article id="crossing-one" class="chapter-panel" data-chapter="1" data-direction-label="西渡" aria-labelledby="chapter-one-title">
             <p class="chapter-date"><span>一渡</span><time datetime="1935-01-29">1935年1月29日拂晓</time></p>
-            <h3 id="chapter-one-title">先脱离堵追</h3>
+            <h3 id="chapter-one-title">一渡：从土城撤出</h3>
+            <p class="chapter-theme">先脱离堵追</p>
             <div class="situation"><h4>当时的情势</h4><p>遵义会议后，中央红军原拟北渡长江。土城战斗未能取得预期战果，继续在这里作战面临被堵追的危险。</p></div>
             <details class="disclosure story-disclosure" open data-disclosure>
               <summary><span>行动与结果</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
@@ -608,7 +468,8 @@
           </article>
           <article id="crossing-two" class="chapter-panel" data-chapter="2" data-direction-label="东渡" aria-labelledby="chapter-two-title">
             <p class="chapter-date"><span>二渡</span><time datetime="1935-02-18">1935年2月18—21日</time></p>
-            <h3 id="chapter-two-title">回到黔北寻找战机</h3>
+            <h3 id="chapter-two-title">二渡：重返黔北</h3>
+            <p class="chapter-theme">回到黔北寻找战机</p>
             <div class="situation"><h4>当时的情势</h4><p>敌军被吸引到川滇边境，黔北兵力相对空虚；川滇敌军又向扎西逼近，北渡长江的计划暂缓执行。</p></div>
             <details class="disclosure story-disclosure" open data-disclosure>
               <summary><span>行动与结果</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
@@ -617,7 +478,8 @@
           </article>
           <article id="crossing-three" class="chapter-panel" data-chapter="3" data-direction-label="西渡" aria-labelledby="chapter-three-title">
             <p class="chapter-date"><span>三渡</span><time datetime="1935-03-16">1935年3月16—17日</time></p>
-            <h3 id="chapter-three-title">转向河西，寻求机动</h3>
+            <h3 id="chapter-three-title">三渡：再向河西</h3>
+            <p class="chapter-theme">转向河西，寻求机动</p>
             <div class="situation"><h4>当时的情势</h4><p>遵义战役后，敌军重新组织围攻，企图把中央红军围在遵义、鸭溪一带。红军需要跳出新的合围。</p></div>
             <details class="disclosure story-disclosure" open data-disclosure>
               <summary><span>行动与结果</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
@@ -626,7 +488,8 @@
           </article>
           <article id="crossing-four" class="chapter-panel" data-chapter="4" data-direction-label="东渡" aria-labelledby="chapter-four-title">
             <p class="chapter-date"><span>四渡</span><time datetime="1935-03-21">1935年3月21—22日</time></p>
-            <h3 id="chapter-four-title">折返东岸，迅速南下</h3>
+            <h3 id="chapter-four-title">四渡：折返东岸</h3>
+            <p class="chapter-theme">折返东岸，迅速南下</p>
             <div class="situation"><h4>当时的情势</h4><p>敌军再次向赤水河以西地区集中。中央红军决定隐蔽、迅速地折返东岸，争取新的机动机会。</p></div>
             <details class="disclosure story-disclosure" open data-disclosure>
               <summary><span>行动与结果</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
@@ -639,12 +502,13 @@
             <button type="button" class="pager-button" id="next-chapter">下一渡 →</button>
           </div>
         </div>
-      </div>
     </section>
+    </div>
 
-    <section id="continuation" class="continuation" aria-labelledby="continuation-title">
+    <section id="continuation" class="continuation continuation-layout" aria-labelledby="continuation-title">
       <div class="continuation-copy">
-        <h2 id="continuation-title">渡过赤水，路还在前方</h2>
+        <h2 id="continuation-title">山河为证</h2>
+        <h3>渡过赤水，路还在前方</h3>
         <p>四渡赤水中，中央红军灵活机动，由被动转向主动，粉碎了敌军在川黔滇边围歼红军的计划。</p>
         <p>这些转向并非预先排定的四步。土城战斗的结果、黔北兵力的变化，以及敌军新的围堵，都影响了后续行动。</p>
         <a class="quiet-link" href="#crossings" data-review-crossings>回看四次转向 <span aria-hidden="true">↑</span></a>
@@ -668,10 +532,17 @@
           <figcaption><strong>红六军团领导人在湖南新化合影 · 1935年11月29日</strong>此图不是中央红军四渡赤水现场，也不是1936年三大主力会师。<a class="image-caption-action" href="#sources">查看来源与复用状态</a></figcaption>
         </figure>
       </div>
-      <figure class="archive-art-secondary"><img src="./design-study/chishui-valley-study.png" alt="原创水彩炭笔河谷示意全幅，河流穿过岩岸、树丛与远山。" width="1774" height="887" loading="lazy"><figcaption>原创河谷场景示意。水彩与炭笔用于建立沿河阅读的空间；此图不是1935年照片，也不复原任何具体渡口。</figcaption></figure>
     </section>
 
-    <section id="sources" class="sources" aria-label="史料来源与音乐候选">
+    <section id="sources" class="sources" aria-label="史料来源与配乐说明">
+      <div class="audio-controls" data-audio-controls hidden>
+        <button type="button" data-audio-toggle aria-pressed="false">开启配乐</button>
+        <button type="button" data-audio-pause>暂停配乐</button>
+        <label class="audio-label">音量<input type="range" min="0" max="100" value="18" data-audio-volume></label>
+        <p class="audio-status" data-audio-status role="status">配乐默认关闭，仅在你点击开启后播放。</p>
+        <div class="audio-credits" data-audio-credits></div>
+        <a href="./audio-credits.html">音频版权与曲目说明</a>
+      </div>
       <details class="disclosure" open data-disclosure>
         <summary><span>史实与图像出处</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
         <div class="disclosure-body"><div class="disclosure-inner">
@@ -690,7 +561,7 @@
       <details class="disclosure" open data-disclosure>
         <summary><span>配乐候选</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
         <div class="disclosure-body"><div class="disclosure-inner">
-          <p>本页保持静音，没有接入音频。下列是后续适配候选，尚未试听或选段。</p>
+          <p>配乐默认关闭，仅在你点击开启后播放；若音频模块或曲目不可用，页面自动隐藏播放控件并保持静音。当前采用曲目与许可见上方曲目表及音频版权页。以下为候选与授权依据：</p>
           <ul class="source-list">
             <li><a href="https://www.scottbuckley.com.au/library/filaments/" target="_blank" rel="noopener noreferrer">Scott Buckley — Filaments</a><p>首选候选。作者以钢琴、弦乐与合成器描述此曲，约4:10有戏剧性收束；适配仍需试听确认。</p></li>
             <li><a href="https://www.scottbuckley.com.au/library/snowfall/" target="_blank" rel="noopener noreferrer">Scott Buckley — Snowfall</a><p>沉静回望段落的备选。原始创作背景为冬夜，与长征没有历史关联。</p></li>
@@ -703,7 +574,7 @@
   </main>
   <p class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="study-status"></p>
   <dialog class="image-dialog" id="image-dialog" aria-labelledby="dialog-title">
-    <div class="dialog-bar"><h2 id="dialog-title">完整档案原图</h2><form method="dialog"><button class="dialog-close" type="submit">关闭</button></form></div>
+    <div class="dialog-bar"><h2 id="dialog-title">完整档案原图</h2><div class="dialog-tools"><button type="button" data-dialog-zoom="out">缩小</button><button type="button" data-dialog-zoom="reset">复原</button><button type="button" data-dialog-zoom="in">放大</button></div><form method="dialog"><button class="dialog-close" type="submit">关闭</button></form></div>
     <figure><img id="dialog-image" alt=""><figcaption id="dialog-caption"></figcaption></figure>
   </dialog>
   <script src="./src/historical-map-data.js"></script>
@@ -715,201 +586,349 @@
       const status = document.getElementById('study-status');
       const panels = Array.from(document.querySelectorAll('[data-chapter]'));
       const chapterLinks = Array.from(document.querySelectorAll('[data-chapter-choice]'));
-      const directionButtons = Array.from(document.querySelectorAll('[data-direction-choice]'));
       const previous = document.getElementById('previous-chapter');
       const next = document.getElementById('next-chapter');
+      const pagerCount = document.getElementById('pager-count');
       const routeDate = document.getElementById('route-date');
       const routeDirection = document.getElementById('route-direction');
-      const mapSVG = document.getElementById('route-map');
-      let historicalMap = null;
-      try { historicalMap = globalThis.ChishuiHistoricalMap?.create() || null; }
-      catch (error) { console.error('Historical map unavailable; first-stage static map retained.', error); }
-      document.querySelectorAll('[data-map-view]').forEach((button) => {
-        button.addEventListener('click', () => historicalMap?.setView(button.dataset.mapView));
-      });
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-      const disclosureStates = new Map();
+      const routeSheet = document.querySelector('.route-sheet');
+      const workspace = document.querySelector('.reading-workspace');
+      const reader = document.querySelector('.reader');
+      const crossings = document.getElementById('crossings');
       const names = ['一渡', '二渡', '三渡', '四渡'];
-      const directionNames = { archive: '行军档案', catalogue: '长征图录', landscape: '山河长卷' };
-      let currentChapter = 1;
+      const count = panels.length;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const mobileQuery = window.matchMedia('(max-width: 899px)');
+      let currentChapter = 0;
+      let historyScroll = null;
+      let scrollFallback = false;
+      let audioController = null;
+      let allRoutesOn = false;
       let activeImageTrigger = null;
-      function fitMapLabels() { historicalMap?.fit(); }
+      let mapSVG = null;
+      let historicalMap = null;
 
-      function announce(message) { status.textContent = message; }
-
-      function finishDisclosure(state) {
-        if (state.frame) cancelAnimationFrame(state.frame);
-        state.frame = 0;
-        state.velocity = 0;
-        state.details.open = state.expanded;
-        state.body.style.height = '';
-        state.body.style.overflow = '';
-        state.body.inert = !state.expanded;
-        state.body.setAttribute('aria-hidden', String(!state.expanded));
+      function announce(message) {
+        if (!status) return;
+        status.textContent = '';
+        window.setTimeout(function () { status.textContent = message; }, 30);
       }
 
-      function stepDisclosure(state, now) {
-        const dt = Math.min((now - state.last) / 1000, .05);
-        state.last = now;
-        state.target = state.expanded ? state.inner.getBoundingClientRect().height : 0;
-        // Exact critically damped integration. A reversal retains both visible height and velocity.
-        const omega = 2 * Math.PI / .35;
-        const displacement = state.height - state.target;
-        const carry = state.velocity + omega * displacement;
-        const decay = Math.exp(-omega * dt);
-        state.height = state.target + (displacement + carry * dt) * decay;
-        state.velocity = (state.velocity - omega * carry * dt) * decay;
-        if (state.height < 0) { state.height = 0; state.velocity = Math.max(0, state.velocity); }
-        state.body.style.height = state.height + 'px';
-        if (Math.abs(state.height - state.target) < .35 && Math.abs(state.velocity) < 3) {
-          finishDisclosure(state);
+      try {
+        if (globalThis.ChishuiHistoricalMap && typeof globalThis.ChishuiHistoricalMap.create === 'function') {
+          historicalMap = globalThis.ChishuiHistoricalMap.create();
+          mapSVG = document.getElementById('route-map');
+        }
+      } catch (error) {
+        historicalMap = null;
+      }
+      if (!historicalMap) {
+        const fallback = document.querySelector('.map-caption');
+        if (fallback) fallback.textContent = '路线图暂不可用。四次渡河的日期、方向与渡口见章节正文。';
+      }
+
+      function fitMapLabels() {
+        try {
+          const size = Math.max(14, Math.min(20, ((mapSVG && mapSVG.clientWidth) || 720) * 0.022));
+          document.querySelectorAll('[data-map-label]').forEach(function (label) {
+            label.setAttribute('font-size', String(size));
+          });
+          if (historicalMap && typeof historicalMap.fit === 'function') historicalMap.fit();
+        } catch (error) {
+          /* label fitting is optional */
+        }
+      }
+
+      function setAllRoutes(on) {
+        allRoutesOn = Boolean(on);
+        const button = document.querySelector('[data-map-all]');
+        if (button) button.setAttribute('aria-pressed', String(allRoutesOn));
+        if (historicalMap && typeof historicalMap.setAllRoutes === 'function') historicalMap.setAllRoutes(allRoutesOn);
+      }
+
+      const mapAllButton = document.querySelector('[data-map-all]');
+      if (mapAllButton) mapAllButton.addEventListener('click', function () { setAllRoutes(!allRoutesOn); });
+
+      document.querySelectorAll('[data-map-view]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const mode = button.dataset.mapView;
+          document.querySelectorAll('[data-map-view]').forEach(function (peer) {
+            peer.setAttribute('aria-pressed', String(peer === button));
+          });
+          if (historicalMap && typeof historicalMap.setView === 'function') historicalMap.setView(mode);
+          announce(mode === 'detail' ? '已切换到渡河细看。' : '已切换到区域总览。');
+        });
+      });
+
+      function placeRouteSheet() {
+        if (!routeSheet || !workspace || !reader || !crossings) return;
+        const panel = panels[currentChapter - 1];
+        const mobile = mobileQuery.matches && Boolean(panel);
+        const parent = mobile ? reader : workspace;
+        const nextNode = mobile ? panel.nextSibling : crossings;
+        if (routeSheet.parentNode === parent && routeSheet.nextSibling === nextNode) return;
+        const before = panel ? panel.getBoundingClientRect().top : 0;
+        parent.insertBefore(routeSheet, nextNode);
+        if (panel) {
+          const delta = panel.getBoundingClientRect().top - before;
+          if (delta) window.scrollBy(0, delta);
+        }
+        fitMapLabels();
+      }
+
+      function scrollToPanel(number) {
+        const panel = panels[number - 1];
+        if (!panel) return;
+        if (historyScroll && typeof historyScroll.select === 'function') historyScroll.select(number, { scroll: true });
+        else panel.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
+      }
+
+      function activateChapter(number, options) {
+        const settings = options || {};
+        const speak = Boolean(settings.announce);
+        const scroll = Boolean(settings.scroll);
+        if (!Number.isInteger(number) || number < 1 || number > count) return;
+        if (number === currentChapter) {
+          if (scroll) scrollToPanel(number);
           return;
         }
-        state.frame = requestAnimationFrame((time) => stepDisclosure(state, time));
-      }
-
-      function setDisclosure(state, expanded, animate = true) {
-        const visibleHeight = state.details.open ? state.body.getBoundingClientRect().height : 0;
-        state.expanded = expanded;
-        state.details.dataset.expanded = String(expanded);
-        state.summary.setAttribute('aria-expanded', String(expanded));
-        if (!expanded && state.body.contains(document.activeElement)) state.summary.focus({ preventScroll: true });
-        state.body.inert = !expanded;
-        state.body.setAttribute('aria-hidden', String(!expanded));
-        if (!animate || reducedMotion.matches || body.dataset.motion === 'off' || document.hidden || state.details.closest('[hidden]')) {
-          finishDisclosure(state);
-          return;
-        }
-        state.details.open = true;
-        state.height = visibleHeight;
-        state.body.style.height = visibleHeight + 'px';
-        state.body.style.overflow = 'hidden';
-        state.target = expanded ? state.inner.getBoundingClientRect().height : 0;
-        if (!state.frame) {
-          state.last = performance.now();
-          state.frame = requestAnimationFrame((time) => stepDisclosure(state, time));
-        }
-      }
-
-      function settleAllDisclosures() {
-        disclosureStates.forEach((state) => { if (state.frame) finishDisclosure(state); });
-      }
-
-      function chooseChapter(number, speak = true) {
-        const targetPanel = panels[number - 1];
-        if (!targetPanel) return;
-        settleAllDisclosures();
         currentChapter = number;
-        panels.forEach((panel, index) => { panel.hidden = index + 1 !== number; });
-        chapterLinks.forEach((link) => {
+        const panel = panels[number - 1];
+        chapterLinks.forEach(function (link) {
           if (Number(link.dataset.chapterChoice) === number) link.setAttribute('aria-current', 'true');
           else link.removeAttribute('aria-current');
         });
-        const date = targetPanel.querySelector('time').textContent;
-        const direction = targetPanel.dataset.directionLabel;
-        if (historicalMap) {
-          historicalMap.setChapter(number);
-          routeDate.textContent = date;
-          routeDirection.textContent = names[number - 1] + ' · ' + direction;
-        } else {
-          routeDirection.textContent = '一渡 · 西渡（静态图）';
-          document.querySelector('.map-caption').textContent = '地图增强未加载：此处始终为第一渡静态区域图；当前所读渡次见右侧或下方正文。';
-        }
-        previous.disabled = number === 1;
-        next.disabled = number === 4;
-        document.getElementById('pager-count').textContent = names[number - 1] + ' / 四渡';
-        if (speak) announce(names[number - 1] + '，' + date + '，' + direction + (historicalMap ? '。正文与概略路线已同步。' : '。正文已切换；地图仍为第一渡静态区域图。'));
-        document.dispatchEvent(new CustomEvent('chishui:chapter', { detail: { number, mapReady: Boolean(historicalMap) } }));
+        if (historicalMap && typeof historicalMap.setChapter === 'function') historicalMap.setChapter(number);
+        const time = panel.querySelector('.chapter-date time');
+        if (routeDate) routeDate.textContent = time ? time.textContent : '';
+        if (routeDirection) routeDirection.textContent = names[number - 1] + ' · ' + (panel.dataset.directionLabel || '');
+        if (previous) previous.disabled = number <= 1;
+        if (next) next.disabled = number >= count;
+        if (pagerCount) pagerCount.textContent = names[number - 1] + ' / 四渡';
+        if (allRoutesOn) setAllRoutes(false);
+        placeRouteSheet();
+        if (audioController && typeof audioController.setChapter === 'function') audioController.setChapter(number);
+        document.dispatchEvent(new CustomEvent('chishui:chapter', {
+          detail: { number: number, mapReady: Boolean(historicalMap) },
+          bubbles: true,
+        }));
+        if (speak) announce('已切换到' + names[number - 1] + '。');
+        if (scroll) scrollToPanel(number);
       }
 
-      document.querySelectorAll('[data-disclosure]').forEach((details, index) => {
-        const summary = details.querySelector('summary');
-        const disclosureBody = details.querySelector('.disclosure-body');
-        const inner = details.querySelector('.disclosure-inner');
-        const id = 'disclosure-content-' + index;
-        disclosureBody.id = id;
-        summary.setAttribute('aria-controls', id);
-        const state = { details, summary, body: disclosureBody, inner, expanded: false, height: 0, target: 0, velocity: 0, frame: 0, last: 0 };
-        disclosureStates.set(details, state);
-        setDisclosure(state, false, false);
-        summary.addEventListener('click', (event) => {
-          event.preventDefault();
-          setDisclosure(state, !state.expanded);
-        });
+      if (previous) previous.addEventListener('click', function () {
+        activateChapter(Math.max(1, currentChapter - 1), { announce: true, scroll: true });
       });
-
-      directionButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const direction = button.dataset.directionChoice;
-          settleAllDisclosures();
-          body.dataset.direction = direction;
-          fitMapLabels();
-          directionButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-          announce('已切换到' + directionNames[direction] + '。当前仍为' + names[currentChapter - 1] + '。');
-          document.dispatchEvent(new CustomEvent('chishui:layout', { detail: { direction } }));
-        });
+      if (next) next.addEventListener('click', function () {
+        activateChapter(Math.min(count, currentChapter + 1), { announce: true, scroll: true });
       });
-      chapterLinks.forEach((link) => link.addEventListener('click', (event) => {
-        event.preventDefault();
-        chooseChapter(Number(link.dataset.chapterChoice));
-      }));
-      previous.addEventListener('click', () => chooseChapter(Math.max(1, currentChapter - 1)));
-      next.addEventListener('click', () => chooseChapter(Math.min(4, currentChapter + 1)));
-      document.querySelector('[data-start-reading]').addEventListener('click', () => chooseChapter(1));
 
       function chapterFromHash() {
-        const index = panels.findIndex((panel) => '#' + panel.id === location.hash);
-        if (index >= 0) chooseChapter(index + 1, false);
+        const index = panels.findIndex(function (panel) { return '#' + panel.id === location.hash; });
+        return index >= 0 ? index + 1 : 0;
       }
-      window.addEventListener('hashchange', chapterFromHash);
+
+      window.addEventListener('hashchange', function () {
+        const number = chapterFromHash();
+        if (number) activateChapter(number);
+      });
+
+      document.querySelectorAll('[data-disclosure]').forEach(function (details) {
+        const summary = details.querySelector('summary');
+        if (!summary) return;
+        function sync() {
+          summary.setAttribute('aria-expanded', String(details.open));
+          details.dataset.expanded = String(details.open);
+        }
+        sync();
+        details.addEventListener('toggle', sync);
+        summary.addEventListener('click', function () {
+          summary.setAttribute('aria-expanded', String(!details.open));
+          details.dataset.expanded = String(!details.open);
+        });
+      });
 
       const dialog = document.getElementById('image-dialog');
-      if (typeof dialog.showModal === 'function') {
-        document.querySelectorAll('[data-image-view]').forEach((link) => {
-          link.addEventListener('click', (event) => {
+      const dialogImage = document.getElementById('dialog-image');
+      const zoomLevels = [1, 1.5, 2, 3, 4];
+      let zoomIndex = 0;
+      function applyZoom() {
+        if (!dialogImage) return;
+        dialogImage.style.width = String(zoomLevels[zoomIndex] * 100) + '%';
+        document.querySelectorAll('[data-dialog-zoom]').forEach(function (button) {
+          const action = button.dataset.dialogZoom;
+          if (action === 'in') button.disabled = zoomIndex >= zoomLevels.length - 1;
+          if (action === 'out') button.disabled = zoomIndex <= 0;
+        });
+      }
+      if (dialog && typeof dialog.showModal === 'function') {
+        document.querySelectorAll('[data-image-view]').forEach(function (link) {
+          link.addEventListener('click', function (event) {
             event.preventDefault();
             activeImageTrigger = link;
-            const image = document.getElementById('dialog-image');
-            image.src = link.href;
-            image.alt = link.querySelector('img').alt;
+            dialogImage.src = link.href;
+            dialogImage.alt = link.querySelector('img').alt;
             document.getElementById('dialog-title').textContent = link.dataset.imageTitle;
             document.getElementById('dialog-caption').textContent = link.dataset.imageCaption;
+            zoomIndex = 0;
+            applyZoom();
             dialog.showModal();
           });
         });
-        dialog.addEventListener('keydown', (event) => {
-          if (event.key !== 'Tab' || !dialog.open) return;
-          event.preventDefault();
-          // The close button is the image dialog's only sequential focus target.
-          dialog.querySelector('.dialog-close').focus({ preventScroll: true });
+        document.querySelectorAll('[data-dialog-zoom]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            const action = button.dataset.dialogZoom;
+            if (action === 'in') zoomIndex = Math.min(zoomLevels.length - 1, zoomIndex + 1);
+            else if (action === 'out') zoomIndex = Math.max(0, zoomIndex - 1);
+            else zoomIndex = 0;
+            applyZoom();
+          });
         });
-        dialog.addEventListener('close', () => {
+        dialog.addEventListener('keydown', function (event) {
+          if (event.key !== 'Tab') return;
+          const controls = Array.from(dialog.querySelectorAll('button:not(:disabled), a[href], input:not(:disabled), [tabindex="0"]')).filter(function (element) { return element.getClientRects().length; });
+          const first = controls[0];
+          const last = controls[controls.length - 1];
+          if (!first) return;
+          if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+            event.preventDefault();
+            first.focus();
+          }
+        });
+        dialog.addEventListener('close', function () {
           if (activeImageTrigger && activeImageTrigger.isConnected) activeImageTrigger.focus({ preventScroll: true });
           activeImageTrigger = null;
         });
       }
 
-      // Native :active supplies the first press frame; pointer state also clears on cancellation.
-      document.addEventListener('pointerdown', (event) => {
+      const audioBox = document.querySelector('[data-audio-controls]');
+      if (audioBox) {
+        import('./src/audio.js').then(function (mod) {
+          const create = mod && mod.createAudioController;
+          const tracks = mod && mod.audioTracks;
+          if (typeof create !== 'function' || !Array.isArray(tracks) || !tracks.length) throw new Error('audio contract unavailable');
+          const toggle = audioBox.querySelector('[data-audio-toggle]');
+          const pause = audioBox.querySelector('[data-audio-pause]');
+          const volume = audioBox.querySelector('[data-audio-volume]');
+          const statusText = audioBox.querySelector('[data-audio-status]');
+          const credits = audioBox.querySelector('[data-audio-credits]');
+          function createAudio(src) {
+            const element = new Audio();
+            element.preload = 'none';
+            if (src) element.src = src;
+            return element;
+          }
+          function onState(state) {
+            const labels = { off: '配乐已关闭。', loading: '配乐载入中…', playing: '配乐播放中。', paused: '配乐已暂停。', error: '配乐暂不可用。' };
+            if (statusText) statusText.textContent = labels[state.status] || '';
+            if (toggle) toggle.setAttribute('aria-pressed', String(state.status === 'playing'));
+          }
+          audioController = create({ tracks: tracks, createAudio: createAudio, onState: onState, volume: 0.18 });
+          if (toggle) toggle.addEventListener('click', function () {
+            if (audioController && typeof audioController.enable === 'function') audioController.enable();
+          });
+          if (pause) pause.addEventListener('click', function () {
+            if (audioController && typeof audioController.pause === 'function') audioController.pause();
+          });
+          if (volume) volume.addEventListener('input', function () {
+            if (audioController && typeof audioController.setVolume === 'function') audioController.setVolume(Number(volume.value) / 100);
+          });
+          if (credits) {
+            const list = document.createElement('ul');
+            list.className = 'source-list';
+            tracks.forEach(function (track) {
+              const item = document.createElement('li');
+              item.textContent = (track.title || '曲目') + ' — ' + (track.author || '作者未记') + '；来源：' + (track.source || '未记') + '；许可：' + (track.license || '未记');
+              list.appendChild(item);
+            });
+            credits.replaceChildren(list);
+          }
+          audioBox.hidden = false;
+        }).catch(function () {
+          audioBox.hidden = true;
+        });
+      }
+
+      const replay = document.getElementById('replay-route');
+      if (replay) replay.addEventListener('click', function () {
+        document.dispatchEvent(new CustomEvent('chishui:chapter', {
+          detail: { number: Math.max(1, currentChapter), mapReady: Boolean(historicalMap) },
+          bubbles: true,
+        }));
+      });
+
+      document.addEventListener('pointerdown', function (event) {
         const target = event.target.closest('button:not(:disabled), summary');
         if (target) target.dataset.pressed = 'true';
       });
-      function clearPressed() { document.querySelectorAll('[data-pressed]').forEach((node) => delete node.dataset.pressed); }
+      function clearPressed() {
+        document.querySelectorAll('[data-pressed]').forEach(function (node) { delete node.dataset.pressed; });
+      }
       document.addEventListener('pointerup', clearPressed);
       document.addEventListener('pointercancel', clearPressed);
       window.addEventListener('blur', clearPressed);
-      window.addEventListener('pagehide', () => { settleAllDisclosures(); clearPressed(); });
-      document.addEventListener('visibilitychange', () => { if (document.hidden) { settleAllDisclosures(); clearPressed(); } });
-      window.addEventListener('resize', () => { settleAllDisclosures(); document.dispatchEvent(new CustomEvent('chishui:map-before', { detail: { reason: 'resize' } })); fitMapLabels(); });
-      if (typeof ResizeObserver === 'function') new ResizeObserver(fitMapLabels).observe(mapSVG);
-      if (document.fonts) document.fonts.ready.then(fitMapLabels).catch(() => {});
-      document.addEventListener('chishui:motion', () => { if (body.dataset.motion === 'off') settleAllDisclosures(); });
-      function motionPreferenceChanged() { if (reducedMotion.matches) settleAllDisclosures(); }
-      if (typeof reducedMotion.addEventListener === 'function') reducedMotion.addEventListener('change', motionPreferenceChanged);
-      else if (typeof reducedMotion.addListener === 'function') reducedMotion.addListener(motionPreferenceChanged);
+      window.addEventListener('pagehide', clearPressed);
+      document.addEventListener('visibilitychange', function () { if (document.hidden) clearPressed(); });
+      window.addEventListener('resize', function () {
+        document.dispatchEvent(new CustomEvent('chishui:map-before', { detail: { reason: 'resize' } }));
+        fitMapLabels();
+        placeRouteSheet();
+      });
+      if (typeof ResizeObserver === 'function' && mapSVG) new ResizeObserver(fitMapLabels).observe(mapSVG);
+      if (document.fonts) document.fonts.ready.then(fitMapLabels).catch(function () {});
+      if (typeof mobileQuery.addEventListener === 'function') mobileQuery.addEventListener('change', placeRouteSheet);
 
-      chooseChapter(1, false);
-      chapterFromHash();
+      // Same reading-line rule as src/history-scroll.js, kept as a tiny inline
+      // fallback so chapter chrome and scroll tracking survive even if the
+      // module never loads (missing build whitelist entry, failed import, …).
+      function chapterAtReadingLine() {
+        const line = 0.45 * (window.innerHeight || 1);
+        let crossing = null;
+        let passed = null;
+        panels.forEach(function (panel, index) {
+          const rect = panel.getBoundingClientRect();
+          const entry = { number: index + 1, top: rect.top, bottom: rect.bottom };
+          if (rect.top <= line && line < rect.bottom && (!crossing || rect.top > crossing.top)) crossing = entry;
+          if (rect.top <= line && (!passed || rect.top > passed.top)) passed = entry;
+        });
+        return (crossing || passed)?.number || (panels.length ? 1 : 0);
+      }
+
+      function installScrollFallback() {
+        if (historyScroll || scrollFallback) return;
+        scrollFallback = true;
+        let frame = 0;
+        function measure() {
+          frame = 0;
+          activateChapter(chapterAtReadingLine());
+        }
+        function schedule() {
+          if (frame) return;
+          if (typeof window.requestAnimationFrame === 'function') frame = window.requestAnimationFrame(measure);
+          else measure();
+        }
+        window.addEventListener('scroll', schedule, { passive: true });
+        window.addEventListener('resize', schedule);
+        schedule();
+      }
+
+      import('./src/history-scroll.js').then(function (mod) {
+        if (mod && typeof mod.createHistoryScroll === 'function') {
+          historyScroll = mod.createHistoryScroll({
+            steps: panels,
+            onChapter: function (n) { activateChapter(n); },
+            offset: 0.45,
+            win: window,
+          });
+          historyScroll.refresh();
+        }
+        installScrollFallback();
+      }).catch(installScrollFallback);
+
+      activateChapter(chapterFromHash() || 1);
       document.documentElement.classList.add('enhanced');
       fitMapLabels();
     })();

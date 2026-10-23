@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chapters, sources, epilogue, questions, initialState, transition } from '../src/story.js';
+import { chapters, sources, epilogue } from '../src/story.js';
 
 const expectedDates = [
   ['1935年1月29日拂晓', ['1935-01-29', '1935-01-29']],
@@ -84,98 +84,4 @@ test('epilogue separates later actions from the end of the fourth crossing', () 
   for (const action of ['南渡乌江', '贵阳', '金沙江']) assert.ok(epilogue.body.includes(action));
   assert.match(epilogue.body, /随后|此后|之后/);
   assert.equal(Object.hasOwn(epilogue, 'reflection'), false);
-});
-
-test('two comprehension questions offer valid answers and useful explanations', () => {
-  assert.equal(questions.length, 2);
-  questions.forEach((question) => {
-    assert.deepEqual(Object.keys(question).sort(), ['prompt', 'options', 'answer', 'explanation'].toSorted());
-    assert.ok(question.prompt.length > 0 && question.explanation.length > 0);
-    assert.ok(question.options.length >= 2);
-    assert.equal(new Set(question.options).size, question.options.length);
-    assert.ok(question.options.every((option) => typeof option === 'string' && option.length > 0));
-    assert.ok(Number.isInteger(question.answer));
-    assert.ok(question.answer >= 0 && question.answer < question.options.length);
-  });
-  assert.match(questions[0].options[questions[0].answer], /形势|局势/);
-  assert.match(questions[1].options[questions[1].answer], /乌江/);
-});
-
-test('initialState returns a fresh unrevealed cover state', () => {
-  assert.deepEqual(initialState(), { chapter: 0, revealed: false });
-  assert.notEqual(initialState(), initialState());
-});
-
-test('START and RESTART always reset the reading position and reveal', () => {
-  for (let chapter = 0; chapter <= 5; chapter += 1) {
-    const state = Object.freeze({ chapter, revealed: true });
-    assert.deepEqual(transition(state, { type: 'START' }), { chapter: 1, revealed: false });
-    assert.deepEqual(transition(state, { type: 'RESTART' }), initialState());
-    assert.deepEqual(state, { chapter, revealed: true });
-  }
-});
-
-test('REVEAL only reveals chapters 1–4 and repeated REVEAL is idempotent', () => {
-  for (let chapter = 0; chapter <= 5; chapter += 1) {
-    const state = Object.freeze({ chapter, revealed: false });
-    const result = transition(state, { type: 'REVEAL' });
-    assert.deepEqual(result, { chapter, revealed: chapter >= 1 && chapter <= 4 });
-    assert.deepEqual(transition(Object.freeze(result), { type: 'REVEAL' }), result);
-    assert.deepEqual(state, { chapter, revealed: false });
-  }
-});
-
-test('NEXT and PREV clamp at both bounds and always reset reveal', () => {
-  for (let chapter = 0; chapter <= 5; chapter += 1) {
-    for (const revealed of [true, false]) {
-      const state = Object.freeze({ chapter, revealed });
-      assert.deepEqual(transition(state, { type: 'NEXT' }), { chapter: Math.min(5, chapter + 1), revealed: false });
-      assert.deepEqual(transition(state, { type: 'PREV' }), { chapter: Math.max(0, chapter - 1), revealed: false });
-      assert.deepEqual(state, { chapter, revealed });
-    }
-  }
-});
-
-test('GOTO accepts every integer chapter, including the current chapter, and resets reveal', () => {
-  for (let chapter = 0; chapter <= 5; chapter += 1) {
-    const state = Object.freeze({ chapter, revealed: true });
-    for (let target = 0; target <= 5; target += 1) {
-      assert.deepEqual(transition(state, Object.freeze({ type: 'GOTO', chapter: target })), { chapter: target, revealed: false });
-    }
-    assert.deepEqual(state, { chapter, revealed: true });
-  }
-});
-
-test('invalid GOTO values preserve the previous state', () => {
-  const state = Object.freeze({ chapter: 3, revealed: true });
-  for (const chapter of [NaN, '2', 2.5, -1, 6, Infinity, -Infinity, null, undefined, {}, true]) {
-    assert.deepEqual(transition(state, { type: 'GOTO', chapter }), state);
-  }
-  assert.deepEqual(state, { chapter: 3, revealed: true });
-});
-
-test('unknown or missing events preserve the previous state', () => {
-  const state = Object.freeze({ chapter: 2, revealed: true });
-  for (const event of [{ type: 'UNKNOWN' }, {}, null, undefined]) {
-    assert.deepEqual(transition(state, event), state);
-  }
-});
-
-test('jump, back, reveal and restart sequences never retain another chapter reveal', () => {
-  let state = initialState();
-  for (const [event, expected] of [
-    [{ type: 'START' }, { chapter: 1, revealed: false }],
-    [{ type: 'REVEAL' }, { chapter: 1, revealed: true }],
-    [{ type: 'GOTO', chapter: 4 }, { chapter: 4, revealed: false }],
-    [{ type: 'REVEAL' }, { chapter: 4, revealed: true }],
-    [{ type: 'PREV' }, { chapter: 3, revealed: false }],
-    [{ type: 'REVEAL' }, { chapter: 3, revealed: true }],
-    [{ type: 'RESTART' }, { chapter: 0, revealed: false }],
-  ]) {
-    const previous = Object.freeze(state);
-    const snapshot = { ...previous };
-    state = transition(previous, event);
-    assert.deepEqual(state, expected);
-    assert.deepEqual(previous, snapshot);
-  }
 });

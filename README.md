@@ -1,28 +1,22 @@
 # 长征路上，四渡赤水
 
-将四渡赤水放回1934—1936年的长征进程，以原创河谷示意、历史老照片与四章叙事组织阅读。首页默认“行军档案”，可切换“长征图录”“山河长卷”；交互支持中途反向、减少动态与无脚本全文。
+纪念长征胜利90周年的静态数字历史博物馆。首页从“赤水河，为什么要渡四次？”进入，沿长征时间线、四次渡河的局势与行动、历史照片和后续历程连续阅读。
 
-当前根首页采用“民国印刷图册＋少量行军批注”的统一视觉：自托管朱雀仿宋显示子集用于题字、章名与题签，宋体正文配合静态原创纸纹、灰蓝河道和暗朱红路线。三种阅读布局共用同一套纸墨与文字层级。地图采用固定北向与十个现代地点参照，提供“区域总览／渡河细看”；城镇参照、渡河区域与行军概括线分层，九溪口只说明与太平渡的上游关系。地形是Open-Meteo完整90点现代高程的粗采样晕渲，不是90米分辨率地图或1935年地表复原。新数据与自绘图形采用CC BY-SA 4.0，素材各依原许可。移动头点只在约1.8秒的实际描绘中出现，静态和完成时显示箭头。
+四章随原生滚动更新当前渡次与地图，也可通过章节导航直达。桌面地图随阅读保持可见，窄屏地图放在当前章节之后；支持区域总览、渡河细看、全部路线和路线重播。地图区分现代地点参照、概略渡河区域与行军概括线，不表示1935年精确轨迹。九溪口仅说明与太平渡的相对关系；高程底图来自90点粗采样，不能当作90米分辨率地形复原。
 
-原有分层开篇、分章入场、河面流线、原创河谷图轻微视差、阅读进度和全局暂停保留。减少动态、页面隐藏或暂停时立即完成静态终态，恢复不续播旧章节；原图保持完整画面与原始字节。地理地图修订的完整Node检查27/27通过、构建32文件；区域投影、阶段衔接、未知坐标和真实仓库前缀资源读取均已验证。控制器已完成120个地图状态、8项真实动效和6类降级检查，均通过；四宽度另含844×390短横屏，正常场景错误为0。独立审查已通过，降级读屏提示的一项小问题已修正并定点实测，详见[验证记录](docs/verification.md#2026-10-23-地理地图修订)。
+页面使用一幅生成河谷艺术示意与两张历史照片。图注说明照片年代和适用范围，点击可查看完整原图并缩放。配乐默认关闭，显式开启后，第1—2章使用 Scott Buckley《Undertow》，第3—4章使用《The Great Sea》，均按 CC BY 4.0 署名。暂停、音量、页面隐藏后的停止行为由独立音频控制器管理。
 
-**在线首页：[https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)**。新版直接发布在根路径，入口通过Cloudflare代理，静态源站和源码仍在GitHub。
+公开入口：[changzheng90.luvch1nabest.me](https://changzheng90.luvch1nabest.me/)。源码：[donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。入口地址不代表当前工作树已发布，发布与验证状态分别见[部署说明](docs/deployment.md)和[验证记录](docs/verification.md)。
 
-公开页面采用原创河谷艺术示意和已有出处依据的历史老照片；无音乐自动播放。尚未确认复用许可的两件研究原图保留官方原文入口，不上传图片本身。
+## 本地预览与构建
 
-本项目后续已授权的修改默认更新根首页、提交到现有远程并提供根域名链接，压缩包只在用户另行要求时提供。
-
-## 本地预览
-
-当前本地仓库为 `~/changzheng90`，公开源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。在本地仓库根目录运行以下命令。
-
-需要 Node.js 22 或更高版本与 npm。项目没有运行时或开发依赖，无需安装依赖。
+需要 Node.js 22 或更高版本与 npm；项目没有 npm 依赖，无需安装依赖。
 
 ```sh
 npm run dev
 ```
 
-在浏览器打开 `http://127.0.0.1:4173/`。按 Ctrl+C 关闭自己启动的预览。浏览器需通过 HTTP 读取 ES modules，直接双击 HTML 文件不属于支持的预览方式。
+在浏览器打开 `http://127.0.0.1:4173/`，按 Ctrl+C 关闭自己启动的预览。ES modules 需要通过 HTTP 加载。
 
 ```sh
 npm test
@@ -30,60 +24,26 @@ npm run build
 PORT=4174 npm run dev -- --root dist
 ```
 
-最后一条命令在 `http://127.0.0.1:4174/` 预览构建结果。构建只复制站点资源，输出的 `dist/` 含根目录 `CNAME` 和 `.nojekyll`，资源使用相对路径，可放在仓库子路径下。`npm test` 会构建一次，并用临时端口检查资源与 HTTP 边界；测试在 `finally` 中关闭自己的监听器、清理自己的临时目录。
+最后一条命令在 `http://127.0.0.1:4174/` 预览构建结果。构建按显式白名单复制资源到 `dist/`，包含根目录 `CNAME` 与 `.nojekyll`；相对资源路径支持仓库子路径部署。测试会使用自己的临时 HTTP 监听器并在结束时清理。
 
-## 文件分工
+## 当前实现
 
-当前首页的历史内容和阅读交互内嵌在 [index.html](index.html)，统一图册视觉由 [print-atlas.css](src/print-atlas.css) 提供；独立动效由 [editorial-motion.js](src/editorial-motion.js) 和 [editorial-motion.css](src/editorial-motion.css) 增强，图片放在 [design-study](design-study/)。自托管显示字体与完整OFL、原创纸纹的固定来源、字节和SHA-256见[素材清单](docs/assets.md#印刷图册新资源2026-10-23)。前版应用实现仍保留，便于追溯。
-
-Anime.js v4.5.0 的原始 ESM 包和完整 MIT 许可随站点同源托管：[库文件](public/vendor/anime-4.5.0.esm.min.js)、[许可](public/vendor/ANIME-LICENSE.txt)。无需 npm 安装，不请求 CDN；固定来源、大小与校验值见[素材清单](docs/assets.md)。模块、库或观察器不可用时，HTML 保留可读内容与完整静态路线。
-
-| 路径 | 用途 |
+| 文件 | 职责 |
 | --- | --- |
-| [index.html](index.html) | 当前根首页、三种阅读版式、四章全文和来源对话框 |
-| [src/historical-map-data.js](src/historical-map-data.js)、[src/historical-map.js](src/historical-map.js)、[src/historical-map.css](src/historical-map.css) | 固定现代参照、原始粗采样高程、总览／渡河细看、稳定SVG渲染与地图适配 |
-| [src/story.js](src/story.js) | 章节日期、方向、叙事、来源、理解题和纯状态切换 |
-| [src/main.js](src/main.js) | 可见界面、阅读导航、理解题和对话框 |
-| [src/map.js](src/map.js) | 原创 SVG 山川和分章路线示意 |
-| [src/share.js](src/share.js) | 本机生成 PNG 纪念卡 |
-| [src/media.js](src/media.js) | 独立音乐与动画控制、系统减少动态与后台暂停 |
-| [public/party-emblem.svg](public/party-emblem.svg)、[public/internationale.mp3](public/internationale.mp3) | 静态标准党徽与 CC0 数字器乐录音 |
-| [src/styles.css](src/styles.css) | 响应式排版、焦点和减少动态设置 |
-| [public/favicon.svg](public/favicon.svg)、[public/CNAME](public/CNAME) | 原创站点图标和专用子域名 |
-| [scripts/serve.mjs](scripts/serve.mjs)、[scripts/build.mjs](scripts/build.mjs) | Node 标准库预览服务器与白名单构建 |
-| [tests/story.test.js](tests/story.test.js)、[tests/site.test.js](tests/site.test.js) | 内容、状态、包装及 HTTP 边界测试 |
-| [scripts/verify-browser.mjs](scripts/verify-browser.mjs) | 交给控制器现有 Brave 页面的浏览器验收函数 |
+| [index.html](index.html) | 连续叙事、章节导航、地图接线、图片缩放对话框与音频控件 |
+| [story.js](src/story.js) | 四章事实、来源、历史分期与时间线数据 |
+| [history-scroll.js](src/history-scroll.js) | 按阅读线选择章节，处理反向滚动与手动定位 |
+| [historical-map-data.js](src/historical-map-data.js)、[historical-map.js](src/historical-map.js)、[historical-map.css](src/historical-map.css) | 地理来源、地图渲染、视图与路线状态 |
+| [editorial-motion.js](src/editorial-motion.js)、[editorial-motion.css](src/editorial-motion.css) | 入场、路线描绘、阅读进度、暂停与减少动态 |
+| [print-atlas.css](src/print-atlas.css) | 博物馆版式、字体与纸墨视觉 |
+| [audio.js](src/audio.js) | 显式开启、分章切曲、交叉淡化、音量与生命周期 |
+| [音频版权页](audio-credits.html) | 曲目、作者、来源、许可与使用说明 |
+| [构建脚本](scripts/build.mjs)、[预览服务器](scripts/serve.mjs) | 白名单部署、HTTP 类型、Range 与路径边界 |
 
-## 前版内容与原创说明
+历史正文在 HTML 中直接可读，无脚本时四章完整展开。动画是渐进增强；字体失败可使用系统后备字体。脚本、样式、图片、字体和音频随站点同源托管，无统计、账号或上传接口。外部链接用于读者主动查看史料与许可。
 
-以下说明对应保留在 `src/` 的前版实现。当前首页使用上文的三种阅读版式及图片，历史来源仍可核查。
+## 来源与维护
 
-历史叙述据[新华网所载《【镜头·长征路上】四渡赤水出奇兵》](https://www.news.cn/politics/2016-10/02/c_129309668.htm)及[中共中央党史和文献研究院网站所载《四渡赤水，以少胜多的光辉典范》](https://www.dswxyjy.org.cn/BIG5/n1/2026/0930/c244516-40808291.html)整理。核查记录见 [docs/sources.md](docs/sources.md)。本作品不代表这些机构制作、授权或背书。
+历史叙述的出处和事实边界见[史料说明](docs/sources.md)；图片、地图、字体和第三方库的归属见[素材清单](docs/assets.md)；音乐完整署名与核验记录见[音频授权](docs/audio-rights.md)。本作品不代表史料发布机构制作、授权或背书。
 
-地图、路线、山川场景与站点图标为原创示意，帮助理解渡河方向和先后关系，不代表精确行军轨迹或真实地形。四章作者解读和尾声感想已完整移除，没有改名并入历史正文。日期和方向由共享数据提供；没有虚构对白或精确兵力。
-
-页面采用紧凑红金开场，桌面地图随阅读保持可见，手机点击“展开路线”后先把整张地图带入视口，再用约1.9秒从起点绘制至终点。每渡只有一条连续路线，展开后可点击“重播路线”。标准党徽保留固定替代文字，作为静态图形展示，不再附可见身份图注；站点图标与纪念卡不使用党徽。标题正文有有限入场，河面流线独立于路线，照片只在进入视口时轻微显现。暂停动画或系统减少动态时立即显示完整静态终态。音乐初始关闭，只有单独点击才播放；切到后台自动暂停，返回后需重新点击。
-
-尾声以四幅本地影像收束：1930年代红军集会、1935年11月29日红六军团领导人合影，以及Gary Todd于2010年拍摄的两幅四川博物院展陈照片。简短图注明确各自年代，“影像出处”提供逐图来源和许可；后两幅不作为1935年现场照片。图库按比例显示，未启用JavaScript也能阅读同一份图片与来源。
-
-《国际歌》采用 MuseScore 数字器乐复刻录音，作曲 Pierre de Geyter，Realmartcraft 上传并将该音频以 CC0 1.0 发布。音频、标准党徽与四幅照片的来源、许可、大小、尺寸及哈希见[素材清单](docs/assets.md)。录音许可由具体音频文件页核实，不仅依据曲调属于公版。
-
-所有站点脚本、样式、图形、照片和音乐均随站点同源托管；使用系统字体，没有第三方脚本或字体依赖、统计、账号或上传接口。纪念卡在设备内生成。下载受限时可用“打开图片”查看本机生成图，再长按保存；不同设备的中文字体和保存行为仍需实测。
-
-## 当前首页与历史验证
-
-2026-10-23根首页改版的包装与HTTP检查**9/9通过**，包含对 `/` 返回新版HTML及仓库子路径图片的实际读取。首页样式和脚本与已验收样稿字节一致，复用此前三版在390／1440px的6组浏览器证据；本次没有把复用记录计作新一轮浏览器回归。
-
-下列22/22、17组及favicon记录属于前版实现，保留作历史核查。
-
-[验证记录](docs/verification.md)把本轮与历史版本分开。本轮最终完整 Node 套件仅运行一次，**22/22**通过；构建输出**16个静态文件**，四张JPEG的实际文件、部署副本、仓库子路径HTTP与MIME检查均通过。7个JavaScript语法检查、验收表达式编译及未知阶段拒绝通过；非浏览器taste lint为0 FAIL、1个原有日期范围横线提示。
-
-控制器已对产品提交 `6e56dbe` 完成六次串行浏览器验收：`gallery` 与390／768／1440／320各2组，`extras` 7组，汇总**17个不同实质组全部通过，应用错误0、媒体取消0**。这是六阶段合并覆盖。四宽度的实际图片解码与排版、无脚本图库、新动效推进及暂停／减少动态、原生路线绘制、键盘焦点、音频和PNG回归均通过。控制器另查看四宽首屏及390／1440px默认折叠图库截图，未发现需修正的视觉问题。PNG实际为213668bytes、1080×1440；音乐解码78秒，真实播放推进及暂停／错误重试通过。
-
-本轮音频始终静音，没有主观听感评估；后台暂停使用合成 `document.hidden` fixture。真实手机设备／微信、内地网络，以及缺少IntersectionObserver时的浏览器降级路径尚未测试。本轮独立审查已完成：Spec PASS、Quality Approved，无产品问题；仅提出的非阻断文档状态清理已在本次同步。
-
-源码在 `main` 分支维护，构建发布到独立 `gh-pages` 分支。正式应用原有16个文件之外，构建新增 `design-study/` 的HTML、原创河谷图与两幅历史照片，共20个静态文件。新“赤水朱印”favicon已发布，并用 `red-river-2` 版本参数更新缓存；16／32／64px深浅背景、实际SVG解码与聚焦包装测试1/1通过。这次favicon小修没有重跑上述图库版本的完整22／17组验收。
-
-2026-10-23在线设计预览的包装与HTTP检查**9/9通过**，覆盖20文件白名单、实际仓库子路径、三幅图片的同源读取、JPEG／PNG类型和原始字节、隐藏路径与穿越边界。公开版与本地已验收样稿的样式、脚本完全相同；本次另在390／1440px实际检查三种版式共6组，均无横向溢出，正文至少16px，三图实际解码与图片对话框关闭后焦点恢复通过。未将旧版验收计为新预览的完整回归。
-
-公开链接现为 **[https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)**。专用域名已启用Cloudflare代理，访客HTTPS使用其Google Trust Services边缘证书，严格TLS校验通过；区域原有Full回源模式未变。用户已反馈关闭代理后能正常进入，其他运营商与微信设备仍需测试。自动公开GET遇Cloudflare验证页，未记为200或浏览器通过。首次GitHub直连时的14资源哈希与音频范围验证属于历史证据。实际状态见[发布记录](docs/deployment.md)。
+当前版本完整 Node 测试 **61/61通过**，构建输出 **25个静态文件**。320／390／768／844短横屏／1440五尺寸浏览器检查、图片缩放与焦点、滚动模块失败降级、无脚本正文及真实静音音频播放通过。验证范围与限制见[验证记录](docs/verification.md)。
