@@ -1,0 +1,113 @@
+/* One fixed north-up window in all three existing atlas layouts. */
+.route-sheet .map-canvas {
+  width: min(100%, 560px, var(--map-max-width, 100vw));
+  max-width: 560px;
+  aspect-ratio: 1.22;
+  max-height: calc(100svh - 130px);
+  margin: 18px auto 8px;
+  background: var(--map-paper);
+}
+.map-canvas #route-map { width: 100%; height: 100%; }
+.map-relief { opacity: .82; pointer-events: none; }
+#route-map .river-bank { stroke-width: 14; vector-effect: non-scaling-stroke; opacity: .72; }
+#route-map .river { stroke-width: 5; vector-effect: non-scaling-stroke; }
+#route-map .river-flow { stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+#route-map .march-line { stroke-width: 3; vector-effect: non-scaling-stroke; }
+#route-map .march-start { stroke-width: 2; vector-effect: non-scaling-stroke; }
+.map-previous-route {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+  opacity: .32;
+  vector-effect: non-scaling-stroke;
+}
+.map-place { fill: var(--ink); stroke: var(--map-paper); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.map-ford {
+  fill: var(--river-bank);
+  fill-opacity: .3;
+  stroke: var(--muted);
+  stroke-width: 1.4;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+.map-ford.is-current-ford { stroke: var(--accent); stroke-width: 2; fill-opacity: .6; }
+.map-maneuver-area { fill: var(--map-paper); fill-opacity: .4; stroke: var(--muted); stroke-dasharray: 5 5; vector-effect: non-scaling-stroke; }
+#route-map .map-type {
+  font-family: var(--display);
+  font-size: 55px;
+  fill: var(--ink);
+  paint-order: stroke fill;
+  stroke: var(--map-paper);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+#route-map .map-north path { stroke: var(--ink); fill: none; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+/* Without scripting only these generous, pre-spaced first-stage labels show. */
+#route-map [data-map-label] { display: none; }
+#route-map [data-static-label] { display: block; font-size: 64px; }
+.map-view-controls { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.map-view-controls button {
+  font-family: var(--sans);
+  font-size: 16px;
+  min-height: 44px;
+  padding: 8px 14px;
+  background: var(--toolbar);
+}
+.map-view-controls button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.map-stage-note, .map-view-note, .map-credit, .map-stage-summary, .map-relation {
+  font-size: 16px;
+  line-height: 1.8;
+  margin-top: 12px;
+}
+.map-stage-note { color: var(--accent); }
+.map-view-note { font-family: var(--sans); }
+.map-notes { grid-column: 1 / -1; min-width: 0; }
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  list-style: none;
+  padding: 0;
+  margin-top: 16px;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.9;
+}
+.map-legend li { display: inline-flex; gap: 8px; align-items: center; }
+.map-key { display: inline-block; width: 24px; height: 12px; flex: none; }
+.map-key.place { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); }
+.map-key.ford { border: 2px dashed var(--muted); border-radius: 50%; }
+.map-key.water { height: 5px; background: var(--river); }
+.map-key.current { height: 3px; background: var(--accent); }
+.map-key.previous { height: 0; border-top: 2px dashed var(--muted); opacity: .6; }
+.map-relation { background: var(--surface); padding: 12px 16px; }
+.map-relation strong { font-weight: 600; }
+.map-details { margin-top: 16px; font-size: 16px; line-height: 1.85; }
+.map-details > summary { min-height: 44px; padding-block: 8px; font-family: var(--sans); }
+.map-details p + p, .map-details ul { margin-top: 12px; }
+.map-details ul { padding-left: 1.2em; }
+.map-details li + li { margin-top: 8px; }
+.map-credit { color: var(--muted); font-size: 14px; }
+.map-credit a { display: inline; text-underline-offset: .2em; }
+@media (max-width: 900px) and (min-width: 651px) {
+  .route-sheet .map-canvas { grid-column: 2; grid-row: 1 / span 2; margin-top: 0; }
+  .route-sheet .map-caption { grid-column: 1; }
+  .route-sheet .map-notes { grid-column: 1 / -1; }
+}
+@media (max-width: 650px) {
+  .route-sheet .map-canvas { margin-top: 18px; }
+  .map-view-controls button { flex: 1; }
+  .map-legend { gap: 6px 14px; }
+  .map-stage-summary { margin-top: 10px; }
+}
+@media (max-height: 450px) {
+  .route-sheet .map-canvas { max-height: calc(100svh - 90px); }
+  #route-map [data-static-label] { font-size: 64px; }
+}
+@media (forced-colors: active) {
+  .map-relief { display: none; }
+  #route-map .map-type { stroke: Canvas; fill: CanvasText; }
+  .map-place { fill: CanvasText; }
+  .map-ford { stroke: CanvasText; fill: none; }
+}
