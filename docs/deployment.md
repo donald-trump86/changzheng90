@@ -2,7 +2,7 @@
 
 公开入口为 [https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)，源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。源码维护于 `main`，GitHub Pages 使用 `gh-pages` 分支根目录，自定义域名由 Cloudflare 代理至 GitHub Pages。
 
-本文件描述当前发布方式。工作树是否已上线，以对应推送、Pages 构建和公开资源核对结果确认。
+本文件描述当前发布方式。当前站点产物已推送至 `gh-pages`，部署提交为 `1ada804110b0bccc873e6971ba2576963dfd9460`；GitHub Pages 构建状态为 `built`。2026-10-24通过专用Brave访问自定义域名时收到 Cloudflare「Just a moment...」403验证页，因此未确认该入口的普通用户页面响应。
 
 ## 构建与本地检查
 
