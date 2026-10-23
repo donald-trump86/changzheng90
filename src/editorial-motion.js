@@ -95,6 +95,7 @@ function initMotion() {
     const point = route.getPointAtLength(route.getTotalLength());
     head.setAttribute('cx', String(point.x));
     head.setAttribute('cy', String(point.y));
+    head.setAttribute('visibility', 'hidden');
     map.classList.remove('is-drawing');
   }
   function invalidateRoute() {
@@ -136,6 +137,7 @@ function initMotion() {
       route.style.strokeDasharray = String(length);
       route.removeAttribute('marker-end');
       map.classList.add('is-drawing');
+      head.setAttribute('visibility', 'visible');
       update();
       run('route', position, { value: 1, duration: 1800, ease: 'linear' }, update, finishRoute);
     });
@@ -296,7 +298,6 @@ function initMotion() {
       enter('hero', all('.opening h1 span, .opening-meta, .opening-lead, .opening-actions, .hero-art, .hero-archive'), 620, 20, 75);
     }
     observeScenes();
-    if (!departed) head.removeAttribute('visibility');
   } catch (error) { failStatic(error); }
 }
 
