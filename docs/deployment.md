@@ -2,7 +2,7 @@
 
 公开入口为 [https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)，源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。源码维护于 `main`，GitHub Pages 使用 `gh-pages` 分支根目录，自定义域名由 Cloudflare 代理至 GitHub Pages。
 
-本文件描述当前发布方式。当前站点产物已推送至 `gh-pages`，部署提交为 `e49df4c1c5afcd56595618743e56045f43f23d70`；GitHub Pages 构建状态为 `built`（构建 #1310024534，23.2 秒，无错误）。2026-10-24通过专用Brave访问自定义域名时收到 Cloudflare「Just a moment...」403验证页，因此未确认该入口的普通用户页面响应；GitHub Pages 侧构建与资源发布已核对通过。
+本文件描述当前发布方式。当前站点产物已推送至 `gh-pages`，部署提交为 `7c0437dd7ea3dc763f818bda1cd41a0c7e581dee`；GitHub Pages 构建状态为 `built`（22.007秒，无错误，完成于2026-10-24 16:59:25，Asia/Shanghai）。本次发布修复首屏标题对比度及五节点时间线排版，源码修复提交为 `6a4414e4d3509e0dde73ff03be46ee21e72ca1d7`。此前通过专用Brave访问自定义域名时收到 Cloudflare「Just a moment...」403验证页，本轮未重试该验证页；普通用户页面响应尚未由此环境确认，GitHub Pages侧构建与发布提交已核对通过。
 
 ## 构建与本地检查
 
