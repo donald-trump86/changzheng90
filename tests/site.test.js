@@ -64,8 +64,8 @@ test('deployment contains only the public site, no source tooling or private art
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
   const studyFiles = ['design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
   const previews = ['valley-480', 'valley-960', 'valley-1440', 'valley-1774', 'gathering-320', 'gathering-585', 'sixth-army-320', 'sixth-army-698'].map(name => `public/images/${name}.webp`);
-  assert.equal(entries.length, 34);
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/image-viewer.js', 'src/audio.js', 'src/history-scroll.js', ...studyFiles, ...previews].sort());
+  assert.equal(entries.length, 35);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/party-emblem.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/image-viewer.js', 'src/audio.js', 'src/history-scroll.js', ...studyFiles, ...previews].sort());
 });
 
 test('historical JPEGs have actual encoded bytes and identical deployment copies', async () => {
@@ -216,15 +216,19 @@ test('new homepage is served at root with working images under a repository pref
         assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
       }
       const imgRefs = [...new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]))];
-      assert.deepEqual(imgRefs.sort(), ['./public/images/gathering-585.webp', './public/images/sixth-army-698.webp', './public/images/valley-960.webp']);
+      assert.deepEqual(imgRefs.sort(), ['./public/images/gathering-585.webp', './public/images/sixth-army-698.webp', './public/images/valley-960.webp', './public/party-emblem.svg']);
       for (const ref of imgRefs) {
         const url = new URL(ref, base);
         assert.equal(url.origin, base.origin);
-        assert.ok(url.pathname.startsWith('/repository/public/images/'));
+        assert.ok(url.pathname.startsWith('/repository/public/'));
         const response = await get(port, url.pathname);
         assert.equal(response.status, 200, url.pathname);
-        assert.equal(response.type, 'image/webp');
-        assert.equal(response.bytes.subarray(8, 12).toString(), 'WEBP');
+        if (ref.endsWith('.svg')) {
+          assert.match(response.type, /^image\/svg\+xml(?:;|$)/);
+        } else {
+          assert.equal(response.type, 'image/webp');
+          assert.equal(response.bytes.subarray(8, 12).toString(), 'WEBP');
+        }
         assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
       }
     });

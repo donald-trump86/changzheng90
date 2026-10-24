@@ -47,7 +47,11 @@
     .primary-action { display: inline-flex; align-items: center; justify-content: space-between; gap: 22px; min-height: 52px; padding: 12px 22px; background: var(--accent); color: var(--surface); font-size: 17px; text-decoration: none; }
     .primary-action svg { width: 24px; height: 24px; flex: none; }
     .read-time { font-size: 16px; color: var(--muted); }
-    .hero-art, .hero-archive { min-width: 0; }
+    .hero-art { min-width: 0; }
+    .hero-emblem { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 16px; }
+    .hero-emblem-backing { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 6px; background: #7A1E1A; border: 1px solid rgba(253, 207, 48, 0.42); box-shadow: inset 0 0 0 1px rgba(24, 16, 14, 0.35); flex: none; }
+    .hero-emblem-mark { width: 100%; height: 100%; display: block; }
+    .hero-emblem-caption { font-size: 13px; line-height: 1.45; letter-spacing: 0.08em; color: rgba(243, 238, 227, 0.88); }
     figcaption { font-size: 16px; line-height: 1.75; }
     .hero-art figcaption { padding-top: 12px; color: var(--muted); }
     .image-link { display: block; background: var(--image-mat); padding: 10px; cursor: zoom-in; text-decoration: none; }
@@ -296,6 +300,10 @@
     <section class="opening" aria-labelledby="page-title">
       <div class="opening-copy">
         <div class="opening-heading">
+          <figure class="hero-emblem">
+            <span class="hero-emblem-backing"><img class="hero-emblem-mark" src="./public/party-emblem.svg" alt="中国共产党党徽" width="40" height="40"></span>
+            <figcaption class="hero-emblem-caption">中国共产党党徽 · 党史学习 · 长征纪念</figcaption>
+          </figure>
           <h1 id="page-title"><span>赤水河，</span><span>为什么要渡四次？</span></h1>
           <p class="opening-meta">1935 · 川黔滇边<br>纪念中国工农红军长征胜利90周年</p>
         </div>
@@ -308,12 +316,8 @@
         </div>
       </div>
       <figure class="hero-art">
-        <div class="art-window"><a class="image-link" href="./design-study/chishui-valley-study.png" data-image-view data-image-title="原创河谷场景示意 · 水彩与炭笔" data-image-caption="原创河谷场景示意 · 水彩与炭笔，1774×887 完整原图。水彩与炭笔用于建立沿河阅读的空间；此图不是1935年照片，也不复原任何具体渡口。河谷图为原创生成艺术示意，不作为史料。具体渡口与行军关系见下方概略图。" aria-label="查看完整原图：原创河谷场景示意，水彩与炭笔"><picture><source type="image/webp" srcset="./public/images/valley-480.webp 480w, ./public/images/valley-960.webp 960w, ./public/images/valley-1440.webp 1440w, ./public/images/valley-1774.webp 1774w" sizes="(min-width: 1024px) 78vw, calc(100vw - 48px)"><img src="./public/images/valley-960.webp" alt="水彩与炭笔绘成的河谷：河水沿山坡与岩岸之间延伸，远山渐隐。" width="1774" height="887" fetchpriority="high"></picture></a></div>
-        <figcaption>原创河谷场景示意 · 水彩与炭笔。具体渡口与行军关系见下方概略图。</figcaption>
-      </figure>
-      <figure class="hero-archive">
-        <a class="image-link" href="./design-study/long-march-gathering.jpg" data-image-view data-image-title="红军集会 · 1930年代" data-image-caption="红军集会，1930年代。具体年份、地点与人物未详，不能确认为四渡赤水现场。这幅集会照为四次机动提供队伍生活的背景，不据此指认某一渡的部队或事件。来源：Wikimedia Commons，File:Long-march.jpg；文件页标记 PD-China 和 PD-US1996。标记的适用范围与限制见‘史实与图像出处’。" aria-label="查看完整原图：红军集会，1930年代，具体年份地点人物未详"><picture><source type="image/webp" srcset="./public/images/gathering-320.webp 320w, ./public/images/gathering-585.webp 585w" sizes="(min-width: 1024px) 42vw, (min-width: 768px) 46vw, calc(100vw - 48px)"><img src="./public/images/gathering-585.webp" alt="1930年代红军集会历史照片，具体年份、地点与人物未详，完整画面保留。" width="585" height="310"></picture></a>
-        <figcaption><strong>红军集会 · 1930年代</strong>具体年份、地点与人物未详，不能确认为四渡赤水现场。这幅集会照为四次机动提供队伍生活的背景，不据此指认某一渡的部队或事件。<a class="image-caption-action" href="#sources">图像来源与说明</a></figcaption>
+        <div class="art-window"><a class="image-link" href="./design-study/chishui-valley-study.png" data-image-view data-image-title="原创赤水渡口示意插画 · 黑白朱砂木刻风格" data-image-caption="原创赤水渡口示意插画 · 黑白朱砂木刻风格，1774×887 完整原图。参考1930年代版画刀刻与朱砂套色表现赤水河深冬峡谷、赤砂岩岸与木船浮桥意象；此图不是1935年历史原件，也不复原某一具体渡口。具体渡口与行军关系见下方概略图。" aria-label="查看完整原图：原创赤水渡口示意插画，黑白朱砂木刻风格"><picture><source type="image/webp" srcset="./public/images/valley-480.webp 480w, ./public/images/valley-960.webp 960w, ./public/images/valley-1440.webp 1440w, ./public/images/valley-1774.webp 1774w" sizes="(min-width: 1024px) 78vw, calc(100vw - 48px)"><img src="./public/images/valley-960.webp" alt="黑白朱砂木刻风格的赤水河峡谷示意插画：两侧陡峭赤砂岩岸与冬雾之间，木船与浮桥横跨河面。" width="1774" height="887" fetchpriority="high"></picture></a></div>
+        <figcaption>原创赤水渡口示意插画 · 黑白朱砂木刻风格（非1935年历史原件）。具体渡口与行军关系见下方概略图。</figcaption>
       </figure>
     </section>
 
@@ -502,12 +506,6 @@
         <ol aria-label="四渡后的部分行动"><li>南渡乌江</li><li>威逼贵阳</li><li>巧渡金沙江</li></ol>
         <p>四渡赤水结束，不等于长征结束，也不意味着红军在渡河当天就完全摆脱了所有围堵。此后，中央红军南渡乌江、威逼贵阳，继而向云南机动，并于5月初巧渡金沙江，逐步跳出敌军的包围。</p><!-- history:epilogue-after:end -->
       </div>
-      <figure class="continuation-plate">
-        <a class="image-link" href="./design-study/chishui-valley-study.png" data-image-view data-image-title="山河为证 · 河谷艺术示意" data-image-caption="河谷艺术示意，1774×887像素完整画面。与开篇使用同一幅生成作品，用于尾声回望，不是1935年实景、历史照片或精确地形复原。" aria-label="查看完整河谷艺术示意">
-          <picture><source type="image/webp" srcset="./public/images/valley-480.webp 480w, ./public/images/valley-960.webp 960w, ./public/images/valley-1440.webp 1440w, ./public/images/valley-1774.webp 1774w" sizes="(min-width: 1024px) 78vw, calc(100vw - 48px)"><img src="./public/images/valley-960.webp" width="1774" height="887" loading="lazy" alt="层层山岭与蜿蜒河谷的生成艺术示意，完整画面，不作为史料。"></picture>
-        </a>
-        <figcaption>以山河收束这段阅读。河谷图为生成艺术示意，与开篇同图；不作为1935年实景或精确地形复原。</figcaption>
-      </figure>
     </section>
 
     <section id="archives" class="archives" aria-labelledby="archives-title">
@@ -543,9 +541,10 @@
             <li><a href="https://m.12371.gov.cn/content/2026-10/22/content_517057.html" target="_blank" rel="noopener noreferrer">七一网／新华社报道（研究线索）</a><p>该文所载渡渭河与1934会议原图仅作研究线索，本预览未转载。</p></li>
             <li><a href="https://commons.wikimedia.org/wiki/File:Long-march.jpg" target="_blank" rel="noopener noreferrer">红军集会 · 1930年代：Commons File:Long-march.jpg</a><p>摄影者、具体年份、地点与人物未详，不能确认为四渡赤水现场。这幅集会照为四次机动提供队伍生活的背景，不据此指认某一渡的部队或事件。文件页标记 <a href="https://commons.wikimedia.org/wiki/Template:PD-China" target="_blank" rel="noopener noreferrer">PD-China</a> 和 <a href="https://commons.wikimedia.org/wiki/Template:PD-1996" target="_blank" rel="noopener noreferrer">PD-US1996</a>。</p></li>
             <li><a href="https://commons.wikimedia.org/wiki/File:Hongerliujuntuan.jpg" target="_blank" rel="noopener noreferrer">红六军团领导人在湖南新化合影 · 1935年11月29日：Commons File:Hongerliujuntuan.jpg</a><p>摄影者未详，原始出版来源为解放军出版社1993年《中国人民解放军历史资料丛书·红军长征 图片》。读完四渡，借此回望参与长征的其他红军队伍。此图不是中央红军四渡赤水现场，也不是1936年三大主力会师。文件页标记 <a href="https://commons.wikimedia.org/wiki/Template:PD-China" target="_blank" rel="noopener noreferrer">PD-China</a>。</p></li>
+            <li><a href="https://commons.wikimedia.org/wiki/File:Danghui_golden.svg" target="_blank" rel="noopener noreferrer">中国共产党党徽（金黄色标准图案）：Commons File:Danghui_golden.svg</a><p>依据中国政府网公布的<a href="https://www.gov.cn/xinwen/2021-06/28/content_5621310.htm" target="_blank" rel="noopener noreferrer">中国共产党党徽党旗条例</a>规范样式制作，仅作党史学习与长征纪念静态标识展示。</p></li>
           </ul>
           <p class="licence">PD-China 说明中国法域的公有领域状态；红军集会文件页另有 PD-US1996，说明美国法域的状态依据。这些标记并非全球任意使用授权，其他法域的保护期限与使用限制仍须按当地法律核对。两张照片保持原始字节、完整画面与比例，未裁切或加滤镜。</p>
-          <p>河谷图为原创生成艺术示意，不作为史料。地图沿用已核对的西、东、西、东关系及概略路线，只表示教学关系，没有测绘坐标或精确地形含义。</p>
+          <p>赤水渡口木刻插画为原创生成艺术示意（参考1930年代黑白套朱砂版画风格），不作为史料。地图沿用已核对的西、东、西、东关系及概略路线，只表示教学关系，没有测绘坐标或精确地形含义。</p>
         </div></div>
       </details>
       <details class="disclosure" open data-disclosure>
@@ -801,7 +800,21 @@
             list.className = 'source-list';
             tracks.forEach(function (track) {
               const item = document.createElement('li');
-              item.textContent = (track.title || '曲目') + ' — ' + (track.author || '作者未记') + '；来源：' + (track.source || '未记') + '；许可：' + (track.license || '未记');
+              item.append((track.title || '曲目') + ' — ' + (track.author || '作者未记') + ' · ');
+              if (track.source) {
+                const sourceLink = document.createElement('a');
+                sourceLink.href = track.source;
+                sourceLink.target = '_blank';
+                sourceLink.rel = 'noopener noreferrer';
+                sourceLink.textContent = '曲目来源';
+                item.append(sourceLink, ' · ');
+              }
+              const licenseLink = document.createElement('a');
+              licenseLink.href = 'https://creativecommons.org/licenses/by/4.0/';
+              licenseLink.target = '_blank';
+              licenseLink.rel = 'noopener noreferrer';
+              licenseLink.textContent = 'CC BY 4.0 许可';
+              item.append(licenseLink);
               list.appendChild(item);
             });
             credits.replaceChildren(list);
