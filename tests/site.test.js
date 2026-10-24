@@ -98,6 +98,23 @@ test('responsive previews match encoded assets and preserved originals', async (
     }
   }
   assert.equal(count, 8);
+  const valley = manifest.images.find((item) => item.id === 'valley');
+  assert.equal(valley.source.width, 1774);
+  assert.equal(valley.source.height, 887);
+  assert.notEqual(valley.source.sha256, 'c5084be3c29d97edf80bb99061b78b212a7c79b1686534977f2365749be9b201');
+});
+
+test('standard golden CPC emblem SVG is exact and free of scripts or external refs', async () => {
+  const svg = await readFile(join(root, 'public/party-emblem.svg'));
+  assert.equal(svg.length, 420);
+  assert.equal(
+    createHash('sha256').update(svg).digest('hex'),
+    '3033ade86f8f9533ab2c7c51c35ebe11998e39485494d5fc13b2f3928a16a4a3'
+  );
+  const text = svg.toString('utf8');
+  assert.match(text, /viewBox="1 1 32 32"/);
+  assert.match(text, /fill="#fdcf30"/);
+  assert.doesNotMatch(text, /<script|href=|xlink:|animate|polygon/i);
 });
 
 test('new homepage is served at root with working images under a repository prefix', async () => {

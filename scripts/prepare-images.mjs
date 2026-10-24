@@ -19,8 +19,8 @@ const sources = [
     id: 'valley',
     role: 'generated-artwork',
     path: 'design-study/chishui-valley-study.png',
-    format: 'PNG', width: 1774, height: 887, bytes: 3018714,
-    sha256: 'c5084be3c29d97edf80bb99061b78b212a7c79b1686534977f2365749be9b201',
+    format: 'PNG', width: 1774, height: 887, bytes: 3767048,
+    sha256: '3c3772ce882347089c0dde5aebeb94fb57a8b0a9df6bb465a6f18652e03bfd50',
     widths: [480, 960, 1440, 1774],
   },
   {

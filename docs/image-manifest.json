@@ -18,8 +18,8 @@
       "role": "generated-artwork",
       "source": {
         "path": "design-study/chishui-valley-study.png",
-        "bytes": 3018714,
-        "sha256": "c5084be3c29d97edf80bb99061b78b212a7c79b1686534977f2365749be9b201",
+        "bytes": 3767048,
+        "sha256": "3c3772ce882347089c0dde5aebeb94fb57a8b0a9df6bb465a6f18652e03bfd50",
         "format": "PNG",
         "width": 1774,
         "height": 887
@@ -31,8 +31,8 @@
           "width": 480,
           "height": 240,
           "quality": 84,
-          "bytes": 28392,
-          "sha256": "43eaa1d217b7331a60719877b6b6cd72bd2c204743bcba81ead1e9d0338826dd"
+          "bytes": 49070,
+          "sha256": "8edd5c63b2978bb14c2e0000f98f9fdbb66652cbcc6a57eafd9e4271c0436101"
         },
         {
           "path": "public/images/valley-960.webp",
@@ -40,8 +40,8 @@
           "width": 960,
           "height": 480,
           "quality": 84,
-          "bytes": 95560,
-          "sha256": "95def188ae894947904d3291c16196eb1b8c515e38c389aa07e7c17b976fa27c"
+          "bytes": 174006,
+          "sha256": "413cb5ae5a36642af09027a9544956019599478443d8e06f849984c6c3cb0671"
         },
         {
           "path": "public/images/valley-1440.webp",
@@ -49,8 +49,8 @@
           "width": 1440,
           "height": 720,
           "quality": 84,
-          "bytes": 176728,
-          "sha256": "b74c21258114116cec9fb0df50d320a901774515497f571464fc63cd0ded653d"
+          "bytes": 335758,
+          "sha256": "8f60c093ba86e1fa064c83f0b4c76805e9238730ce3696d97e4d94b5bb38c6e5"
         },
         {
           "path": "public/images/valley-1774.webp",
@@ -58,8 +58,8 @@
           "width": 1774,
           "height": 887,
           "quality": 84,
-          "bytes": 285322,
-          "sha256": "7720b1b8eb6c03147c8079afc702d4789295c9e8931dd1cee4d507ec1e633b32"
+          "bytes": 540512,
+          "sha256": "f511108453ebdba6b0366a4da4674e6b87f4ccb21571393ca64f476774677bf9"
         }
       ]
     },
@@ -129,12 +129,12 @@
     }
   ],
   "totals": {
-    "sourceBytes": 3219040,
-    "variantBytes": 743620,
-    "largestVariantBytes": 410678,
-    "allVariantsSavedBytes": 2475420,
-    "allVariantsSavingPercent": 76.9,
-    "largestVariantsSavedBytes": 2808362,
-    "largestVariantsSavingPercent": 87.24
+    "sourceBytes": 3967374,
+    "variantBytes": 1256964,
+    "largestVariantBytes": 665868,
+    "allVariantsSavedBytes": 2710410,
+    "allVariantsSavingPercent": 68.32,
+    "largestVariantsSavedBytes": 3301506,
+    "largestVariantsSavingPercent": 83.22
   }
 }
