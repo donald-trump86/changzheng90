@@ -51,7 +51,7 @@
     .hero-emblem { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 16px; }
     .hero-emblem-backing { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 6px; background: #7A1E1A; border: 1px solid rgba(253, 207, 48, 0.42); box-shadow: inset 0 0 0 1px rgba(24, 16, 14, 0.35); flex: none; }
     .hero-emblem-mark { width: 100%; height: 100%; display: block; }
-    .hero-emblem-caption { font-size: 13px; line-height: 1.45; letter-spacing: 0.08em; color: rgba(243, 238, 227, 0.88); }
+    .hero-emblem-caption { font-size: 14px; line-height: 1.45; letter-spacing: 0.06em; color: inherit; opacity: 0.92; }
     figcaption { font-size: 16px; line-height: 1.75; }
     .hero-art figcaption { padding-top: 12px; color: var(--muted); }
     .image-link { display: block; background: var(--image-mat); padding: 10px; cursor: zoom-in; text-decoration: none; }
@@ -672,7 +672,7 @@
         if (routeSheet.parentNode === parent && routeSheet.nextSibling === nextNode) return;
         const before = panel ? panel.getBoundingClientRect().top : 0;
         parent.insertBefore(routeSheet, nextNode);
-        if (panel) {
+        if (panel && crossings.getBoundingClientRect().bottom > 0) {
           const delta = panel.getBoundingClientRect().top - before;
           if (delta) window.scrollBy(0, delta);
         }

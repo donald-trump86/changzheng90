@@ -297,3 +297,15 @@ test('current deployed pages and modules contain no personal signature', async (
     assert.doesNotMatch(await readFile(join(dist, file), 'utf8'), /戴诗旭|Jason Dai|作品作者：/i, file);
   }
 });
+
+test('atlas CSS styles CPC emblem backing, dark archive cabinet, native-width caps, and elevated paper rules', async () => {
+  const atlas = await readFile(join(root, 'src/print-atlas.css'), 'utf8');
+  const mapCss = await readFile(join(root, 'src/historical-map.css'), 'utf8');
+  assert.match(atlas, /\.hero-emblem-backing\s*\{[\s\S]*?background:\s*#7A1E1A/i);
+  assert.match(atlas, /\.archives-grid\s*\{[\s\S]*?background:\s*#221D18/i);
+  assert.match(atlas, /\.archive-primary\s*\{[\s\S]*?max-width:\s*585px/);
+  assert.match(atlas, /\.archive-secondary\s*\{[\s\S]*?max-width:\s*560px/);
+  assert.doesNotMatch(atlas, /\.archive-secondary\s*\{[^}]*margin-top:\s*28px/);
+  assert.match(atlas, /--surface-elevated:\s*#F7F2E7/i);
+  assert.match(mapCss, /\.map-relief\s*\{[\s\S]*?opacity:\s*0\.48/);
+});
