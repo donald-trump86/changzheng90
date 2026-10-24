@@ -253,7 +253,7 @@ mark time {
 }
 
 /* ── 开篇：河谷图版 + 纪念碑式提问 ─────────────────
-   桌面：河谷画面通栏、不裁切不滤镜，提问压在画面下缘的中性压暗带上。
+   桌面：提问落在河谷画面左侧的中性压暗区。
    手机：画面为整幅图版在上，提问落回纸面——另一种构图，不是缩小的桌面。 */
 
 .opening {
@@ -404,7 +404,7 @@ mark time {
   text-decoration: underline;
 }
 
-/* 桌面叠压构图：画面占满首屏，提问落在画面下缘的压暗带上 */
+/* 桌面叠压构图：画面、压暗层、文案依次叠放，避免图片盖过压暗层。 */
 @media (min-width: 1024px) {
   .opening {
     min-height: 92svh;
@@ -418,9 +418,12 @@ mark time {
     position: absolute;
     inset: 0;
     height: 100%;
+    z-index: 0;
   }
 
   .opening .art-window {
+    position: relative;
+    isolation: isolate;
     height: 100%;
   }
 
@@ -436,22 +439,23 @@ mark time {
     object-position: 50% 42%;
   }
 
-  /* 中性压暗：只压文案所在的下缘，其余画面不着色（照片上的中性 scrim 是本技能唯一允许的渐变） */
-  .opening::before {
+  /* 中性压暗覆盖文字背后的图片，图窗外的独立图注不受影响。 */
+  .opening .art-window::after {
     content: "";
     position: absolute;
-    inset: 34% 0 0;
-    z-index: 0;
+    inset: 0;
+    z-index: 1;
     background: linear-gradient( /* taste-skill-ignore: neutral scrim under hero text, the one allowed gradient */
-      180deg,
-      rgba(33, 31, 28, 0) 0%,
-      rgba(33, 31, 28, 0.62) 42%,
-      rgba(33, 31, 28, 0.88) 100%
+      90deg,
+      rgba(33, 31, 28, 0.9) 0%,
+      rgba(33, 31, 28, 0.78) 68%,
+      rgba(33, 31, 28, 0.18) 100%
     );
     pointer-events: none;
   }
 
   .opening-copy {
+    z-index: 2;
     width: 100%;
     padding-inline: max(var(--frame), calc((100vw - var(--page)) / 2));
     max-width: none;
@@ -546,14 +550,19 @@ mark time {
   }
 }
 
-/* ── 战局：陈述在左，日期序列在右 ─────────────────── */
+/* ── 战局：说明在前，五个日期节点逐行阅读 ─────────── */
 
 .context {
   margin-top: var(--section-gap);
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  gap: clamp(32px, 5vw, 88px);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
   align-items: start;
+}
+
+.context-intro {
+  min-width: 0;
+  margin: 0;
 }
 
 .context-intro h2 {
@@ -561,15 +570,14 @@ mark time {
   max-width: 12em;
 }
 
-/* 陈述段：图版语言里的大字说明，≤36px，约三行 */
+/* 背景说明与下方日期共用正文宽度，不再嵌套分栏。 */
 .context-lead {
   margin: 26px 0 0;
-  max-width: 24em;
+  max-width: var(--measure);
   font-family: var(--display);
-  font-size: var(--t-display);
-  line-height: 1.55;
+  font-size: var(--t-title);
+  line-height: 1.8;
   letter-spacing: -0.015em;
-  text-indent: 3em;
 }
 
 .context-note {
@@ -581,6 +589,10 @@ mark time {
 }
 
 .timeline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  min-width: 0;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -588,18 +600,22 @@ mark time {
 
 .timeline li {
   display: grid;
-  grid-template-columns: 10.5em minmax(0, 1fr);
+  grid-template-columns: minmax(0, 11.5em) minmax(0, 1fr);
   gap: 4px 24px;
   padding: 18px 0 20px;
+  min-width: 0;
   align-items: baseline;
 }
 
 .timeline time {
+  display: block;
+  min-width: 0;
   font-family: var(--display);
   font-size: var(--t-body);
   letter-spacing: -0.01em;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
+  line-height: 1.8;
 }
 
 .timeline strong {
@@ -610,8 +626,9 @@ mark time {
   line-height: 1.35;
 }
 
-.timeline p {
-  margin: 4px 0 0;
+.timeline li p {
+  min-width: 0;
+  margin: 0;
   font-size: var(--t-body);
   line-height: 1.8;
   color: var(--ink);

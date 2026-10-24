@@ -55,15 +55,8 @@
     .image-link:active { transform: none; }
     .image-caption-action { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; }
     .context { margin-top: 66px; background: var(--surface); padding: 32px 36px 36px; }
-    .context-intro { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 32px; align-items: start; margin-bottom: 28px; }
     .context h2 { font-size: 29px; }
     .context-intro p { max-width: 39em; }
-    .timeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px; list-style: none; padding: 0; }
-    .timeline li { padding-top: 16px; border-top: 4px solid var(--toolbar); }
-    .timeline .timeline-focus { border-color: var(--accent); }
-    .timeline time { display: block; font-family: var(--serif); font-size: 22px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
-    .timeline li p { font-size: 16px; line-height: 1.75; }
-    .timeline-focus time { color: var(--accent); }
     .crossings { margin-top: 88px; scroll-margin-top: 112px; }
     .section-heading { display: flex; justify-content: space-between; gap: 36px; align-items: end; }
     .section-heading p { max-width: 34em; }
@@ -165,8 +158,6 @@
       .opening-lead { margin-top: 22px; }
       .opening-actions { margin-top: 22px; }
       .context { padding: 28px; margin-top: 44px; }
-      .context-intro { grid-template-columns: 1fr; gap: 14px; }
-      .timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 32px; }
       .section-heading { display: block; }
       .section-heading p { margin-top: 14px; max-width: 42em; }
       .reading-workspace { grid-template-columns: 1fr; grid-template-areas: "context" "map" "crossings"; gap: 20px; }
@@ -201,10 +192,6 @@
       .hero-art figcaption { padding-top: 10px; }
       .context { margin-top: 40px; padding: 24px 22px; }
       .context h2 { font-size: 27px; }
-      .context-intro { margin-bottom: 24px; }
-      .timeline { gap: 24px 20px; }
-      .timeline time { font-size: 21px; }
-      .timeline li { padding-top: 12px; }
       .crossings { margin-top: 56px; scroll-margin-top: 84px; }
       .chapter-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin-block: 24px 20px; }
       .chapter-link { align-items: center; justify-content: center; padding: 10px 4px; gap: 3px; min-height: 70px; }
@@ -248,9 +235,6 @@
       .opening-actions { gap: 10px 14px; }
       .read-time { font-size: 16px; }
       .context { padding: 22px 18px; }
-      .timeline { grid-template-columns: 1fr; gap: 20px; }
-      .timeline li { display: grid; grid-template-columns: 5.6em 1fr; gap: 14px; }
-      .timeline time { font-size: 19px; margin: 0; }
       .chapter-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .chapter-link { flex-direction: row; justify-content: space-between; padding-inline: 12px; min-height: 54px; }
       .route-sheet { padding: 20px 16px; }
