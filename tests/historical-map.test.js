@@ -5,6 +5,7 @@ import { runInNewContext } from 'node:vm';
 import { createHash } from 'node:crypto';
 
 const context = {};
+runInNewContext(await readFile(new URL('../src/history-data.js', import.meta.url), 'utf8'), context);
 runInNewContext(await readFile(new URL('../src/historical-map-data.js', import.meta.url), 'utf8'), context);
 const data = context.ChishuiMapData;
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -89,4 +90,26 @@ test('terrain provenance contains the complete 90-point grid and explicit coarse
   assert.equal(sourceURL.searchParams.get('longitude').split(',').length, 90);
   assert.match(data.terrain.notice, /粗采样/);
   assert.match(data.terrain.license, /by\/4.0/);
+});
+
+
+test('map stage historical text comes from the canonical chapters, including edited facts', async () => {
+  const canonical = context.ChishuiHistory;
+  for (const [index, stage] of data.stages.entries()) {
+    for (const [key, value] of Object.entries(canonical.chapters[index].mapStage)) assert.equal(stage[key], value);
+  }
+  const history = plain(canonical);
+  for (const chapter of history.chapters) {
+    chapter.mapStage.summary = `修改后的地图说明${chapter.id}`;
+    chapter.mapStage.chronology = `修改后的时间顺序${chapter.id}`;
+    chapter.mapStage.destination = `修改后的目的地${chapter.id}`;
+  }
+  const edited = { ChishuiHistory: history };
+  const mapSource = await readFile(new URL('../src/historical-map-data.js', import.meta.url), 'utf8');
+  runInNewContext(mapSource, edited);
+  for (const [index, stage] of edited.ChishuiMapData.stages.entries()) {
+    for (const [key, value] of Object.entries(history.chapters[index].mapStage)) assert.equal(stage[key], value);
+    assert.deepEqual(plain(edited.ChishuiMapData.geometry(index + 1, 'overview')), plain(data.geometry(index + 1, 'overview')));
+  }
+  assert.throws(() => runInNewContext(mapSource, {}), /Load history-data.js before historical-map-data.js/);
 });

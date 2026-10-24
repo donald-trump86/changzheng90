@@ -1,11 +1,16 @@
-import { copyFile, lstat, mkdir, readdir, realpath, rm, writeFile } from 'node:fs/promises';
+import { copyFile, lstat, mkdir, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import '../src/history-data.js';
+import { renderHistory } from './render-history.mjs';
 
 const projectRoot = await realpath(fileURLToPath(new URL('../', import.meta.url)));
+const html = await readFile(join(projectRoot, 'index.html'), 'utf8');
+if (renderHistory(html, globalThis.ChishuiHistory) !== html) throw new Error('Historical HTML is stale; run node scripts/render-history.mjs');
 const dist = resolve(projectRoot, 'dist');
-const sourceFiles = new Set(['src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/story.js', 'src/audio.js', 'src/history-scroll.js']);
-const assetFiles = new Set(['public/map/region-relief.png', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/favicon.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/CNAME']);
+const sourceFiles = new Set(['src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/audio.js', 'src/history-scroll.js', 'src/image-viewer.js']);
+const imageFiles = ['valley-480', 'valley-960', 'valley-1440', 'valley-1774', 'gathering-320', 'gathering-585', 'sixth-army-320', 'sixth-army-698'].map(name => `public/images/${name}.webp`);
+const assetFiles = new Set(['public/map/region-relief.png', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/favicon.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/CNAME', ...imageFiles]);
 const studyFiles = ['design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
 const files = ['index.html', 'audio-credits.html', ...studyFiles];
 

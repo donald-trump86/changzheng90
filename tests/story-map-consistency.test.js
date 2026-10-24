@@ -8,6 +8,7 @@ import { chapters } from '../src/story.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const expectedContext = {};
+runInNewContext(await readFile(join(root, 'src/history-data.js'), 'utf8'), expectedContext);
 runInNewContext(await readFile(join(root, 'src/historical-map-data.js'), 'utf8'), expectedContext);
 const map = expectedContext.ChishuiMapData;
 

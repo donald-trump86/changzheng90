@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "encoding": {
+    "format": "WEBP",
+    "quality": 84,
+    "method": 6,
+    "sharpYuv": true,
+    "metadata": "none",
+    "resize": "full-frame; integer height rounded from original aspect ratio; no upscaling",
+    "tools": {
+      "magick": "Version: ImageMagick 7.1.2-34 Q16-HDRI aarch64 c5d4ca8a0:20261014 https://imagemagick.org",
+      "cwebp": "1.6.0"
+    }
+  },
+  "images": [
+    {
+      "id": "valley",
+      "role": "generated-artwork",
+      "source": {
+        "path": "design-study/chishui-valley-study.png",
+        "bytes": 3018714,
+        "sha256": "c5084be3c29d97edf80bb99061b78b212a7c79b1686534977f2365749be9b201",
+        "format": "PNG",
+        "width": 1774,
+        "height": 887
+      },
+      "variants": [
+        {
+          "path": "public/images/valley-480.webp",
+          "format": "WEBP",
+          "width": 480,
+          "height": 240,
+          "quality": 84,
+          "bytes": 28392,
+          "sha256": "43eaa1d217b7331a60719877b6b6cd72bd2c204743bcba81ead1e9d0338826dd"
+        },
+        {
+          "path": "public/images/valley-960.webp",
+          "format": "WEBP",
+          "width": 960,
+          "height": 480,
+          "quality": 84,
+          "bytes": 95560,
+          "sha256": "95def188ae894947904d3291c16196eb1b8c515e38c389aa07e7c17b976fa27c"
+        },
+        {
+          "path": "public/images/valley-1440.webp",
+          "format": "WEBP",
+          "width": 1440,
+          "height": 720,
+          "quality": 84,
+          "bytes": 176728,
+          "sha256": "b74c21258114116cec9fb0df50d320a901774515497f571464fc63cd0ded653d"
+        },
+        {
+          "path": "public/images/valley-1774.webp",
+          "format": "WEBP",
+          "width": 1774,
+          "height": 887,
+          "quality": 84,
+          "bytes": 285322,
+          "sha256": "7720b1b8eb6c03147c8079afc702d4789295c9e8931dd1cee4d507ec1e633b32"
+        }
+      ]
+    },
+    {
+      "id": "gathering",
+      "role": "historical-photograph-preview",
+      "source": {
+        "path": "design-study/long-march-gathering.jpg",
+        "bytes": 71686,
+        "sha256": "dcc1807e93537afdd8bc02978996cd52410a11e8e3009d50be9c68a01569ec8c",
+        "format": "JPEG",
+        "width": 585,
+        "height": 310
+      },
+      "variants": [
+        {
+          "path": "public/images/gathering-320.webp",
+          "format": "WEBP",
+          "width": 320,
+          "height": 170,
+          "quality": 84,
+          "bytes": 18336,
+          "sha256": "74e2dae3749e9d04879881334443d875d9ec3ed4536ebd5a330705f914496b11"
+        },
+        {
+          "path": "public/images/gathering-585.webp",
+          "format": "WEBP",
+          "width": 585,
+          "height": 310,
+          "quality": 84,
+          "bytes": 53268,
+          "sha256": "197907164ea39ae677bced9ca0430a75152a8975456dee166a793e7dc8463489"
+        }
+      ]
+    },
+    {
+      "id": "sixth-army",
+      "role": "historical-photograph-preview",
+      "source": {
+        "path": "design-study/sixth-army-1935.jpg",
+        "bytes": 128640,
+        "sha256": "ee2238bfcdf45a50af86302091cb9799de73b40e647b0cc99b51a9dc781e049f",
+        "format": "JPEG",
+        "width": 698,
+        "height": 357
+      },
+      "variants": [
+        {
+          "path": "public/images/sixth-army-320.webp",
+          "format": "WEBP",
+          "width": 320,
+          "height": 164,
+          "quality": 84,
+          "bytes": 13926,
+          "sha256": "0c57ae117e4f3fa192c0e92d1a24790f39f00a253e16043d6178a402ccf3859a"
+        },
+        {
+          "path": "public/images/sixth-army-698.webp",
+          "format": "WEBP",
+          "width": 698,
+          "height": 357,
+          "quality": 84,
+          "bytes": 72088,
+          "sha256": "cc5405fc29989c283a36de881b5c982bb6b768c3b355814afeea7f6f42481fd8"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "sourceBytes": 3219040,
+    "variantBytes": 743620,
+    "largestVariantBytes": 410678,
+    "allVariantsSavedBytes": 2475420,
+    "allVariantsSavingPercent": 76.9,
+    "largestVariantsSavedBytes": 2808362,
+    "largestVariantsSavingPercent": 87.24
+  }
+}

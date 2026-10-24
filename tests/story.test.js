@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chapters, sources, epilogue } from '../src/story.js';
+import { chapters, sources, epilogue, eras, timeline } from '../src/story.js';
 
 const expectedDates = [
   ['1935年1月29日拂晓', ['1935-01-29', '1935-01-29']],
@@ -33,7 +33,7 @@ test('four chronological chapters carry the exact dates and alternating directio
 });
 
 test('each chapter supplies the agreed content contract and real crossing names', () => {
-  const keys = ['id', 'date', 'dateISO', 'title', 'situation', 'action', 'result', 'crossings', 'direction', 'sourceIds'];
+  const keys = ['id', 'date', 'dateISO', 'title', 'situation', 'action', 'result', 'crossings', 'direction', 'sourceIds', 'theme', 'actionHeading', 'resultHeading', 'mapStage'];
   chapters.forEach((chapter) => {
     assert.deepEqual(Object.keys(chapter).sort(), keys.toSorted());
     for (const field of ['title', 'situation', 'action', 'result']) {
@@ -79,9 +79,32 @@ test('chapters and their nested data are immutable', () => {
 });
 
 test('epilogue separates later actions from the end of the fourth crossing', () => {
-  assert.deepEqual(Object.keys(epilogue).sort(), ['title', 'body'].toSorted());
+  assert.deepEqual(Object.keys(epilogue).sort(), ['title', 'body', 'sectionTitle', 'paragraphs', 'afterTitle', 'actions'].toSorted());
   assert.match(epilogue.body, /四渡赤水.*不等于.*长征结束/);
   for (const action of ['南渡乌江', '贵阳', '金沙江']) assert.ok(epilogue.body.includes(action));
   assert.match(epilogue.body, /随后|此后|之后/);
   assert.equal(Object.hasOwn(epilogue, 'reflection'), false);
+});
+
+
+test('ESM adapter exposes canonical references and the complete graph is deeply frozen', () => {
+  const history = globalThis.ChishuiHistory;
+  assert.deepEqual(Object.keys(history).sort(), ['sources', 'chapters', 'eras', 'timeline', 'epilogue'].toSorted());
+  for (const [key, value] of Object.entries({ sources, chapters, eras, timeline, epilogue })) assert.equal(value, history[key], key);
+  assertDeepFrozen(history);
+  assert.throws(() => { chapters[0].mapStage.summary = 'changed'; }, TypeError);
+  assert.throws(() => { eras[0].description = 'changed'; }, TypeError);
+});
+
+test('crossing timeline events derive from the same chapter dates, titles and results', () => {
+  assert.equal(eras.length, 5);
+  assert.equal(timeline.length, 11);
+  for (const [index, chapter] of chapters.entries()) {
+    const event = timeline[index + 3];
+    assert.equal(event.start_date.display_date, chapter.date);
+    assert.equal(event.text.headline, chapter.title);
+    assert.equal(event.text.text, chapter.result);
+    assert.equal(event.media, null);
+    assert.deepEqual(Object.keys(chapter.mapStage).sort(), ['summary', 'destination', 'chronology', 'historicalText'].toSorted());
+  }
 });

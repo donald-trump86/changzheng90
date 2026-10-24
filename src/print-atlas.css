@@ -276,6 +276,16 @@ mark time {
   line-height: 0;
 }
 
+/* 响应式图片的包裹层沿用图窗尺寸，不引入行内基线空隙。 */
+.art-window > a,
+.art-window picture,
+.hero-archive picture,
+.archives-grid picture,
+.continuation-plate picture {
+  display: block;
+  width: 100%;
+}
+
 .opening .hero-art img {
   width: 100%;
   height: auto;
@@ -414,6 +424,11 @@ mark time {
     height: 100%;
   }
 
+  .opening .art-window > a,
+  .opening .art-window picture {
+    height: 100%;
+  }
+
   .opening .hero-art img {
     height: 100%;
     width: 100%;
@@ -474,9 +489,33 @@ mark time {
     right: max(var(--frame), calc((100vw - var(--page)) / 2));
     width: min(34ch, 30vw);
     margin: 0;
-    padding: 0;
+    padding: 10px 14px;
+    z-index: 1;
+  }
+
+  /* 深色图注有自己的实色底，纸色文字不会落在浅色原图或衬纸上。 */
+  .opening .hero-art figcaption,
+  .hero-archive figcaption {
+    background: var(--ink);
     color: var(--paper);
-    opacity: 0.92;
+    opacity: 1;
+  }
+
+  .opening .hero-art figcaption a,
+  .hero-archive figcaption a {
+    color: inherit;
+    text-decoration-color: currentColor;
+  }
+
+  .opening .hero-art figcaption a:focus-visible,
+  .hero-archive figcaption a:focus-visible {
+    outline-color: var(--paper);
+  }
+
+  .opening .hero-art figcaption a:active,
+  .hero-archive figcaption a:active {
+    background: var(--paper);
+    color: var(--ink);
   }
 
   .hero-archive {
@@ -492,7 +531,8 @@ mark time {
   }
 
   .hero-archive figcaption {
-    color: var(--muted);
+    padding: 10px;
+    color: var(--paper);
   }
 }
 
@@ -1087,12 +1127,25 @@ details[open] > summary .disclosure-icon,
 }
 
 .continuation-plate {
-  margin: 0 0 clamp(36px, 4.5vw, 72px);
+  grid-column: 1 / -1;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+}
+
+.continuation-plate .art-window,
+.continuation-plate .image-link {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .continuation-plate img {
+  display: block;
   width: 100%;
   height: auto;
+  max-height: none;
+  object-fit: contain;
 }
 
 .continuation-plate figcaption {
@@ -1404,11 +1457,19 @@ details[open] > summary .disclosure-icon,
 
 .image-dialog {
   width: min(1160px, calc(100vw - 32px));
-  max-height: calc(100svh - 48px);
+  max-width: calc(100vw - 32px);
+  height: min(1040px, calc(100svh - 32px));
+  max-height: calc(100svh - 32px);
   padding: 0;
   border: 0;
+  overflow: hidden;
   background: var(--surface);
   color: var(--ink);
+}
+
+.image-dialog[open] {
+  display: flex;
+  flex-direction: column;
 }
 
 .image-dialog::backdrop {
@@ -1417,14 +1478,42 @@ details[open] > summary .disclosure-icon,
 
 .dialog-bar {
   display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 18px;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 12px 18px;
 }
 
 .dialog-bar h2 {
+  flex: 1 1 14em;
+  min-width: 0;
+  max-width: 100%;
   font-size: var(--t-title);
+  overflow-wrap: anywhere;
+}
+
+.dialog-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.dialog-tools button {
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 8px 12px;
+  background: var(--toolbar);
+  font-size: var(--t-body);
+  line-height: 1.5;
+}
+
+.dialog-bar form {
+  flex: 0 0 auto;
+  margin: 0;
 }
 
 .dialog-close {
@@ -1443,25 +1532,58 @@ details[open] > summary .disclosure-icon,
 }
 
 .image-dialog figure {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
   margin: 0;
   padding: 0 18px 18px;
 }
 
-.image-dialog img {
+/* 视窗占剩余高度，图片放大只增加内部滚动范围，不撑大图版或图注。 */
+.image-dialog .dialog-viewport {
+  flex: 1 1 auto;
   width: 100%;
-  height: auto;
-  max-height: calc(100svh - 220px);
-  object-fit: contain;
+  height: min(66svh, 760px);
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
   background: var(--image-mat);
 }
 
+.image-dialog .dialog-viewport:focus-visible {
+  outline-offset: -3px;
+}
+
+.image-dialog #dialog-image {
+  display: block;
+  width: 100%; /* 未增强时的适配；控制器按视窗与原图比例写入像素宽度。 */
+  height: auto;
+  max-width: none;
+  max-height: none;
+  flex-shrink: 0;
+  margin-inline: auto; /* 普通块级 auto 外边距：溢出时归零，左上边缘仍可滚到。 */
+}
+
+.image-dialog #dialog-image[hidden] {
+  display: none;
+}
+
 .image-dialog figcaption {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
+  max-height: min(22svh, 10em);
+  overflow: auto;
+  overflow-wrap: anywhere;
   margin-top: 12px;
   font-family: var(--sans);
   font-size: var(--t-meta);
   line-height: 1.8;
   color: var(--muted);
-  max-width: 62em;
 }
 
 /* ── 响应式：每档都是自己的构图 ───────────────────── */
@@ -1626,11 +1748,36 @@ details[open] > summary .disclosure-icon,
 
   .image-dialog {
     width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+    height: min(1040px, calc(100svh - 16px));
     max-height: calc(100svh - 16px);
   }
 
+  .dialog-bar {
+    padding: 12px;
+  }
+
   .dialog-bar h2 {
+    flex-basis: 100%;
     font-size: var(--t-body);
+  }
+
+  .dialog-tools {
+    flex: 1 1 auto;
+    margin-left: 0;
+  }
+
+  .dialog-tools button {
+    flex: 1 1 auto;
+    padding-inline: 10px;
+  }
+
+  .dialog-close {
+    padding-inline: 14px;
+  }
+
+  .image-dialog figure {
+    padding: 0 12px 12px;
   }
 }
 

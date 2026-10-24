@@ -60,20 +60,16 @@
     westward: [250, 480], returnWest: [300, 540], eastward: [660, 430],
     fromZunyi: [770, 610], westMaotai: [540, 550], returnEast: [450, 470], afterFord: [640, 510]
   };
+  const history = globalThis.ChishuiHistory;
+  if (!history) throw new Error('Load history-data.js before historical-map-data.js');
   const stages = [
-    { nodes: ['approach', 'ford:tucheng', 'westward', 'zaxi'], fords: ['yuanhou', 'tucheng'], focus: 'tucheng',
-      summary: '土城、猿猴场（今元厚）地区分路西渡，向川南机动，随后在扎西地区集中。连线概括阶段顺序，不是1月29日当天全程。',
-      destination: '扎西地区', chronology: '1月29日西渡；2月上旬向扎西集中。' },
-    { nodes: ['zaxi', 'returnWest', 'ford:taiping', 'eastward', 'tongzi', 'loushan', 'zunyi'], fords: ['taiping', 'erlang'], focus: 'taiping',
-      summary: '自扎西东返，在太平渡、二郎滩、九溪口等渡口分路东渡；继而经桐梓、娄山关至遵义。渡口并列，不表示依次经过。',
-      destination: '遵义地区', chronology: '2月18—21日东渡；24日桐梓，25—26日娄山关战斗，28日再占遵义。' },
-    { nodes: ['zunyi', 'fromZunyi', 'ford:maotai', 'westMaotai', 'chuannan'], fords: ['maotai'], focus: 'maotai',
-      summary: '由遵义地区向西，经茅台及附近西渡，再向川南镇龙山、大村、铁厂等地区机动。终点标宽泛机动区，不指古蔺县城。',
-      destination: '川南机动区（概略）', chronology: '3月16—17日西渡；随后在川南地区机动。' },
-    { nodes: ['chuannan', 'returnEast', 'ford:taiping', 'afterFord', 'south'], fords: ['taiping', 'erlang'], focus: 'taiping',
-      summary: '从川南折返，经太平渡、二郎滩、九溪口等渡口东渡，随后向南。南渡乌江属于之后的行动，主线不在遵义城结束。',
-      destination: '向南机动', chronology: '3月21—22日东渡；3月31日南渡乌江是后续行动。' }
-  ];
+    { nodes: ['approach', 'ford:tucheng', 'westward', 'zaxi'], fords: ['yuanhou', 'tucheng'], focus: 'tucheng' },
+    { nodes: ['zaxi', 'returnWest', 'ford:taiping', 'eastward', 'tongzi', 'loushan', 'zunyi'], fords: ['taiping', 'erlang'], focus: 'taiping' },
+    { nodes: ['zunyi', 'fromZunyi', 'ford:maotai', 'westMaotai', 'chuannan'], fords: ['maotai'], focus: 'maotai' },
+    { nodes: ['chuannan', 'returnEast', 'ford:taiping', 'afterFord', 'south'], fords: ['taiping', 'erlang'], focus: 'taiping' }
+  ].map((geometry, index) => ({
+    ...geometry, ...history.chapters[index].mapStage
+  }));
   const river = {
     // Original broad course constrained by town order and documented relations;
     // intervening bends are illustrative, not surveyed riverbank geometry.

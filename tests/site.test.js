@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import test, { before } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -62,8 +63,9 @@ test('deployment contains only the public site, no source tooling or private art
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
   const studyFiles = ['design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
-  assert.equal(entries.length, 25);
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/story.js', 'src/audio.js', 'src/history-scroll.js', ...studyFiles].sort());
+  const previews = ['valley-480', 'valley-960', 'valley-1440', 'valley-1774', 'gathering-320', 'gathering-585', 'sixth-army-320', 'sixth-army-698'].map(name => `public/images/${name}.webp`);
+  assert.equal(entries.length, 34);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/image-viewer.js', 'src/audio.js', 'src/history-scroll.js', ...studyFiles, ...previews].sort());
 });
 
 test('historical JPEGs have actual encoded bytes and identical deployment copies', async () => {
@@ -73,6 +75,29 @@ test('historical JPEGs have actual encoded bytes and identical deployment copies
     assert.ok(original.length > 10000, `${name}: real photograph, not a placeholder`);
     assert.deepEqual(await readFile(join(dist, 'design-study', name)), original, name);
   }
+});
+
+test('responsive previews match encoded assets and preserved originals', async () => {
+  const manifest = JSON.parse(await readFile(join(root, 'docs/image-manifest.json'), 'utf8'));
+  let count = 0;
+  for (const image of manifest.images) {
+    const source = await readFile(join(root, image.source.path));
+    assert.equal(createHash('sha256').update(source).digest('hex'), image.source.sha256);
+    assert.equal(source.length, image.source.bytes);
+    for (const variant of image.variants) {
+      assert.match(variant.path, /^public\/images\/[a-z0-9-]+\.webp$/);
+      const bytes = await readFile(join(root, variant.path));
+      assert.equal(bytes.subarray(0, 4).toString(), 'RIFF');
+      assert.equal(bytes.subarray(8, 12).toString(), 'WEBP');
+      assert.equal(bytes.length, variant.bytes);
+      assert.equal(createHash('sha256').update(bytes).digest('hex'), variant.sha256);
+      assert.ok(variant.width <= image.source.width && variant.height <= image.source.height);
+      assert.ok(variant.bytes < image.source.bytes);
+      assert.deepEqual(await readFile(join(dist, variant.path)), bytes);
+      count++;
+    }
+  }
+  assert.equal(count, 8);
 });
 
 test('new homepage is served at root with working images under a repository prefix', async () => {
@@ -94,7 +119,7 @@ test('new homepage is served at root with working images under a repository pref
       assert.deepEqual(modules, ['./src/editorial-motion.js']);
       assert.deepEqual(styles, ['./src/editorial-motion.css', './src/print-atlas.css', './src/historical-map.css']);
       const classics = [...html.body.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1]);
-      assert.deepEqual(classics, ['./src/historical-map-data.js', './src/historical-map.js']);
+      assert.deepEqual(classics, ['./src/history-data.js', './src/historical-map-data.js', './src/historical-map.js']);
       const visited = new Set();
       async function resource(ref, parent, type) {
         assert.match(ref, /^\.\.?\//, 'resources use local relative URLs');
@@ -145,7 +170,7 @@ test('new homepage is served at root with working images under a repository pref
       for (const match of html.body.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)) {
         await resource(match[1], base, /^(?:text|application)\/javascript(?:;|$)/);
       }
-      const reliefRef = [...html.body.matchAll(/<image\b[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
+      const reliefRef = [...html.body.matchAll(/<image\b[^>]*\bdata-map-src="([^"]+)"/g)].map((match) => match[1]);
       assert.deepEqual(reliefRef, ['./public/map/region-relief.png']);
       const relief = await resource(reliefRef[0], base, /^image\/png(?:;|$)/);
       assert.deepEqual([...relief.bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
@@ -155,15 +180,34 @@ test('new homepage is served at root with working images under a repository pref
       const license = await resource('./public/vendor/ANIME-LICENSE.txt', base, /^text\/plain(?:;|$)/);
       assert.match(license.body, /MIT License[\s\S]*Copyright[\s\S]*Permission is hereby granted[\s\S]*THE SOFTWARE IS PROVIDED "AS IS"/);
       assert.equal((await get(port, '/repository/public/vendor/anime-4.5.0.esm.min.js')).bytes.length, 118678);
-      const refs = new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]));
-      assert.deepEqual([...refs].sort(), ['./design-study/chishui-valley-study.png', './design-study/long-march-gathering.jpg', './design-study/sixth-army-1935.jpg']);
-      for (const ref of refs) {
+      const previews = new Set([...html.body.matchAll(/<source\b[^>]*\bsrcset="([^"]+)"/g)].flatMap(match => match[1].split(',').map(item => item.trim().split(/\s+/)[0])));
+      assert.equal(previews.size, 8, 'all responsive variants are wired');
+      for (const ref of previews) {
+        const preview = await resource(ref, base, /^image\/webp(?:;|$)/);
+        assert.equal(preview.bytes.subarray(8, 12).toString(), 'WEBP');
+      }
+      const viewerAnchors = [...html.body.matchAll(/<a\b[^>]*\bdata-image-view\b[^>]*>/g)].map((match) => match[0]);
+      const originals = new Set(viewerAnchors.map((tag) => (tag.match(/\bhref="([^"]+)"/) || [])[1]));
+      assert.deepEqual([...originals].sort(), ['./design-study/chishui-valley-study.png', './design-study/long-march-gathering.jpg', './design-study/sixth-army-1935.jpg']);
+      for (const ref of originals) {
         const url = new URL(ref, base);
         assert.equal(url.origin, base.origin);
         assert.ok(url.pathname.startsWith('/repository/design-study/'));
         const response = await get(port, url.pathname);
         assert.equal(response.status, 200, url.pathname);
         assert.equal(response.type, ref.endsWith('.png') ? 'image/png' : 'image/jpeg');
+        assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
+      }
+      const imgRefs = [...new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]))];
+      assert.deepEqual(imgRefs.sort(), ['./public/images/gathering-585.webp', './public/images/sixth-army-698.webp', './public/images/valley-960.webp']);
+      for (const ref of imgRefs) {
+        const url = new URL(ref, base);
+        assert.equal(url.origin, base.origin);
+        assert.ok(url.pathname.startsWith('/repository/public/images/'));
+        const response = await get(port, url.pathname);
+        assert.equal(response.status, 200, url.pathname);
+        assert.equal(response.type, 'image/webp');
+        assert.equal(response.bytes.subarray(8, 12).toString(), 'WEBP');
         assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
       }
     });
@@ -228,7 +272,7 @@ test('local audio supports exact GET ranges, suffixes, HEAD and 416', async () =
 });
 
 test('current deployed pages and modules contain no personal signature', async () => {
-  for (const file of ['index.html', 'audio-credits.html', 'src/story.js', 'src/audio.js', 'src/history-scroll.js', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/print-atlas.css', 'src/historical-map.js', 'src/historical-map.css', 'src/historical-map-data.js']) {
+  for (const file of ['index.html', 'audio-credits.html', 'src/history-data.js', 'src/image-viewer.js', 'src/audio.js', 'src/history-scroll.js', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/print-atlas.css', 'src/historical-map.js', 'src/historical-map.css', 'src/historical-map-data.js']) {
     assert.doesNotMatch(await readFile(join(dist, file), 'utf8'), /戴诗旭|Jason Dai|作品作者：/i, file);
   }
 });

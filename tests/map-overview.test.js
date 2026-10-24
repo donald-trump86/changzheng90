@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 
+const historySrc = await readFile(new URL('../src/history-data.js', import.meta.url), 'utf8');
 const dataSrc = await readFile(new URL('../src/historical-map-data.js', import.meta.url), 'utf8');
 const mapSrc = await readFile(new URL('../src/historical-map.js', import.meta.url), 'utf8');
 
 const expectedContext = {};
+runInNewContext(historySrc, expectedContext);
 runInNewContext(dataSrc, expectedContext);
 const data = expectedContext.ChishuiMapData;
 const overviewPaths = [1, 2, 3, 4].map((n) => data.geometry(n, 'overview').path);
@@ -223,6 +225,7 @@ function buildEnv({ reduce = false, motionOff = false, previousRoutes = 3 } = {}
     setTimeout,
     clearTimeout
   };
+  runInNewContext(historySrc, context);
   runInNewContext(dataSrc, context);
   runInNewContext(mapSrc, context);
   Object.assign(env, {
