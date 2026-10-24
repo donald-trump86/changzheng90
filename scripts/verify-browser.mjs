@@ -132,10 +132,10 @@ async (page, { phase = 'all' } = {}) => {
           heroComplete: document.querySelector('.opening .hero-art img').complete, heroW: document.querySelector('.opening .hero-art img').naturalWidth,
           terrain: document.querySelector('.map-relief').getAttribute('href') }));
         const pngRequests = initial.requests.filter(r => r.includes('chishui-valley-study.png'));
-        assert(initial.hero.endsWith('.webp') && pngRequests.length === 0,
+        assert(new URL(initial.hero).pathname.endsWith('.webp') && pngRequests.length === 0,
           `initial hero uses responsive preview (url=${initial.url} iw=${initial.innerWidth} hero=${initial.hero || '<empty>'} heroAttr=${initial.heroAttr} heroComplete=${initial.heroComplete} heroW=${initial.heroW} pngRequests=${JSON.stringify(pngRequests)} requests=${JSON.stringify(initial.requests)})`);
         assert(!initial.terrain && !initial.requests.some(url => url.includes('region-relief.png')), 'terrain absent from initial viewport network');
-        const response = page.waitForResponse(r => r.url().endsWith('/public/map/region-relief.png'));
+        const response = page.waitForResponse(r => r.url().includes('/public/map/region-relief.png'));
         await page.locator('.map-canvas').scrollIntoViewIfNeeded();
         assert((await response).status() === 200, 'terrain fetched when approaching map');
         const decoded = await page.locator('.map-relief').evaluate(async node => { const image = new Image(); image.src = node.getAttribute('href'); await image.decode(); return [image.naturalWidth, image.naturalHeight]; });
@@ -154,7 +154,7 @@ async (page, { phase = 'all' } = {}) => {
         return evidence;
       });
       await check('module failure retains chapter tracking', async () => {
-        await page.route('**/src/history-scroll.js', async route => { try { await route.fulfill({ status: 200, contentType: 'text/javascript', body: 'throw new Error("intentional module failure fixture")' }); } catch { /* already handled */ } });
+        await page.route('**/src/history-scroll.js*', async route => { try { await route.fulfill({ status: 200, contentType: 'text/javascript', body: 'throw new Error("intentional module failure fixture")' }); } catch { /* already handled */ } });
         try {
           await open('#crossing-three');
           for (const n of [4, 2]) {
@@ -162,14 +162,14 @@ async (page, { phase = 'all' } = {}) => {
             await page.waitForFunction(number => document.querySelector(`[data-chapter-choice="${number}"]`).getAttribute('aria-current') === 'true', n);
           }
           return 'fallback tracks forward and backward with module import rejected';
-        } finally { await page.unroute('**/src/history-scroll.js'); }
+        } finally { await page.unroute('**/src/history-scroll.js*'); }
       });
       await check('cold chapter three/four synchronize delayed audio import before first play', async () => {
         const evidence = [];
         for (const chapter of [3, 4]) {
           let release;
           const gate = new Promise(resolve => { release = resolve; });
-          await page.route('**/src/audio.js', async route => { await gate; try { await route.continue(); } catch { /* already handled */ } });
+          await page.route('**/src/audio.js*', async route => { await gate; try { await route.continue(); } catch { /* already handled */ } });
           try {
             await page.goto(base + `?qa=audio-${++navigation}` + (chapter === 3 ? '#crossing-three' : '#crossing-four'), { waitUntil: 'domcontentloaded' });
             await page.waitForFunction(n => document.querySelector(`[data-chapter-choice="${n}"]`).getAttribute('aria-current') === 'true', chapter);
@@ -184,10 +184,10 @@ async (page, { phase = 'all' } = {}) => {
             await page.waitForFunction(() => window.__qaPageAudio.some(audio => !audio.paused && audio.currentTime > 0.05), null, { timeout: 20000 });
             const tracks = await page.evaluate(() => window.__qaPageAudio.map(audio => ({ src: audio.src, time: audio.currentTime, muted: audio.muted, paused: audio.paused })));
             const playing = tracks.filter(audio => !audio.paused && audio.time > 0.05);
-            assert(playing.length > 0 && playing.every(audio => audio.src.endsWith('/public/audio/the-great-sea.mp3') && audio.muted) && tracks.every(audio => audio.muted), `chapter ${chapter}: correct first track (playing=${playing.length}/${tracks.length})`);
+            assert(playing.length > 0 && playing.every(audio => new URL(audio.src).pathname.endsWith('/public/audio/the-great-sea.mp3') && audio.muted) && tracks.every(audio => audio.muted), `chapter ${chapter}: correct first track (playing=${playing.length}/${tracks.length})`);
             evidence.push({ chapter, tracks });
           } finally {
-            release(); await page.unroute('**/src/audio.js');
+            release(); await page.unroute('**/src/audio.js*');
             await page.evaluate(() => { window.__qaPageAudio?.forEach(audio => audio.pause()); if (window.__nativeAudio) window.Audio = window.__nativeAudio; delete window.__nativeAudio; delete window.__qaPageAudio; });
           }
         }

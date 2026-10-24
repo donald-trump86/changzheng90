@@ -68,16 +68,25 @@
   fill: var(--accent);
   stroke: var(--map-paper);
   stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+#march-start,
+.map-ford,
+.map-crossing-dot {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 /* 河水缓流：虚线相位漂移（stroke-dashoffset），图面可见时才走 */
 .river-flow {
   fill: none;
   stroke: var(--surface);
-  stroke-width: 2;
-  stroke-dasharray: 13 27;
+  stroke-width: 2.6;
+  stroke-dasharray: 10 22;
   stroke-linecap: round;
-  opacity: 0.65;
+  opacity: 0.78;
 }
 
 /* 图版揭示用的临时遮片（由 JS 注入，动画结束即移除） */
