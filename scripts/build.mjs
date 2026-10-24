@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { copyFile, lstat, mkdir, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -5,7 +6,7 @@ import '../src/history-data.js';
 import { renderHistory } from './render-history.mjs';
 
 const projectRoot = await realpath(fileURLToPath(new URL('../', import.meta.url)));
-const html = await readFile(join(projectRoot, 'index.html'), 'utf8');
+let html = await readFile(join(projectRoot, 'index.html'), 'utf8');
 if (renderHistory(html, globalThis.ChishuiHistory) !== html) throw new Error('Historical HTML is stale; run node scripts/render-history.mjs');
 const dist = resolve(projectRoot, 'dist');
 const sourceFiles = new Set(['src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/audio.js', 'src/history-scroll.js', 'src/image-viewer.js']);
@@ -34,6 +35,25 @@ for (const name of [...sourceFiles, ...assetFiles]) {
 }
 for (const name of files) {
   if (!(await lstat(join(projectRoot, name))).isFile()) throw new Error(`Expected regular file: ${name}`);
+}
+
+const hashes = new Map();
+for (const name of files) {
+  if (name === 'index.html' || name === 'audio-credits.html' || name === 'public/CNAME') continue;
+  const bytes = await readFile(join(projectRoot, name));
+  hashes.set(name, createHash('sha256').update(bytes).digest('hex').slice(0, 8));
+}
+const versionedHTML = html.replace(
+  /\.\/((?:src|public|design-study)\/[^"'\s)]+\.(?:css|js|webp|png|jpg|jpeg|svg))(?:\?v=[0-9a-f]{8})?/g,
+  (match, relPath) => {
+    const version = hashes.get(relPath);
+    if (!version) throw new Error(`Untracked versioned asset in index.html: ${relPath}`);
+    return `./${relPath}?v=${version}`;
+  }
+);
+if (versionedHTML !== html) {
+  html = versionedHTML;
+  await writeFile(join(projectRoot, 'index.html'), html);
 }
 
 // Deletion is confined to this verified, fixed absolute sibling of this project's src/.

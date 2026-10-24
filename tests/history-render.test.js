@@ -74,11 +74,11 @@ test('renderer import and --check leave index untouched; canonical precedes map 
 
 test('hero emblem, single valley woodcut plate, and readable source links are present', async () => {
   const html = await readFile(indexURL, 'utf8');
-  assert.match(html, /src="\.\/public\/party-emblem\.svg"/);
+  assert.match(html, /src="\.\/public\/party-emblem\.svg(?:\?v=[0-9a-f]{8})?"/);
   assert.doesNotMatch(html, /class="hero-archive"/);
   assert.doesNotMatch(html, /class="continuation-plate"/);
-  assert.equal((html.match(/href="\.\/design-study\/chishui-valley-study\.png"/g) || []).length, 1);
-  assert.equal((html.match(/href="\.\/design-study\/long-march-gathering\.jpg"/g) || []).length, 1);
+  assert.equal((html.match(/href="\.\/design-study\/chishui-valley-study\.png(?:\?v=[0-9a-f]{8})?"/g) || []).length, 1);
+  assert.equal((html.match(/href="\.\/design-study\/long-march-gathering\.jpg(?:\?v=[0-9a-f]{8})?"/g) || []).length, 1);
   assert.match(html, /黑白朱砂木刻风格/);
   assert.doesNotMatch(html, />https?:\/\//);
 });

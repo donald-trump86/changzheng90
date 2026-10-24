@@ -14,6 +14,7 @@ const root = await realpath(fileURLToPath(new URL('../', import.meta.url)));
 const dist = join(root, 'dist');
 const domain = 'changzheng90.luvch1nabest.me\n';
 const historyImages = ['long-march-gathering.jpg', 'sixth-army-1935.jpg'];
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 before(() => execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root }));
 
 function get(port, path, options = {}) {
@@ -131,12 +132,17 @@ test('new homepage is served at root with working images under a repository pref
       const html = await get(port, base.pathname);
       assert.equal(html.status, 200);
       assert.doesNotMatch(html.body, /reference-(?:weiriver|conference-1934)\.jpg|\/Users\/|artifacts\/|context-b\d+/);
+      const stripVersion = (ref) => {
+        const match = /^([^?]+)\?v=([0-9a-f]{8})$/.exec(ref);
+        assert.ok(match, `expected ?v=<8-char-sha256> on ${ref}`);
+        return match[1];
+      };
       const modules = [...html.body.matchAll(/<script\b[^>]*\btype="module"[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]);
       const styles = [...html.body.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
-      assert.deepEqual(modules, ['./src/editorial-motion.js']);
-      assert.deepEqual(styles, ['./src/editorial-motion.css', './src/print-atlas.css', './src/historical-map.css']);
+      assert.deepEqual(modules.map(stripVersion), ['./src/editorial-motion.js']);
+      assert.deepEqual(styles.map(stripVersion), ['./src/editorial-motion.css', './src/print-atlas.css', './src/historical-map.css']);
       const classics = [...html.body.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1]);
-      assert.deepEqual(classics, ['./src/history-data.js', './src/historical-map-data.js', './src/historical-map.js']);
+      assert.deepEqual(classics.map(stripVersion), ['./src/history-data.js', './src/historical-map-data.js', './src/historical-map.js']);
       const visited = new Set();
       async function resource(ref, parent, type) {
         assert.match(ref, /^\.\.?\//, 'resources use local relative URLs');
@@ -145,11 +151,13 @@ test('new homepage is served at root with working images under a repository pref
         assert.ok(url.pathname.startsWith('/repository/'), url.pathname);
         if (visited.has(url.pathname)) return;
         visited.add(url.pathname);
-        const response = await get(port, url.pathname);
+        const response = await get(port, url.pathname + url.search);
         assert.equal(response.status, 200, url.pathname);
         assert.match(response.type, type, url.pathname);
         const original = await readFile(join(root, url.pathname.slice('/repository/'.length)));
         assert.deepEqual(response.bytes, original, url.pathname);
+        const version = url.searchParams.get('v');
+        if (version !== null) assert.equal(version, sha256(original).slice(0, 8), url.pathname);
         if (url.pathname.endsWith('.js')) {
           const bindings = new Map([...response.body.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*['"]([^'"]+)['"]/g)].map((match) => [match[1], match[2]]));
           const specs = [];
@@ -165,7 +173,7 @@ test('new homepage is served at root with working images under a repository pref
       }
       for (const ref of styles) {
         const sheet = await resource(ref, base, /^text\/css(?:;|$)/);
-        if (ref.endsWith('/print-atlas.css')) {
+        if (stripVersion(ref).endsWith('/print-atlas.css')) {
           const urls = [...sheet.body.matchAll(/url\(['"]?([^)'"\s]+)['"]?\)/g)].map((match) => match[1]);
           assert.deepEqual(urls.sort(), ['../public/atlas-paper.png', '../public/fonts/chishui-atlas-display.woff2']);
           const sheetURL = new URL(ref, base);
@@ -185,10 +193,11 @@ test('new homepage is served at root with working images under a repository pref
       }
       for (const ref of [...classics, ...modules]) await resource(ref, base, /^(?:text|application)\/javascript(?:;|$)/);
       for (const match of html.body.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+        stripVersion(match[1]);
         await resource(match[1], base, /^(?:text|application)\/javascript(?:;|$)/);
       }
       const reliefRef = [...html.body.matchAll(/<image\b[^>]*\bdata-map-src="([^"]+)"/g)].map((match) => match[1]);
-      assert.deepEqual(reliefRef, ['./public/map/region-relief.png']);
+      assert.deepEqual(reliefRef.map(stripVersion), ['./public/map/region-relief.png']);
       const relief = await resource(reliefRef[0], base, /^image\/png(?:;|$)/);
       assert.deepEqual([...relief.bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
       assert.equal(relief.bytes.readUInt32BE(16), 600);
@@ -200,36 +209,43 @@ test('new homepage is served at root with working images under a repository pref
       const previews = new Set([...html.body.matchAll(/<source\b[^>]*\bsrcset="([^"]+)"/g)].flatMap(match => match[1].split(',').map(item => item.trim().split(/\s+/)[0])));
       assert.equal(previews.size, 8, 'all responsive variants are wired');
       for (const ref of previews) {
+        stripVersion(ref);
         const preview = await resource(ref, base, /^image\/webp(?:;|$)/);
         assert.equal(preview.bytes.subarray(8, 12).toString(), 'WEBP');
       }
       const viewerAnchors = [...html.body.matchAll(/<a\b[^>]*\bdata-image-view\b[^>]*>/g)].map((match) => match[0]);
       const originals = new Set(viewerAnchors.map((tag) => (tag.match(/\bhref="([^"]+)"/) || [])[1]));
-      assert.deepEqual([...originals].sort(), ['./design-study/chishui-valley-study.png', './design-study/long-march-gathering.jpg', './design-study/sixth-army-1935.jpg']);
+      assert.deepEqual([...originals].map(stripVersion).sort(), ['./design-study/chishui-valley-study.png', './design-study/long-march-gathering.jpg', './design-study/sixth-army-1935.jpg']);
       for (const ref of originals) {
+        stripVersion(ref);
         const url = new URL(ref, base);
         assert.equal(url.origin, base.origin);
         assert.ok(url.pathname.startsWith('/repository/design-study/'));
-        const response = await get(port, url.pathname);
+        const response = await get(port, url.pathname + url.search);
         assert.equal(response.status, 200, url.pathname);
-        assert.equal(response.type, ref.endsWith('.png') ? 'image/png' : 'image/jpeg');
-        assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
+        assert.equal(response.type, url.pathname.endsWith('.png') ? 'image/png' : 'image/jpeg');
+        const original = await readFile(join(root, url.pathname.slice('/repository/'.length)));
+        assert.deepEqual(response.bytes, original);
+        assert.equal(url.searchParams.get('v'), sha256(original).slice(0, 8), url.pathname);
       }
       const imgRefs = [...new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]))];
-      assert.deepEqual(imgRefs.sort(), ['./public/images/gathering-585.webp', './public/images/sixth-army-698.webp', './public/images/valley-960.webp', './public/party-emblem.svg']);
+      assert.deepEqual(imgRefs.map(stripVersion).sort(), ['./public/images/gathering-585.webp', './public/images/sixth-army-698.webp', './public/images/valley-960.webp', './public/party-emblem.svg']);
       for (const ref of imgRefs) {
+        stripVersion(ref);
         const url = new URL(ref, base);
         assert.equal(url.origin, base.origin);
         assert.ok(url.pathname.startsWith('/repository/public/'));
-        const response = await get(port, url.pathname);
+        const response = await get(port, url.pathname + url.search);
         assert.equal(response.status, 200, url.pathname);
-        if (ref.endsWith('.svg')) {
+        if (url.pathname.endsWith('.svg')) {
           assert.match(response.type, /^image\/svg\+xml(?:;|$)/);
         } else {
           assert.equal(response.type, 'image/webp');
           assert.equal(response.bytes.subarray(8, 12).toString(), 'WEBP');
         }
-        assert.deepEqual(response.bytes, await readFile(join(root, url.pathname.slice('/repository/'.length))));
+        const original = await readFile(join(root, url.pathname.slice('/repository/'.length)));
+        assert.deepEqual(response.bytes, original);
+        assert.equal(url.searchParams.get('v'), sha256(original).slice(0, 8), url.pathname);
       }
     });
   });
