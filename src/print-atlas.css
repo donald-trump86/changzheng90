@@ -28,11 +28,14 @@
 
   /* 派生令牌：面（tone step）与地图专用色 */
   --surface: #f7f1e3;      /* 比纸亮一档：阅读栏、对话框 */
-  --toolbar: #e7dcc5;      /* 比纸暗一档：控件与条带 */
+  --surface-elevated: #F7F2E7; /* 展签高光纸面：与底纸拉开清晰层次 */
+  --toolbar: #e4d8c1;      /* 比纸暗一档：控件与条带 */
   --map-paper: #ede3ce;    /* 地图纸面 */
   --river: #6e8a93;        /* 河道 */
   --river-bank: #c6d2cc;   /* 河滩 */
   --image-mat: #e5d9c2;    /* 图版衬纸 */
+  --rule-ink: rgba(33, 31, 28, 0.14);    /* 展签细框线 */
+  --rule-strong: rgba(33, 31, 28, 0.24); /* 章节分界线 */
   --night: #211f1c;        /* 与 ink 同值，兼容旧引用 */
 
   /* ── 字体与栏宽 ───────────────────────────────── */
@@ -310,6 +313,41 @@ mark time {
   padding-inline: max(var(--frame), calc((100vw - var(--page)) / 2));
 }
 
+/* 党徽题眉：深红实底衬托标准金黄党徽，静态庄重展示 */
+.hero-emblem {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 16px;
+}
+
+.hero-emblem-backing {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 6px;
+  background: #7A1E1A;
+  border: 1px solid rgba(253, 207, 48, 0.48);
+  box-shadow: inset 0 0 0 1px rgba(24, 16, 14, 0.35);
+  flex: none;
+}
+
+.hero-emblem-mark {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hero-emblem-caption {
+  font-family: var(--sans);
+  font-size: var(--t-meta);
+  line-height: 1.45;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
 .opening h1 {
   font-size: var(--t-monument);
   line-height: 0.98;
@@ -439,7 +477,7 @@ mark time {
     object-position: 50% 42%;
   }
 
-  /* 中性压暗覆盖文字背后的图片，图窗外的独立图注不受影响。 */
+  /* 中性压暗覆盖文字背后的图片，右侧保留渡船与浮桥木刻视觉焦点。 */
   .opening .art-window::after {
     content: "";
     position: absolute;
@@ -447,9 +485,10 @@ mark time {
     z-index: 1;
     background: linear-gradient( /* taste-skill-ignore: neutral scrim under hero text, the one allowed gradient */
       90deg,
-      rgba(33, 31, 28, 0.9) 0%,
-      rgba(33, 31, 28, 0.78) 68%,
-      rgba(33, 31, 28, 0.18) 100%
+      rgba(26, 22, 19, 0.92) 0%,
+      rgba(26, 22, 19, 0.78) 46%,
+      rgba(26, 22, 19, 0.24) 76%,
+      rgba(26, 22, 19, 0.08) 100%
     );
     pointer-events: none;
   }
@@ -462,7 +501,16 @@ mark time {
     color: var(--paper);
   }
 
-  /* 提问占左侧版心，右下角留给插页图版，互不相压 */
+  .hero-emblem {
+    margin-top: 0;
+  }
+
+  .hero-emblem-caption {
+    color: var(--paper);
+    opacity: 0.92;
+  }
+
+  /* 提问占左侧版心，右侧留给赤水渡口木刻主画面 */
   .opening h1 {
     max-width: min(62%, 900px);
   }
@@ -596,6 +644,7 @@ mark time {
   list-style: none;
   margin: 0;
   padding: 0;
+  border-bottom: 1px solid var(--rule-ink);
 }
 
 .timeline li {
@@ -605,6 +654,7 @@ mark time {
   padding: 18px 0 20px;
   min-width: 0;
   align-items: baseline;
+  border-top: 1px solid var(--rule-ink);
 }
 
 .timeline time {
@@ -738,6 +788,7 @@ mark time {
   margin: 0;
   padding: clamp(18px, 2.2vw, 28px);
   background: var(--map-paper);
+  border: 1px solid var(--rule-strong);
   position: sticky;
   top: 16px;
   align-self: start;
@@ -867,7 +918,8 @@ details[data-disclosure] > summary {
 /* 阅读栏：与地图纸面在中缝相接的另一块面 */
 .reader {
   padding: clamp(20px, 2.6vw, 36px);
-  background: var(--surface);
+  background: var(--surface-elevated);
+  border: 1px solid var(--rule-ink);
 }
 
 .chapter-panel + .chapter-panel {
@@ -1010,41 +1062,85 @@ details[open] > summary .disclosure-icon,
   font-variant-numeric: tabular-nums;
 }
 
-/* ── 影像档案：大图版，错落网格，原图不裁切 ─────────── */
+/* ── 影像档案：深色展柜衬托黑白史料，原图按真实像素上限展示 ─────────── */
+
+.archives {
+  margin-top: var(--section-gap);
+  padding: clamp(32px, 4.5vw, 56px);
+  background: #221D18;
+  color: var(--paper);
+  border-top: 3px solid var(--accent);
+}
+
+.archives-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px 48px;
+  flex-wrap: wrap;
+  margin-bottom: clamp(28px, 3.6vw, 44px);
+  padding-bottom: clamp(18px, 2.4vw, 28px);
+  border-bottom: 1px solid rgba(240, 232, 216, 0.16);
+}
+
+.archives-heading h2 {
+  font-size: var(--t-display);
+  color: var(--paper);
+  max-width: 14em;
+}
+
+.archives-heading p {
+  margin: 0;
+  max-width: 32em;
+  font-size: var(--t-body);
+  color: #D2C8B6;
+}
 
 .archives-grid {
-  margin-top: var(--section-gap);
+  margin-top: 0;
+  background: #221D18;
+  color: var(--paper);
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: clamp(48px, 6vw, 96px) clamp(28px, 4vw, 64px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(32px, 4.5vw, 56px) clamp(28px, 4vw, 56px);
   align-items: start;
 }
 
-/* 标题行占满整幅，图版错落排在两侧 */
+/* 标题行若在网格内也占满整幅，两幅历史照片平齐并列 */
 .archives-grid > *:not(figure) {
   grid-column: 1 / -1;
   margin-top: 0;
   margin-bottom: 0;
 }
 
+.archives .plate-sheet {
+  background: #171310;
+}
+
 .archives-grid figure {
   margin: 0;
 }
 
-.archives-grid figure:nth-child(even) {
-  margin-top: clamp(40px, 6vw, 112px);   /* 错落：有意的不对称，不留空洞 */
+.archive-primary {
+  max-width: 585px;
+}
+
+.archive-secondary {
+  max-width: 560px;
+  margin-top: 0;
 }
 
 .archives-grid .image-link {
   display: block;
   padding: 12px;
-  background: var(--image-mat);
+  background: #171310;
+  border: 1px solid rgba(240, 232, 216, 0.2);
   cursor: zoom-in;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .archives-grid .image-link:hover {
-  opacity: 0.92;
+  opacity: 0.94;
 }
 
 .archives-grid .image-link:active {
@@ -1058,6 +1154,7 @@ details[open] > summary .disclosure-icon,
 
 .archives-grid figcaption {
   margin-top: 18px;
+  color: var(--paper);
 }
 
 .archives-grid figcaption strong {
@@ -1068,16 +1165,20 @@ details[open] > summary .disclosure-icon,
   line-height: 1.35;
   letter-spacing: -0.015em;
   margin-bottom: 10px;
+  color: var(--paper);
 }
 
 .archives-grid figcaption p {
   margin: 0 0 0.7em;
   font-size: var(--t-body);
   line-height: 1.8;
+  color: #E5DDD0;
 }
 
 .archive-meta {
   margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(240, 232, 216, 0.14);
   display: grid;
   grid-template-columns: 7.5em minmax(0, 1fr);
   gap: 6px 16px;
@@ -1090,12 +1191,22 @@ details[open] > summary .disclosure-icon,
   font-family: var(--sans);
   font-size: var(--t-meta);
   letter-spacing: 0;
-  color: var(--muted);
+  color: #C7BDAE;
   padding-top: 2px;
 }
 
 .archive-meta dd {
   margin: 0;
+  color: #EDE4D4;
+}
+
+.archives-grid .image-caption-action {
+  color: var(--paper);
+  text-decoration-color: #C8A672;
+}
+
+.archives-grid .image-caption-action:hover {
+  text-decoration-color: var(--paper);
 }
 
 .image-caption-action {
@@ -1137,10 +1248,12 @@ details[open] > summary .disclosure-icon,
   max-width: 46em;
 }
 
-/* ── 尾声「山河为证」：全幅画面 + 陈述 + 后续序列 ─── */
+/* ── 尾声「山河为证」：纪念陈述 + 后续序列 + 五段位置 ─── */
 
 .continuation {
   margin-top: var(--section-gap);
+  padding-top: clamp(36px, 5vw, 64px);
+  border-top: 1px solid var(--rule-strong);
 }
 
 .continuation-plate {
@@ -1220,7 +1333,9 @@ details[open] > summary .disclosure-icon,
 }
 
 .after-route {
-  background: var(--toolbar);
+  background: var(--surface-elevated);
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--accent);
   padding: clamp(20px, 2.6vw, 32px);
 }
 
@@ -1268,6 +1383,12 @@ details[open] > summary .disclosure-icon,
 .era-strip li {
   font-size: var(--t-body);
   line-height: 1.7;
+  padding-left: 14px;
+  border-left: 2px solid var(--rule-strong);
+}
+
+.era-strip .era-current {
+  border-left-color: var(--accent);
 }
 
 .era-strip time {
@@ -1332,7 +1453,8 @@ details[open] > summary .disclosure-icon,
 .sources {
   margin-top: var(--section-gap);
   padding: clamp(24px, 3vw, 44px) clamp(18px, 2.6vw, 36px);
-  background: var(--surface);
+  background: var(--surface-elevated);
+  border: 1px solid var(--rule-ink);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px clamp(28px, 4vw, 56px);
@@ -1422,13 +1544,33 @@ details[open] > summary .disclosure-icon,
   font-size: var(--t-meta);
 }
 
-/* ── 页脚：名字回到整幅，反色收束 ─────────────────── */
+/* ── 页脚：紧凑题跋条，反色收束 ─────────────────── */
 
 .footer {
   margin-top: var(--section-gap);
   background: var(--ink);
   color: var(--paper);
-  padding: clamp(40px, 6vw, 88px) 0 clamp(28px, 4vw, 56px);
+  border-top: 2px solid var(--accent);
+  padding: clamp(24px, 3.2vw, 36px) max(var(--frame), calc((100vw - var(--page)) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 28px;
+  flex-wrap: wrap;
+}
+
+.footer p {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--t-body);
+  color: var(--paper);
+}
+
+.footer a {
+  font-family: var(--sans);
+  font-size: var(--t-meta);
+  color: var(--paper);
+  opacity: 0.9;
 }
 
 .footer-inner {
