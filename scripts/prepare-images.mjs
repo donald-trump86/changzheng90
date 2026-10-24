@@ -106,7 +106,6 @@ async function main() {
   for (const path of ['scripts', 'docs', 'design-study']) {
     await inspectPath(path, 'directory');
   }
-  await inspectPath('docs/redesign-plan.md', 'file');
   // Validate all sources and destinations before the first write.
   const verifiedSources = [];
   for (const source of sources) verifiedSources.push(await verifySource(source));
