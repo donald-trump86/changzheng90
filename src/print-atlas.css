@@ -282,9 +282,7 @@ mark time {
 /* 响应式图片的包裹层沿用图窗尺寸，不引入行内基线空隙。 */
 .art-window > a,
 .art-window picture,
-.hero-archive picture,
-.archives-grid picture,
-.continuation-plate picture {
+.archives-grid picture {
   display: block;
   width: 100%;
 }
@@ -411,21 +409,6 @@ mark time {
   color: var(--muted);
 }
 
-/* 开篇插图：钉在图版一侧的档案照片（图集插页，不做拼贴） */
-.hero-archive {
-  margin: clamp(24px, 3vw, 40px) 0 0;
-  margin-inline: max(var(--frame), calc((100vw - var(--page)) / 2));
-  max-width: 320px;
-}
-
-.hero-archive figcaption {
-  margin-top: 10px;
-  font-family: var(--sans);
-  font-size: var(--t-meta);
-  line-height: 1.75;
-  color: var(--muted);
-}
-
 .scroll-hint {
   display: inline-flex;
   align-items: center;
@@ -546,53 +529,28 @@ mark time {
   }
 
   /* 深色图注有自己的实色底，纸色文字不会落在浅色原图或衬纸上。 */
-  .opening .hero-art figcaption,
-  .hero-archive figcaption {
+  .opening .hero-art figcaption {
     background: var(--ink);
     color: var(--paper);
     opacity: 1;
   }
 
-  .opening .hero-art figcaption a,
-  .hero-archive figcaption a {
+  .opening .hero-art figcaption a {
     color: inherit;
     text-decoration-color: currentColor;
   }
 
-  .opening .hero-art figcaption a:focus-visible,
-  .hero-archive figcaption a:focus-visible {
+  .opening .hero-art figcaption a:focus-visible {
     outline-color: var(--paper);
   }
 
-  .opening .hero-art figcaption a:active,
-  .hero-archive figcaption a:active {
+  .opening .hero-art figcaption a:active {
     background: var(--paper);
     color: var(--ink);
-  }
-
-  .hero-archive {
-    position: absolute;
-    right: max(var(--frame), calc((100vw - var(--page)) / 2));
-    bottom: clamp(48px, 6vh, 96px);
-    width: min(300px, 22vw);
-    margin: 0;
-    padding: 10px;
-    background: var(--paper);
-    color: var(--ink);
-    z-index: 2;
-  }
-
-  .hero-archive figcaption {
-    padding: 10px;
-    color: var(--paper);
   }
 }
 
 @media (min-width: 1024px) and (max-width: 1180px) {
-  .hero-archive {
-    width: min(260px, 24vw);
-  }
-
   .opening h1 {
     font-size: calc(var(--t-monument) * 0.75);
   }
@@ -1229,62 +1187,12 @@ details[open] > summary .disclosure-icon,
   text-decoration-color: var(--ink);
 }
 
-/* 全幅图版（尾声与档案的收束画面） */
-.plate-wide {
-  margin: clamp(48px, 6vw, 96px) 0 0;
-}
-
-.plate-wide img {
-  width: 100%;
-  height: auto;
-}
-
-.plate-wide figcaption {
-  margin-top: 12px;
-  font-family: var(--sans);
-  font-size: var(--t-meta);
-  line-height: 1.75;
-  color: var(--muted);
-  max-width: 46em;
-}
-
 /* ── 尾声「山河为证」：纪念陈述 + 后续序列 + 五段位置 ─── */
 
 .continuation {
   margin-top: var(--section-gap);
   padding-top: clamp(36px, 5vw, 64px);
   border-top: 1px solid var(--rule-strong);
-}
-
-.continuation-plate {
-  grid-column: 1 / -1;
-  min-width: 0;
-  width: 100%;
-  margin: 0;
-}
-
-.continuation-plate .art-window,
-.continuation-plate .image-link {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.continuation-plate img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: none;
-  object-fit: contain;
-}
-
-.continuation-plate figcaption {
-  margin-top: 12px;
-  font-family: var(--sans);
-  font-size: var(--t-meta);
-  line-height: 1.75;
-  color: var(--muted);
-  max-width: 46em;
 }
 
 .continuation-layout {
@@ -1573,45 +1481,6 @@ details[open] > summary .disclosure-icon,
   opacity: 0.9;
 }
 
-.footer-inner {
-  width: calc(100% - var(--frame) * 2);
-  max-width: var(--page);
-  margin-inline: auto;
-}
-
-.footer-name {
-  margin: 0;
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: var(--t-monument);
-  line-height: 1.05;
-  letter-spacing: -0.035em;
-  color: var(--paper);
-  max-width: none;
-}
-
-.footer-meta {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px 28px;
-  flex-wrap: wrap;
-  margin-top: clamp(24px, 3vw, 40px);
-  font-family: var(--sans);
-  font-size: var(--t-meta);
-  color: var(--paper);
-  opacity: 0.82;
-}
-
-.footer-meta p {
-  margin: 0;
-  max-width: none;
-}
-
-.footer-meta a {
-  color: inherit;
-}
-
 /* ── 原图对话框 ───────────────────────────────────── */
 
 .image-dialog {
@@ -1834,10 +1703,6 @@ details[open] > summary .disclosure-icon,
     font-size: var(--t-body);
   }
 
-  .hero-archive {
-    max-width: none;
-  }
-
   .timeline li {
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
@@ -1899,10 +1764,6 @@ details[open] > summary .disclosure-icon,
 
   .reader-footer {
     flex-wrap: wrap;
-  }
-
-  .footer-meta {
-    flex-direction: column;
   }
 
   .image-dialog {

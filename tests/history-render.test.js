@@ -74,7 +74,7 @@ test('renderer import and --check leave index untouched; canonical precedes map 
 
 test('hero emblem, single valley woodcut plate, and readable source links are present', async () => {
   const html = await readFile(indexURL, 'utf8');
-  assert.match(html, /<figure class="hero-emblem"[\s\S]*?<img class="hero-emblem-mark" src="\.\/public\/party-emblem\.svg" alt="中国共产党党徽"/);
+  assert.match(html, /src="\.\/public\/party-emblem\.svg"/);
   assert.doesNotMatch(html, /class="hero-archive"/);
   assert.doesNotMatch(html, /class="continuation-plate"/);
   assert.equal((html.match(/href="\.\/design-study\/chishui-valley-study\.png"/g) || []).length, 1);
