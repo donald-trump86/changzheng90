@@ -20,19 +20,10 @@ const FADE_STEP_MS = 16;
  */
 export const audioTracks = [
   {
-    id: 'undertow',
-    title: 'Undertow',
-    src: './public/audio/undertow.mp3',
-    chapters: [1, 2],
-    author: 'Scott Buckley',
-    source: 'https://www.scottbuckley.com.au/library/undertow/',
-    license: 'CC BY 4.0（https://creativecommons.org/licenses/by/4.0/）',
-  },
-  {
     id: 'the-great-sea',
     title: 'The Great Sea',
     src: './public/audio/the-great-sea.mp3',
-    chapters: [3, 4],
+    chapters: [1, 2, 3, 4],
     author: 'Scott Buckley',
     source: 'https://www.scottbuckley.com.au/library/the-great-sea/',
     license: 'CC BY 4.0（https://creativecommons.org/licenses/by/4.0/）',

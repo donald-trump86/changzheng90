@@ -1387,14 +1387,20 @@ details[open] > summary .disclosure-icon,
   max-width: 42em;
 }
 
-/* ── 配乐控件：一行平面控件，44px 起 ───────────────── */
+/* ── 配乐控件：开篇显眼手动开关，44px 起 ───────────────── */
 
 .audio-controls {
   display: flex;
   align-items: center;
-  gap: 12px 18px;
+  gap: 10px 16px;
   flex-wrap: wrap;
-  margin-top: 22px;
+  margin-top: 20px;
+  margin-bottom: 0;
+  padding: 12px 16px;
+  background: var(--surface);
+  color: var(--ink);
+  border-top: 2px solid var(--accent);
+  border-left: 3px solid var(--accent);
 }
 
 .audio-credits {
@@ -1414,28 +1420,90 @@ details[open] > summary .disclosure-icon,
   font-size: var(--t-body);
 }
 
-.audio-controls button {
+.audio-controls .audio-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   padding: 10px 18px;
-  background: var(--toolbar);
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .audio-controls button:hover {
-  opacity: 0.82;
+  opacity: 0.88;
 }
 
 .audio-controls button:active {
   transform: translateY(1px);
 }
 
-.audio-controls button[aria-pressed="true"] {
-  background: var(--ink);
+.audio-controls .audio-toggle-btn[aria-pressed="true"] {
+  background: var(--accent);
   color: var(--paper);
 }
 
 .audio-label {
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  color: var(--ink);
   font-size: var(--t-meta);
+}
+
+.audio-label input[type="range"] {
+  width: 92px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.audio-status {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--t-meta);
+  color: var(--ink);
+}
+
+.audio-credit-jump {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  margin-left: auto;
+  font-family: var(--sans);
+  font-size: var(--t-meta);
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 1024px) {
+  .opening .opening-audio {
+    max-width: 42rem;
+    margin-top: 22px;
+    padding: 12px 18px;
+    background: rgba(24, 21, 18, 0.88);
+    color: var(--paper);
+    border-top: 2px solid var(--accent);
+    border-left: 3px solid var(--accent);
+  }
+
+  .opening .opening-audio .audio-toggle-btn {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .opening .opening-audio .audio-toggle-btn[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--paper);
+  }
+
+  .opening .opening-audio .audio-label,
+  .opening .opening-audio .audio-status,
+  .opening .opening-audio .audio-credit-jump {
+    color: var(--paper);
+  }
 }
 
 /* ── 页脚：紧凑题跋条，反色收束 ─────────────────── */

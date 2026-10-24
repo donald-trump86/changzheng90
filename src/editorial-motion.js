@@ -28,7 +28,9 @@ const EASE = {
   outQuad: (t) => 1 - (1 - t) * (1 - t),
   outCubic: (t) => 1 - Math.pow(1 - t, 3),
   outExpo: (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)),
-  inOutQuad: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
+  outBack: (t) => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2),
+  inOutQuad: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+  inOutSine: (t) => -(Math.cos(Math.PI * t) - 1) / 2
 };
 
 function rafTween(targets, to, options, update, finish) {
@@ -247,9 +249,10 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     const sheets = [];
     plates.forEach((figure) => {
       const img = figure.querySelector('img');
-      const frame = img ? img.parentElement : null;
+      const frame = img ? (img.closest('.art-window, .image-link') || img.parentElement) : null;
       if (!img || !frame) return;
       touched.add(img);
+      frame.querySelectorAll(':scope > .plate-sheet').forEach((old) => old.remove());
       frame.style.position = 'relative';
       frame.style.overflow = 'clip';
       const sheet = doc.createElement('span');
@@ -261,9 +264,9 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     const values = sheets.map(() => ({ value: 0 }));
     const apply = () => values.forEach(({ value }, index) => {
       const entry = sheets[index];
-      entry.sheet.style.transform = `translateY(${-(value * 101)}%)`;
-      entry.img.style.opacity = String(Math.min(1, value * 1.25));
-      entry.img.style.transform = `scale(${1.025 - value * 0.025})`;
+      entry.sheet.style.transform = `translateY(${-(value * 102)}%)`;
+      entry.img.style.opacity = String(Math.min(1, 0.15 + value * 1.1));
+      entry.img.style.transform = `scale(${1.04 - value * 0.04})`;
     });
     const done = () => sheets.forEach(({ sheet, frame, img }) => {
       sheet.remove();
@@ -273,10 +276,20 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       img.style.removeProperty('opacity');
     });
     apply();
-    run(key, values, { value: 1 }, { duration: 760, gap: 120, ease: 'outExpo' }, apply, done);
+    run(key, values, { value: 1 }, { duration: 780, gap: 130, ease: 'outExpo' }, apply, done);
   }
 
-  /* ── 路线：一笔画到渡口，箭头只在画完时出现 ─────── */
+  /* ── 路线：一笔画到渡口，箭头只在画完时出现，联动起点与渡口 ── */
+
+  function clearMapAccentTransforms() {
+    const startMark = $('#march-start');
+    if (startMark) clearNode(startMark);
+    all('.map-ford, .map-crossing-dot').forEach(clearNode);
+    all('.map-previous-route').forEach((prev) => {
+      prev.style.removeProperty('stroke-dasharray');
+      prev.style.removeProperty('stroke-dashoffset');
+    });
+  }
 
   function finishRoute() {
     if (!route) return;
@@ -284,6 +297,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     route.style.strokeDashoffset = '0';
     route.setAttribute('marker-end', 'url(#route-arrow)');
     if (head) {
+      clearNode(head);
       try {
         const point = route.getPointAtLength(route.getTotalLength());
         head.setAttribute('cx', String(point.x));
@@ -291,6 +305,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       } catch (error) { /* 路径几何不可用时保持原位 */ }
       head.setAttribute('visibility', 'hidden');
     }
+    clearMapAccentTransforms();
     if (mapCanvas) mapCanvas.classList.remove('is-drawing');
   }
 
@@ -298,6 +313,9 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     if (routeFrame) win.cancelAnimationFrame(routeFrame);
     routeFrame = 0;
     cancel('route');
+    cancel('map-fords');
+    cancel('map-start');
+    cancel('all-routes');
     finishRoute();
   }
 
@@ -319,6 +337,64 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     win.scrollBy({ top: rect.top - (win.innerHeight - rect.height) / 2, behavior: 'auto' });
   }
 
+  function pulseMapMarkers() {
+    if (blocked() || mode() !== 'full') return;
+    const startMark = $('#march-start');
+    if (startMark) {
+      touched.add(startMark);
+      const sVal = { value: 0 };
+      const applyStart = () => {
+        const v = sVal.value;
+        startMark.style.opacity = String(Math.min(1, v * 1.4));
+        startMark.style.transform = `scale(${0.45 + 0.55 * v})`;
+      };
+      applyStart();
+      run('map-start', [sVal], { value: 1 }, { duration: 480, gap: 0, ease: 'outBack' }, applyStart, () => clearNode(startMark));
+    }
+    const fords = all('.map-ford.is-current-ford');
+    if (fords.length) {
+      fords.forEach((f) => touched.add(f));
+      const fVals = fords.map(() => ({ value: 0 }));
+      const applyFords = () => fVals.forEach(({ value }, idx) => {
+        const f = fords[idx];
+        f.style.opacity = String(Math.min(1, 0.25 + value * 0.75));
+        f.style.transform = `scale(${0.5 + 0.5 * value})`;
+      });
+      applyFords();
+      run('map-fords', fVals, { value: 1 }, { duration: 640, gap: 130, ease: 'outBack' }, applyFords, () => fords.forEach(clearNode));
+    }
+  }
+
+  function playAllRoutes() {
+    if (!mapReady() || blocked() || mode() !== 'full' || !mapInViewport()) {
+      finishRoute();
+      return;
+    }
+    cancel('all-routes');
+    const prevRoutes = all('.map-previous-route.is-all-route');
+    const allPaths = [...prevRoutes, route].filter(Boolean);
+    if (!allPaths.length) return;
+    const lengths = allPaths.map((p) => {
+      try { return p.getTotalLength() || 0; } catch (e) { return 0; }
+    });
+    const vals = allPaths.map(() => ({ value: 0 }));
+    const apply = () => vals.forEach(({ value }, i) => {
+      const len = lengths[i];
+      if (!len) return;
+      allPaths[i].style.strokeDasharray = String(len);
+      allPaths[i].style.strokeDashoffset = String(len * (1 - value));
+    });
+    const done = () => {
+      prevRoutes.forEach((p) => {
+        p.style.removeProperty('stroke-dasharray');
+        p.style.removeProperty('stroke-dashoffset');
+      });
+      finishRoute();
+    };
+    apply();
+    run('all-routes', vals, { value: 1 }, { duration: 920, gap: 160, ease: 'outCubic' }, apply, done);
+  }
+
   function playRoute(manual = false) {
     if (!mapReady()) return;
     invalidateRoute();
@@ -336,26 +412,31 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     const length = route.getTotalLength();
     const position = { value: 0 };
     const apply = () => {
+      const v = position.value;
       route.style.strokeDasharray = String(length);
-      route.style.strokeDashoffset = String(length * (1 - position.value));
+      route.style.strokeDashoffset = String(length * (1 - v));
       try {
-        const point = route.getPointAtLength(length * position.value);
+        const point = route.getPointAtLength(length * v);
         head.setAttribute('cx', String(point.x));
         head.setAttribute('cy', String(point.y));
+        const pulse = 1 + 0.18 * Math.sin(v * Math.PI * 3);
+        head.style.transform = `scale(${pulse})`;
       } catch (error) { /* 同上 */ }
     };
     route.removeAttribute('marker-end');
     if (mapCanvas) mapCanvas.classList.add('is-drawing');
     head.setAttribute('visibility', 'visible');
+    touched.add(head);
+    pulseMapMarkers();
     apply();
-    run('route', [position], { value: 1 }, { duration: 1800, gap: 0, ease: 'linear' }, apply, finishRoute);
+    run('route', [position], { value: 1 }, { duration: 1800, gap: 0, ease: 'inOutSine' }, apply, finishRoute);
   }
 
   /* ── 常驻微动：河水缓流 + 河谷画面的缓慢漂移与视差 ── */
 
   function artworkPosition() {
     if (!art) return;
-    art.style.transform = `translate(${drift * 3}px, ${parallax + drift * 2}px) scale(1.035)`;
+    art.style.transform = `translate(${drift * 3.5}px, ${parallax + drift * 2}px) scale(1.035)`;
   }
 
   function syncAmbient() {
@@ -371,8 +452,8 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       return;
     }
     const phase = { value: 0 };
-    run('ambient', [phase], { value: 1 }, { duration: 12000, gap: 0, ease: 'linear', loop: true }, () => {
-      if (river) river.style.strokeDashoffset = String(-80 * phase.value);
+    run('ambient', [phase], { value: 1 }, { duration: 8000, gap: 0, ease: 'linear', loop: true }, () => {
+      if (river) river.style.strokeDashoffset = String(-160 * phase.value);
       drift = Math.sin(phase.value * Math.PI * 2);
       if (art && visible(art)) artworkPosition();
     }, () => {
@@ -448,7 +529,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     } else if (scene.kind === 'fade') {
       enter(`scene-${index}`, scene.nodes, { distance: 0, duration: 320, gap: 40 });
     } else {
-      enter(`scene-${index}`, scene.nodes, { duration: 480, gap: 70, distance: scene.options.distance ?? 14 });
+      enter(`scene-${index}`, scene.nodes, { duration: 440, gap: 55, distance: scene.options.distance ?? 14 });
     }
   }
 
@@ -478,10 +559,25 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     });
   }
 
+  function pulseChapterFocus(key, panel) {
+    if (!panel || blocked() || mode() !== 'full') return;
+    const targets = [$('.chapter-date', panel), $('h3', panel), $('#route-direction'), $('#route-date')].filter(Boolean);
+    if (!targets.length) return;
+    targets.forEach((node) => touched.add(node));
+    const vals = targets.map(() => ({ value: 0 }));
+    const apply = () => vals.forEach(({ value }, i) => {
+      const node = targets[i];
+      node.style.opacity = String(0.35 + 0.65 * value);
+      node.style.transform = `translateX(${(1 - value) * 10}px)`;
+    });
+    const done = () => targets.forEach(clearNode);
+    apply();
+    run(key, vals, { value: 1 }, { duration: 380, gap: 45, ease: 'outCubic' }, apply, done);
+  }
+
   function chapterChanged(event) {
     const detail = (event && event.detail) || {};
     invalidateRoute();
-    // 常驻可见的四章里，只让 detail.number 指定的当前章入场
     const number = String(detail.number || '');
     const panels = all('.chapter-panel');
     let panel = panels.find((element) => element.getAttribute('data-chapter') === number) || null;
@@ -491,10 +587,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       panel = $('[data-chapter][data-current]') || panels[0];
     }
     if (panel) {
-      const heading = $('h3', panel);
-      enter(`chapter-${number || panel.getAttribute('data-chapter') || 'x'}`,
-        [$('.chapter-date', panel), ...(heading ? lineNodes(heading) : []), ...all('.situation p, .situation h4', panel).slice(0, 6)],
-        { duration: 420, gap: 45, distance: 10 });
+      pulseChapterFocus(`chapter-${number || panel.getAttribute('data-chapter') || 'x'}`, panel);
     }
     if (detail.mapReady === false) return; // 地图几何未就绪：等 chishui:map-before 之后再画
     schedulePlay();
@@ -533,6 +626,14 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
 
   function settle() {
     cancelAll();
+    all('.plate-sheet').forEach((sheet) => {
+      const parent = sheet.parentElement;
+      sheet.remove();
+      if (parent) {
+        parent.style.removeProperty('position');
+        parent.style.removeProperty('overflow');
+      }
+    });
     if (art) art.style.removeProperty('transform');
     if (river) river.style.removeProperty('stroke-dashoffset');
     finishRoute(); // 恢复完整路线（含箭头与行军点状态）
@@ -572,13 +673,13 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     addScene('.context', '.context-intro h2 > span, .context-intro h2, .context-lead, .context-note, .timeline li', 'rise');
     addScene('.crossings > .section-heading, .crossings .section-heading', 'h2 > span, h2, p', 'rise', { distance: 12 });
     addScene('.crossings .chapter-nav', '[data-chapter-choice], .chapter-link', 'rise', { distance: 10 });
+    addScene('.chapter-panel', '.chapter-date, h3, .situation > p', 'rise', { distance: 12 });
     addScene('.archives-grid', 'figure', 'plate');
     addScene('.continuation-plate', 'img', 'plate');
     addScene('.continuation-copy', 'h2 > span, h2, .statement, p, .quiet-link', 'rise', { distance: 18 });
     addScene('.after-route', 'h3, li, p', 'rise', { distance: 12 });
     addScene('.era-strip', 'li', 'rise', { distance: 12 });
     addScene('.sources', '.disclosure > summary, .licence', 'fade');
-    addScene('.footer', '.footer-name', 'rise', { distance: 24 });
 
     if (typeof win.IntersectionObserver === 'function') {
       observer = new win.IntersectionObserver(safe((entries) => {
@@ -593,14 +694,26 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
             playScene(target);
           }
         });
-      }), { threshold: [0, 0.15] });
+      }), { threshold: [0, 0.12] });
     }
 
+    all('details[data-disclosure]').forEach((details, idx) => {
+      listen(details, 'toggle', safe(() => {
+        if (!details.open || blocked() || mode() !== 'full') return;
+        const inner = $('.disclosure-inner', details);
+        if (inner) enter(`disclosure-${idx}`, [inner], { duration: 300, gap: 0, distance: 8 });
+      }));
+    });
+
     once('chishui:map-before', safe(mapBefore));
-    once('chishui:map-after', safe(() => {
-      // 视图切换只收束，不重放
+    once('chishui:map-after', safe((event) => {
+      const detail = (event && event.detail) || {};
       pendingPlay = false;
-      finishRoute();
+      if (detail.reason === 'all-routes' && detail.allRoutes) {
+        playAllRoutes();
+      } else {
+        finishRoute();
+      }
     }));
     once('chishui:chapter', safe(chapterChanged));
     once('chishui:layout', safe(() => {
@@ -677,11 +790,22 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     observeScenes();
 
     if (!blocked()) {
-      // 开篇分层入场：画面先亮，题词逐行升起，导语与行动跟上——总时长 ≤ 1.2s
-      enter('hero-line', all('.opening h1 > span'), { duration: 520, gap: 90, distance: 26 });
-      enter('hero-meta', all('.opening-meta'), { duration: 460, gap: 0, distance: 14 });
-      enter('hero-lead', all('.opening-lead, .opening-actions, .scroll-hint'), { duration: 460, gap: 80, distance: 14 });
-      enter('hero-art', all('.hero-art, .hero-archive'), { duration: 620, gap: 120, distance: 0 });
+      // 开篇分层入场：徽标先落定，题词逐行升起，导语与配乐控制跟上，木刻画幅拉幕展开
+      const emblem = $('.hero-emblem-backing');
+      if (emblem && mode() === 'full') {
+        touched.add(emblem);
+        const eVal = { value: 0 };
+        const applyEmblem = () => {
+          emblem.style.opacity = String(Math.min(1, eVal.value * 1.2));
+          emblem.style.transform = `scale(${0.82 + 0.18 * eVal.value})`;
+        };
+        applyEmblem();
+        run('hero-emblem', [eVal], { value: 1 }, { duration: 520, gap: 0, ease: 'outBack' }, applyEmblem, () => clearNode(emblem));
+      }
+      enter('hero-line', all('.opening h1 > span'), { duration: 560, gap: 95, distance: 26, ease: 'outExpo' });
+      enter('hero-meta', all('.opening-meta'), { duration: 480, gap: 0, distance: 14 });
+      enter('hero-lead', all('.opening-lead, .opening-actions, .opening-audio'), { duration: 500, gap: 80, distance: 14 });
+      revealPlates('hero-art', all('.hero-art, .hero-archive'));
       pendingPlay = true;
     }
   } catch (error) {
@@ -724,7 +848,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
 /* 页面自启动：本模块是唯一的 module script，加载即接管；
    在没有 DOM 的环境（测试、SSR）import 本模块不做任何事。 */
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  const start = () => {
+  const boot = () => {
     if (globalThis.ChishuiMotion && typeof globalThis.ChishuiMotion.pause === 'function') return;
     try {
       globalThis.ChishuiMotion = initEditorialMotion({});
@@ -734,6 +858,14 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         window.console.error('Editorial motion unavailable; static reading retained.', error);
       }
     }
+  };
+  const start = () => {
+    loadAnime().then((module) => {
+      animeModule = module;
+      boot();
+    }).catch(() => {
+      boot();
+    });
   };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start, { once: true });

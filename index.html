@@ -273,13 +273,14 @@
     .chapter-theme { margin: -2px 0 14px; color: var(--muted); font-size: 17px; }
     .dialog-tools { display: flex; gap: 4px; margin-left: auto; }
     .dialog-tools button { min-height: 44px; padding: 8px 14px; font-size: 16px; }
-    .audio-controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-bottom: 28px; padding: 18px 20px; background: var(--surface); }
-    .audio-status, .audio-credits { flex-basis: 100%; margin: 0; color: var(--muted); }
+    .audio-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 20px 0 0; padding: 12px 16px; background: var(--surface); color: var(--ink); border-top: 2px solid var(--accent); border-left: 3px solid var(--accent); }
+    .audio-status { margin: 0; color: var(--ink); font-size: 15px; }
+    .audio-credits { flex-basis: 100%; margin: 0; color: var(--muted); }
     :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
   </style>
-  <link rel="stylesheet" href="./src/editorial-motion.css?v=7b7c5521">
-  <link rel="stylesheet" href="./src/print-atlas.css?v=432c5f62">
+  <link rel="stylesheet" href="./src/editorial-motion.css?v=f444638c">
+  <link rel="stylesheet" href="./src/print-atlas.css?v=02f3105c">
   <link rel="stylesheet" href="./src/historical-map.css?v=61fbdd14">
 </head>
 <body>
@@ -310,6 +311,12 @@
           <div class="opening-actions">
             <a href="#crossings" class="primary-action" data-start-reading>阅读四渡赤水<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h17m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></a>
             <span class="read-time">约3分钟</span>
+          </div>
+          <div class="audio-controls opening-audio" data-audio-controls hidden role="region" aria-label="背景配乐控制">
+            <button type="button" class="audio-toggle-btn" data-audio-toggle aria-pressed="false"><span class="audio-wave" aria-hidden="true"><i></i><i></i><i></i></span><span data-audio-toggle-label>开启配乐</span></button>
+            <label class="audio-label">音量<input type="range" min="0" max="100" value="18" data-audio-volume></label>
+            <p class="audio-status" data-audio-status role="status">配乐：The Great Sea（默认关闭，可手动开关）</p>
+            <a class="audio-credit-jump" href="#audio-copyright">曲目版权 ↓</a>
           </div>
         </div>
       </div>
@@ -521,14 +528,6 @@
     </section>
 
     <section id="sources" class="sources" aria-label="史料来源与配乐说明">
-      <div class="audio-controls" data-audio-controls hidden>
-        <button type="button" data-audio-toggle aria-pressed="false">开启配乐</button>
-        <button type="button" data-audio-pause>暂停配乐</button>
-        <label class="audio-label">音量<input type="range" min="0" max="100" value="18" data-audio-volume></label>
-        <p class="audio-status" data-audio-status role="status">配乐默认关闭，仅在你点击开启后播放。</p>
-        <div class="audio-credits" data-audio-credits></div>
-        <a href="./audio-credits.html">音频版权与曲目说明</a>
-      </div>
       <details class="disclosure" open data-disclosure>
         <summary><span>史实与图像出处</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
         <div class="disclosure-body"><div class="disclosure-inner">
@@ -544,15 +543,15 @@
           <p>赤水渡口木刻插画为原创生成艺术示意（参考1930年代黑白套朱砂版画风格），不作为史料。地图沿用已核对的西、东、西、东关系及概略路线，只表示教学关系，没有测绘坐标或精确地形含义。</p>
         </div></div>
       </details>
-      <details class="disclosure" open data-disclosure>
-        <summary><span>配乐候选</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
+      <details class="disclosure" id="audio-copyright" open data-disclosure>
+        <summary><span>配乐与版权说明（The Great Sea）</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
         <div class="disclosure-body"><div class="disclosure-inner">
-          <p>配乐默认关闭，仅在你点击开启后播放；若音频模块或曲目不可用，页面自动隐藏播放控件并保持静音。当前采用曲目与许可见上方曲目表及音频版权页。以下为候选与授权依据：</p>
+          <p>页面背景配乐确认采用 <strong>Scott Buckley —《The Great Sea》</strong>，控制栏位于页面开篇处，默认静音关闭，由访客手动选择开启或关闭。音频由本站本地托管，保持作者发布的原始 MP3 字节完整（无剪辑、无重新编码），播放时仅作音量调节与整曲循环。</p>
+          <div class="audio-credits" data-audio-credits></div>
           <ul class="source-list">
-            <li><a href="https://www.scottbuckley.com.au/library/filaments/" target="_blank" rel="noopener noreferrer">Scott Buckley — Filaments</a><p>首选候选。作者以钢琴、弦乐与合成器描述此曲，约4:10有戏剧性收束；适配仍需试听确认。</p></li>
-            <li><a href="https://www.scottbuckley.com.au/library/snowfall/" target="_blank" rel="noopener noreferrer">Scott Buckley — Snowfall</a><p>沉静回望段落的备选。原始创作背景为冬夜，与长征没有历史关联。</p></li>
+            <li><a href="https://www.scottbuckley.com.au/library/the-great-sea/" target="_blank" rel="noopener noreferrer">Scott Buckley — The Great Sea（官方作品页）</a><p>作曲、编曲、管弦乐录音均为 Scott Buckley 本人。官方署名原文：<span lang="en">'The Great Sea' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au</span></p></li>
+            <li><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 International（CC BY 4.0）</a><p>结合<a href="https://www.scottbuckley.com.au/library/using-this-music/" target="_blank" rel="noopener noreferrer">作者官网使用许可条款</a>及<a href="./audio-credits.html">完整音乐素材与授权说明页</a>提供完整授权与核验记录。</p></li>
           </ul>
-          <p><a href="https://www.scottbuckley.com.au/library/using-this-music/" target="_blank" rel="noopener noreferrer">作者官网使用许可</a>及<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>适用于官网对应录音。正式采用须保留作者、作品、来源、许可，并标明实际剪辑等修改。</p>
         </div></div>
       </details>
     </section>
@@ -761,15 +760,17 @@
 
       const audioBox = document.querySelector('[data-audio-controls]');
       if (audioBox) {
-        import('./src/audio.js?v=481db1f6').then(function (mod) {
+        import('./src/audio.js?v=808b90ea').then(function (mod) {
           const create = mod && mod.createAudioController;
           const tracks = mod && mod.audioTracks;
           if (typeof create !== 'function' || !Array.isArray(tracks) || !tracks.length) throw new Error('audio contract unavailable');
           const toggle = audioBox.querySelector('[data-audio-toggle]');
+          const toggleLabel = audioBox.querySelector('[data-audio-toggle-label]');
           const pause = audioBox.querySelector('[data-audio-pause]');
           const volume = audioBox.querySelector('[data-audio-volume]');
           const statusText = audioBox.querySelector('[data-audio-status]');
-          const credits = audioBox.querySelector('[data-audio-credits]');
+          const credits = document.querySelector('[data-audio-credits]');
+          let currentStatus = 'off';
           function createAudio(src) {
             const element = new Audio();
             element.preload = 'none';
@@ -777,14 +778,29 @@
             return element;
           }
           function onState(state) {
-            const labels = { off: '配乐已关闭。', loading: '配乐载入中…', playing: '配乐播放中。', paused: '配乐已暂停。', error: '配乐暂不可用。' };
-            if (statusText) statusText.textContent = labels[state.status] || '';
-            if (toggle) toggle.setAttribute('aria-pressed', String(state.status === 'playing'));
+            currentStatus = state.status || 'off';
+            const playing = currentStatus === 'playing';
+            const labels = {
+              off: '配乐：The Great Sea（已关闭）',
+              loading: '配乐：The Great Sea（载入中…）',
+              playing: '正在播放：The Great Sea — Scott Buckley',
+              paused: '配乐：The Great Sea（已暂停）',
+              error: '配乐暂不可用。'
+            };
+            if (statusText) statusText.textContent = labels[currentStatus] || '';
+            if (toggle) toggle.setAttribute('aria-pressed', String(playing));
+            if (toggleLabel) toggleLabel.textContent = playing ? '关闭配乐' : '开启配乐';
+            document.body.dataset.audioPlaying = String(playing);
           }
           audioController = create({ tracks: tracks, createAudio: createAudio, onState: onState, volume: 0.18 });
           audioController.setChapter(currentChapter || 1);
           if (toggle) toggle.addEventListener('click', function () {
-            if (audioController && typeof audioController.enable === 'function') audioController.enable();
+            if (!audioController) return;
+            if (currentStatus === 'playing' && typeof audioController.pause === 'function') {
+              audioController.pause();
+            } else if (typeof audioController.enable === 'function') {
+              audioController.enable();
+            }
           });
           if (pause) pause.addEventListener('click', function () {
             if (audioController && typeof audioController.pause === 'function') audioController.pause();
@@ -938,6 +954,6 @@
       fitMapLabels();
     })();
   </script>
-  <script type="module" src="./src/editorial-motion.js?v=6bc49f10"></script>
+  <script type="module" src="./src/editorial-motion.js?v=19bdabc1"></script>
 </body>
 </html>
