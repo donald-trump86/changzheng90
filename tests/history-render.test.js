@@ -10,18 +10,27 @@ const canonicalURL = new URL('../src/history-data.js', import.meta.url);
 const load = async () => {
   const context = {};
   runInNewContext(await readFile(canonicalURL, 'utf8'), context);
+  runInNewContext(await readFile(new URL('../src/historical-map-data.js', import.meta.url), 'utf8'), context);
+  mapData = context.ChishuiMapData;
   return context.ChishuiHistory;
 };
+let mapData;
 const outsideRegions = (html) => html.replace(/<!-- history:([\w-]+):start -->[\s\S]*?<!-- history:\1:end -->/g, '<generated>');
 
 test('checked-in HTML equals the pure renderer and rendering is idempotent', async () => {
   const { renderHistory } = await import(rendererURL);
   const history = await load();
   const html = await readFile(indexURL, 'utf8');
-  assert.equal(renderHistory(html, history), html);
-  assert.equal(renderHistory(renderHistory(html, history), history), html);
+  assert.equal(renderHistory(html, history, mapData), html);
+  assert.equal(renderHistory(renderHistory(html, history, mapData), history, mapData), html);
   assert.equal((html.match(/class="chapter-panel"/g) || []).length, 4);
   assert.equal((html.match(/class="timeline-focus"/g) || []).length, 1);
+  assert.equal((html.match(/data-static-map="overview"/g) || []).length, 1);
+  for (const number of [1, 2, 3, 4]) {
+    const article = html.split(`<article id="crossing-${['one', 'two', 'three', 'four'][number - 1]}"`)[1].split('</article>')[0];
+    assert.ok(article.includes(`data-static-map="${number}"`), `chapter ${number} owns its static map`);
+    assert.equal((article.match(/data-static-route=/g) || []).length, 1);
+  }
   assert.ok(html.includes(history.epilogue.body));
   for (const chapter of history.chapters) {
     for (const key of ['date', 'title', 'situation', 'action', 'result']) assert.ok(html.includes(chapter[key]), `${chapter.id}/${key}`);
@@ -43,20 +52,20 @@ test('edited chapter dates/action, eras and map facts propagate without touching
   history.eras[0].display_date = '修改后的分期';
   history.eras[0].description = '修改后的分期正文';
   history.epilogue.body = '修改后的尾声';
-  const rendered = renderHistory(html, history);
+  const rendered = renderHistory(html, history, mapData);
   assert.notEqual(rendered, html);
   for (const text of ['测试日期&lt;&amp;&quot;', '修改后的行动&lt;&amp;&quot;', 'datetime="1935-01-30"', '1.30—31', '修改后的地图说明', '修改后的地图日期', '修改后的历史列表', '修改后的分期', '修改后的分期正文', '修改后的尾声']) assert.ok(rendered.includes(text), text);
   assert.equal(outsideRegions(rendered), outsideRegions(html));
-  assert.equal(renderHistory(rendered, history), rendered);
-  assert.equal(renderHistory(rendered, await load()), html, 'canonical rendering repairs stale generated text');
+  assert.equal(renderHistory(rendered, history, mapData), rendered);
+  assert.equal(renderHistory(rendered, await load(), mapData), html, 'canonical rendering repairs stale generated text');
 });
 
 test('missing or duplicated generated boundaries fail instead of silently leaving stale facts', async () => {
   const { renderHistory } = await import(rendererURL);
   const html = await readFile(indexURL, 'utf8');
   const history = await load();
-  assert.throws(() => renderHistory(html.replace('<!-- history:timeline:start -->', ''), history), /timeline/);
-  assert.throws(() => renderHistory(html + '<!-- history:timeline:start --><!-- history:timeline:end -->', history), /timeline/);
+  assert.throws(() => renderHistory(html.replace('<!-- history:timeline:start -->', ''), history, mapData), /timeline/);
+  assert.throws(() => renderHistory(html + '<!-- history:timeline:start --><!-- history:timeline:end -->', history, mapData), /timeline/);
 });
 
 test('renderer import and --check leave index untouched; canonical precedes map scripts', async () => {

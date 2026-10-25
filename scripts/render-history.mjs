@@ -1,5 +1,6 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { renderStaticMap } from './render-static-maps.mjs';
 
 const anchors = ['one', 'two', 'three', 'four'];
 const names = ['一渡', '二渡', '三渡', '四渡'];
@@ -24,17 +25,19 @@ function replaceRegion(html, name, content) {
 /** Pure static renderer. Only replaces the explicit history:* regions.
  * `history` follows globalThis.ChishuiHistory; importing this module performs no I/O.
  */
-export function renderHistory(html, history) {
+export function renderHistory(html, history, mapData) {
   const { chapters, eras, epilogue } = history;
   const first = chapters[0];
   const e = escapeHTML;
   const regions = {
+    'context-overview': renderStaticMap({ id: 'context-map', mapData, chapters }),
     timeline: `<ol class="timeline" aria-label="长征进程中的五个节点">\n${eras.map((era) => `        <li${era.id === 'sidu' ? ' class="timeline-focus"' : ''}><time datetime="${e(isoDate(era.start_date))}">${e(era.display_date)}</time><p>${e(era.description)}</p></li>`).join('\n')}\n      </ol>`,
     'chapter-nav': `<nav class="chapter-nav" aria-label="选择四渡赤水章节">\n${chapters.map((chapter, index) => `        <a class="chapter-link" href="#crossing-${anchors[index]}" data-chapter-choice="${e(chapter.id)}"${index === 0 ? ' aria-current="true"' : ''}><strong>${names[index]}</strong><time datetime="${e(chapter.dateISO[0])}">${e(shortDate(chapter.dateISO))}</time></a>`).join('\n')}\n      </nav>`,
     chapters: chapters.map((chapter, index) => `<article id="crossing-${anchors[index]}" class="chapter-panel" data-chapter="${e(chapter.id)}" data-direction-label="${direction(chapter)}" aria-labelledby="chapter-${anchors[index]}-title">
             <p class="chapter-date"><span>${names[index]}</span><time datetime="${e(chapter.dateISO[0])}">${e(chapter.date)}</time></p>
             <h3 id="chapter-${anchors[index]}-title">${e(chapter.title)}</h3>
             <p class="chapter-theme">${e(chapter.theme)}</p>
+            ${renderStaticMap({ id: `chapter-map-${chapter.id}`, chapter: chapter.id, mapData, chapters })}
             <div class="situation"><h4>当时的情势</h4><p>${e(chapter.situation)}</p></div>
             <details class="disclosure story-disclosure" open data-disclosure>
               <summary><span>行动与结果</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
@@ -59,9 +62,10 @@ async function main() {
   if (args.length > 1 || (args.length === 1 && args[0] !== '--check')) throw new Error('Usage: node scripts/render-history.mjs [--check]');
   const { readFile, writeFile } = await import('node:fs/promises');
   await import('../src/history-data.js');
+  await import('../src/historical-map-data.js');
   const index = new URL('../index.html', import.meta.url);
   const html = await readFile(index, 'utf8');
-  const rendered = renderHistory(html, globalThis.ChishuiHistory);
+  const rendered = renderHistory(html, globalThis.ChishuiHistory, globalThis.ChishuiMapData);
   if (args[0] === '--check') {
     if (rendered !== html) throw new Error('Generated history is stale. Run node scripts/render-history.mjs');
     console.log('Generated history is current.');

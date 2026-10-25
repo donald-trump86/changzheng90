@@ -3,11 +3,12 @@ import { copyFile, lstat, mkdir, readFile, readdir, realpath, rm, writeFile } fr
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import '../src/history-data.js';
+import '../src/historical-map-data.js';
 import { renderHistory } from './render-history.mjs';
 
 const projectRoot = await realpath(fileURLToPath(new URL('../', import.meta.url)));
 let html = await readFile(join(projectRoot, 'index.html'), 'utf8');
-if (renderHistory(html, globalThis.ChishuiHistory) !== html) throw new Error('Historical HTML is stale; run node scripts/render-history.mjs');
+if (renderHistory(html, globalThis.ChishuiHistory, globalThis.ChishuiMapData) !== html) throw new Error('Historical HTML is stale; run node scripts/render-history.mjs');
 const dist = resolve(projectRoot, 'dist');
 const sourceFiles = new Set(['src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/audio.js', 'src/history-scroll.js', 'src/image-viewer.js']);
 const imageFiles = ['valley-480', 'valley-960', 'valley-1440', 'valley-1774', 'gathering-320', 'gathering-585', 'sixth-army-320', 'sixth-army-698'].map(name => `public/images/${name}.webp`);
