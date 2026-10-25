@@ -79,8 +79,19 @@ test('deployment contains only the public site, no source tooling or private art
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
   const studyFiles = ['design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
   const previews = ['valley-480', 'valley-960', 'valley-1440', 'valley-1774', 'gathering-320', 'gathering-585', 'sixth-army-320', 'sixth-army-698'].map(name => `public/images/${name}.webp`);
-  assert.equal(entries.length, 35);
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/party-emblem.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/image-viewer.js', 'src/audio.js', 'src/history-scroll.js', ...studyFiles, ...previews].sort());
+  assert.equal(entries.length, 38);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/party-emblem.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/vendor/lenis-1.3.27.esm.js', 'public/vendor/lenis-1.3.27-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/image-viewer.js', 'src/audio.js', 'src/history-scroll.js', 'src/page-scroll.js', ...studyFiles, ...previews].sort());
+});
+
+test('vendored Lenis matches the verified release bytes and ships its original license', async () => {
+  for (const [name, expected] of [
+    ['lenis-1.3.27.esm.js', '4cdb25138c7233e7419f630d9536adb41d71fa51906c059f0a27a1268ddedacc'],
+    ['lenis-1.3.27-LICENSE.txt', '7d1896b31f2eed9f286b05faca067c4e35b2f109ae7c4ed5105220e2d2820228'],
+  ]) {
+    const bytes = await readFile(join(root, 'public/vendor', name));
+    assert.equal(sha256(bytes), expected, name);
+    assert.deepEqual(await readFile(join(dist, 'public/vendor', name)), bytes, name);
+  }
 });
 
 test('historical JPEGs have actual encoded bytes and identical deployment copies', async () => {

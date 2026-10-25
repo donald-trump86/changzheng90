@@ -9,7 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23e9e4d8'/%3E%3Cpath d='M20-2C30 8 9 9 16 18S23 26 17 34' fill='none' stroke='%23526b73' stroke-width='5'/%3E%3C/svg%3E">
   <style>
     * { box-sizing: border-box; }
-    html { scroll-padding-top: 108px; }
+    html { scroll-padding-top: 0; }
     body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.8; -webkit-font-smoothing: antialiased; }
     h1, h2, h3, h4, p, figure, ol, ul { margin: 0; }
     h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; }
@@ -173,7 +173,7 @@
       .sources { gap: 28px; padding: 24px 28px; }
     }
     @media (max-width: 650px) {
-      html { scroll-padding-top: 84px; }
+      html { scroll-padding-top: 0; }
       h2 { font-size: 29px; }
       .site-header { display: block; padding-block: 14px 12px; }
       .site-name { font-size: 18px; min-height: 44px; }
@@ -270,7 +270,7 @@
 
   </style>
   <link rel="stylesheet" href="./src/editorial-motion.css?v=f444638c">
-  <link rel="stylesheet" href="./src/print-atlas.css?v=b9e9a7c0">
+  <link rel="stylesheet" href="./src/print-atlas.css?v=57532c27">
   <link rel="stylesheet" href="./src/historical-map.css?v=25028781">
 </head>
 <body>
@@ -594,9 +594,9 @@
     <footer class="footer"><p>长征胜利90周年互动阅读</p><p>长征路上 <a href="#main">回到开篇 ↑</a></p></footer>
   </main>
   <p class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="study-status"></p>
-  <dialog class="image-dialog" id="image-dialog" aria-labelledby="dialog-title">
+  <dialog class="image-dialog" id="image-dialog" data-lenis-prevent aria-labelledby="dialog-title">
     <div class="dialog-bar"><h2 id="dialog-title">完整档案原图</h2><div class="dialog-tools"><button type="button" data-dialog-zoom="out">缩小</button><button type="button" data-dialog-zoom="reset">复原</button><button type="button" data-dialog-zoom="in">放大</button></div><form method="dialog"><button class="dialog-close" type="submit">关闭</button></form></div>
-    <figure><div class="dialog-viewport" tabindex="0" aria-label="原图浏览区域，可横向和纵向滚动"><img id="dialog-image" alt="" hidden></div><figcaption id="dialog-caption"></figcaption></figure>
+    <figure><div class="dialog-viewport" data-lenis-prevent tabindex="0" aria-label="原图浏览区域，可横向和纵向滚动"><img id="dialog-image" alt="" hidden></div><figcaption id="dialog-caption"></figcaption></figure>
   </dialog>
   <script src="./src/history-data.js?v=f8fc0980"></script>
   <script src="./src/historical-map-data.js?v=2f83ac0f"></script>
@@ -619,14 +619,21 @@
       const crossings = document.getElementById('crossings');
       const names = ['一渡', '二渡', '三渡', '四渡'];
       const count = panels.length;
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       const wideQuery = window.matchMedia('(min-width: 901px)');
       const mapExplorer = document.querySelector('.map-explorer');
       let currentChapter = 0;
       let historyScroll = null;
       let scrollFallback = false;
+      let stopScrollFallback = null;
+      let pageScroll = null;
+      let pageScrollModule = null;
+      let historyScrollModule = null;
+      let pageDeparted = false;
+      let navigationPending = false;
+      let navigationId = 0;
+      let intentVersion = 0;
+      let lastHandledHash = location.hash;
       let audioController = null;
-      let scrollPinActive = false;
       let allRoutesOn = false;
       let mapSVG = null;
       let historicalMap = null;
@@ -722,24 +729,52 @@
       }
       mapExplorer.addEventListener('toggle', scheduleMapLayout);
 
-      function scrollToPanel(number) {
+      function scrollElement(element, options) {
+        if (!element) return;
+        const settings = options || {};
+        const token = ++navigationId;
+        navigationPending = true;
+        function settled(result) {
+          if (token === navigationId) navigationPending = false;
+          settings[result]?.();
+          if (token === navigationId) {
+            historyScroll?.refresh();
+            activateFromScroll(chapterAtReadingLine());
+          }
+        }
+        const request = {
+          immediate: Boolean(settings.immediate),
+          onComplete: function () { settled('onComplete'); },
+          onCancel: function () { settled('onCancel'); },
+        };
+        if (pageScroll) pageScroll.scrollTo(element, request);
+        else {
+          const height = window.visualViewport?.height || innerHeight;
+          const gap = Math.min(24, Math.max(0, 0.45 * height - 16));
+          window.scrollTo({ top: Math.max(0, scrollY + element.getBoundingClientRect().top - gap), behavior: 'instant' });
+          request.onComplete();
+        }
+      }
+
+      function pushHash(hash) {
+        if (location.hash !== hash) history.pushState(null, '', hash);
+        lastHandledHash = hash;
+      }
+      function navigateToChapter(number, options) {
         const panel = panels[number - 1];
         if (!panel) return;
-        if (historyScroll && typeof historyScroll.select === 'function') historyScroll.select(number, { scroll: true });
-        else panel.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
+        intentVersion++;
+        pushHash('#' + panel.id);
+        activateChapter(number, { announce: true });
+        if (historyScroll) historyScroll.select(number, { scroll: true, immediate: Boolean(options?.immediate) });
+        else scrollElement(panel, options);
       }
 
       function activateChapter(number, options) {
         const settings = options || {};
         const speak = Boolean(settings.announce);
-        const scroll = Boolean(settings.scroll);
-        if (!Number.isInteger(number) || number < 1 || number > count) return;
-        if (number === currentChapter) {
-          if (scroll) scrollToPanel(number);
-          return;
-        }
+        if (!Number.isInteger(number) || number < 1 || number > count || number === currentChapter) return;
         currentChapter = number;
-        const panel = panels[number - 1];
         chapterLinks.forEach(function (link) {
           if (Number(link.dataset.chapterChoice) === number) link.setAttribute('aria-current', 'true');
           else link.removeAttribute('aria-current');
@@ -760,19 +795,18 @@
           bubbles: true,
         }));
         if (speak) announce('已切换到' + names[number - 1] + '。');
-        if (scroll) scrollToPanel(number);
       }
 
       function activateFromScroll(number) {
-        if (scrollPinActive) return;
+        if (navigationPending || pageDeparted || document.hidden) return;
         activateChapter(number);
       }
 
       if (previous) previous.addEventListener('click', function () {
-        activateChapter(Math.max(1, currentChapter - 1), { announce: true, scroll: true });
+        navigateToChapter(Math.max(1, currentChapter - 1));
       });
       if (next) next.addEventListener('click', function () {
-        activateChapter(Math.min(count, currentChapter + 1), { announce: true, scroll: true });
+        navigateToChapter(Math.min(count, currentChapter + 1));
       });
 
       function chapterFromHash() {
@@ -791,15 +825,36 @@
         return target;
       }
       document.addEventListener('click', function (event) {
-        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         const link = event.target.closest('a[href^="#"]');
-        if (link) revealTarget(link.hash);
+        if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+        const target = revealTarget(link.hash);
+        if (!target) return;
+        event.preventDefault();
+        const number = panels.indexOf(target) + 1;
+        if (number) navigateToChapter(number);
+        else {
+          intentVersion++;
+          pushHash(link.hash);
+          scrollElement(target);
+          if (link.classList.contains('skip-link')) {
+            if (!target.hasAttribute('tabindex')) target.tabIndex = -1;
+            target.focus({ preventScroll: true });
+          }
+        }
       });
-      window.addEventListener('hashchange', function () {
-        revealTarget(location.hash);
+      function followHash() {
+        if (lastHandledHash === location.hash) return;
+        lastHandledHash = location.hash;
+        intentVersion++;
+        const target = revealTarget(location.hash) || (!location.hash && document.getElementById('main'));
         const number = chapterFromHash();
-        if (number) activateChapter(number);
-      });
+        if (number) navigateToChapter(number, { immediate: true });
+        else if (target) scrollElement(target, { immediate: true });
+      }
+      history.scrollRestoration = 'manual';
+      window.addEventListener('hashchange', followHash);
+      window.addEventListener('popstate', followHash);
       revealTarget(location.hash);
 
       document.querySelectorAll('[data-disclosure]').forEach(function (details) {
@@ -935,11 +990,9 @@
       window.addEventListener('resize', scheduleMapLayout);
       window.visualViewport?.addEventListener('resize', scheduleMapLayout);
 
-      // Same reading-line rule as src/history-scroll.js, kept as a tiny inline
-      // fallback so chapter chrome and scroll tracking survive even if the
-      // module never loads (missing build whitelist entry, failed import, …).
+      // Inline position fallback also covers an unavailable history module.
       function chapterAtReadingLine() {
-        const line = 0.45 * (window.innerHeight || 1);
+        const line = 0.45 * (window.visualViewport?.height || innerHeight || 1);
         let crossing = null;
         let passed = null;
         panels.forEach(function (panel, index) {
@@ -952,7 +1005,7 @@
       }
 
       function installScrollFallback() {
-        if (historyScroll || scrollFallback) return;
+        if (historyScroll || scrollFallback || pageDeparted) return;
         scrollFallback = true;
         let frame = 0;
         function measure() {
@@ -960,66 +1013,80 @@
           activateFromScroll(chapterAtReadingLine());
         }
         function schedule() {
-          if (frame) return;
-          if (typeof window.requestAnimationFrame === 'function') frame = window.requestAnimationFrame(measure);
-          else measure();
+          if (!frame) frame = requestAnimationFrame(measure);
         }
         window.addEventListener('scroll', schedule, { passive: true });
         window.addEventListener('resize', schedule);
+        stopScrollFallback = function () {
+          cancelAnimationFrame(frame);
+          window.removeEventListener('scroll', schedule);
+          window.removeEventListener('resize', schedule);
+          scrollFallback = false;
+          stopScrollFallback = null;
+        };
         schedule();
       }
-
-      import('./src/history-scroll.js?v=3fdcfc22').then(function (mod) {
-        if (mod && typeof mod.createHistoryScroll === 'function') {
-          historyScroll = mod.createHistoryScroll({
-            steps: panels,
-            onChapter: function (n) { activateFromScroll(n); },
-            offset: 0.45,
-            win: window,
-          });
-          historyScroll.refresh();
-        }
-        installScrollFallback();
-      }).catch(installScrollFallback);
-
-      activateChapter(chapterFromHash() || 1);
-      const deepLinkChapter = chapterFromHash();
-      if (deepLinkChapter) {
-        let userMoved = false;
-        let lastSetY = null;
-        scrollPinActive = true;
-        const releasePin = function () {
-          scrollPinActive = false;
-          userMoved = true;
-          lastSetY = null;
-        };
-        window.addEventListener('wheel', releasePin, { passive: true, once: true });
-        window.addEventListener('touchmove', releasePin, { passive: true, once: true });
-        window.addEventListener('keydown', releasePin, { once: true });
-        window.addEventListener('scroll', function () {
-          if (!scrollPinActive) return;
-          if (lastSetY !== null && Math.abs(window.scrollY - lastSetY) > 8) releasePin();
-        }, { passive: true });
-        const reanchorDeepLink = function () {
-          if (userMoved) return;
-          const panel = panels[deepLinkChapter - 1];
-          if (!panel || location.hash !== '#' + panel.id) return;
-          activateChapter(deepLinkChapter);
-          panel.scrollIntoView({ behavior: 'instant', block: 'start' });
-          // Land the panel ACROSS the reading line so the scroll tracker keeps
-          // reporting this chapter (scroll-margin can leave its top below the line,
-          // which on short viewports falls inside the previous panel and reverts it).
-          const line = 0.45 * (window.innerHeight || 1);
-          const top = panel.getBoundingClientRect().top;
-          if (top > line - 16) window.scrollBy(0, top - (line - 16));
-          lastSetY = window.scrollY;
-          if (historyScroll && typeof historyScroll.refresh === 'function') historyScroll.refresh();
-        };
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(reanchorDeepLink);
-        window.addEventListener('load', reanchorDeepLink);
+      function initHistoryScroll() {
+        if (historyScroll || !historyScrollModule || pageDeparted || document.hidden) return;
+        stopScrollFallback?.();
+        historyScroll = historyScrollModule.createHistoryScroll({
+          steps: panels, onChapter: activateFromScroll, scrollTo: scrollElement, offset: 0.45, win: window,
+        });
+        historyScroll.refresh();
       }
+      function initPageScroll() {
+        if (pageScroll || !pageScrollModule || pageDeparted || document.hidden) return;
+        pageScroll = pageScrollModule.createPageScroll({ win: window });
+      }
+      installScrollFallback();
+      import('./src/history-scroll.js?v=4bb19045').then(function (mod) {
+        if (typeof mod.createHistoryScroll === 'function') { historyScrollModule = mod; initHistoryScroll(); }
+      }).catch(function () { /* inline fallback remains active */ });
+      import('./src/page-scroll.js?v=d047bc70').then(function (mod) {
+        if (typeof mod.createPageScroll === 'function') { pageScrollModule = mod; initPageScroll(); }
+      }).catch(function () { /* numeric native navigation remains available */ });
+      window.addEventListener('pagehide', function () {
+        pageDeparted = true;
+        intentVersion++;
+        stopScrollFallback?.();
+        historyScroll?.destroy();
+        historyScroll = null;
+        pageScroll?.cancel();
+      });
+      window.addEventListener('pageshow', function () {
+        pageDeparted = false;
+        initPageScroll(); initHistoryScroll(); installScrollFallback();
+        historyScroll?.refresh();
+      });
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) intentVersion++;
+        else { initPageScroll(); initHistoryScroll(); historyScroll?.refresh(); }
+      });
+      for (const type of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
+        window.addEventListener(type, function () { intentVersion++; }, { passive: true });
+      }
+
       document.documentElement.classList.add('enhanced');
       refreshMapLayout();
+      const deepLinkChapter = chapterFromHash();
+      if (deepLinkChapter) navigateToChapter(deepLinkChapter, { immediate: true });
+      else {
+        activateChapter(1);
+        const initialTarget = revealTarget(location.hash);
+        if (initialTarget) scrollElement(initialTarget, { immediate: true });
+      }
+      const initialIntent = intentVersion;
+      document.fonts?.ready.then(function () {
+        requestAnimationFrame(function () {
+          refreshMapLayout();
+          if (deepLinkChapter && intentVersion === initialIntent && !pageDeparted && chapterFromHash() === deepLinkChapter) {
+            navigateToChapter(deepLinkChapter, { immediate: true });
+          } else {
+            historyScroll?.refresh();
+            activateFromScroll(chapterAtReadingLine());
+          }
+        });
+      });
     })();
   </script>
   <script type="module" src="./src/editorial-motion.js?v=19bdabc1"></script>

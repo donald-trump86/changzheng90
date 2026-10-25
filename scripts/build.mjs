@@ -10,9 +10,9 @@ const projectRoot = await realpath(fileURLToPath(new URL('../', import.meta.url)
 let html = await readFile(join(projectRoot, 'index.html'), 'utf8');
 if (renderHistory(html, globalThis.ChishuiHistory, globalThis.ChishuiMapData) !== html) throw new Error('Historical HTML is stale; run node scripts/render-history.mjs');
 const dist = resolve(projectRoot, 'dist');
-const sourceFiles = new Set(['src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/audio.js', 'src/history-scroll.js', 'src/image-viewer.js']);
+const sourceFiles = new Set(['src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'src/print-atlas.css', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/audio.js', 'src/history-scroll.js', 'src/page-scroll.js', 'src/image-viewer.js']);
 const imageFiles = ['valley-480', 'valley-960', 'valley-1440', 'valley-1774', 'gathering-320', 'gathering-585', 'sixth-army-320', 'sixth-army-698'].map(name => `public/images/${name}.webp`);
-const assetFiles = new Set(['public/map/region-relief.png', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/favicon.svg', 'public/party-emblem.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/CNAME', ...imageFiles]);
+const assetFiles = new Set(['public/map/region-relief.png', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/vendor/lenis-1.3.27.esm.js', 'public/vendor/lenis-1.3.27-LICENSE.txt', 'public/favicon.svg', 'public/party-emblem.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/CNAME', ...imageFiles]);
 const studyFiles = ['design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
 const files = ['index.html', 'audio-credits.html', ...studyFiles];
 

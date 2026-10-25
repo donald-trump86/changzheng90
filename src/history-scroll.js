@@ -75,13 +75,14 @@ export function createHistoryScroll({
   win,
   observe = true,
   holdMs = 700,
+  scrollTo,
 } = {}) {
   const entries = normalizeSteps(steps, typeof positions === 'function');
   const byNumber = new Map(entries.map((entry) => [entry.number, entry]));
   const windowRef = win ?? (typeof globalThis !== 'undefined' ? globalThis.window : undefined);
   const viewportHeight = () => {
     if (typeof getViewportHeight === 'function') return Number(getViewportHeight()) || 0;
-    const raw = windowRef?.innerHeight ?? (typeof globalThis !== 'undefined' ? globalThis.innerHeight : 0);
+    const raw = windowRef?.visualViewport?.height || windowRef?.innerHeight || (typeof globalThis !== 'undefined' ? globalThis.innerHeight : 0);
     return Number(raw) || 0;
   };
 
@@ -116,6 +117,7 @@ export function createHistoryScroll({
     if (destroyed) return current;
     const computed = selectAtLine(measure(), offset * viewportHeight());
     if (hold) {
+      if (hold.managed) return current;
       if (computed === hold.number) {
         hold = null; // the programmatic scroll arrived; position truth resumes
         return emit(computed);
@@ -139,11 +141,24 @@ export function createHistoryScroll({
     });
   }
 
-  function select(number, { scroll = false } = {}) {
+  function select(number, { scroll = false, immediate = false } = {}) {
     if (destroyed) return current;
     const target = strictNumber(number);
     if (target === null || !byNumber.has(target)) return current; // invalid numbers ignored
     const entry = byNumber.get(target);
+    if (scroll && typeof scrollTo === 'function') {
+      const request = { number: target, managed: true };
+      hold = request;
+      emit(target);
+      const release = () => {
+        if (destroyed || hold !== request) return;
+        hold = null;
+        refresh();
+      };
+      try { scrollTo(entry.element, { immediate, onComplete: release, onCancel: release }); }
+      catch { release(); }
+      return current;
+    }
     if (scroll) {
       const reduce = Boolean(windowRef?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
       if (typeof entry.element.scrollIntoView === 'function') {
@@ -162,6 +177,10 @@ export function createHistoryScroll({
     windowRef.addEventListener('resize', onActivity);
     cleanups.push(() => windowRef.removeEventListener('scroll', onActivity, { passive: true }));
     cleanups.push(() => windowRef.removeEventListener('resize', onActivity));
+    if (typeof windowRef.visualViewport?.addEventListener === 'function') {
+      windowRef.visualViewport.addEventListener('resize', onActivity);
+      cleanups.push(() => windowRef.visualViewport.removeEventListener('resize', onActivity));
+    }
     // Collapse the observer root to the reading line, so entry changes fire
     // exactly when a chapter crosses it; positions still decide the winner.
     const top = (offset * 100).toFixed(3);

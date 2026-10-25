@@ -379,6 +379,17 @@ test('custom offset moves the reading line', () => {
   assert.deepEqual(highCalls, [3], 'line 800 is inside chapter 3 (700..1400)');
 });
 
+test('reading line follows the visual viewport used by explicit navigation', () => {
+  const win = makeWin(800);
+  win.visualViewport = { height: 400 };
+  const steps = [step(1, 0, 250), step(2, 250, 600)];
+  const controller = createHistoryScroll({ steps: steps.map(s => s.element), win });
+  assert.equal(controller.refresh(), 1);
+  win.visualViewport.height = 800;
+  assert.equal(controller.refresh(), 2);
+  controller.destroy();
+});
+
 test('works without a window: manual refresh and select only', () => {
   const steps = [step(1, -500, 0), step(2, 0, 500)];
   const calls = [];
@@ -414,4 +425,62 @@ test('null/empty chapter metadata falls back to position numbering, never 0', ()
   assert.deepEqual(calls, [1]);
   assert.equal(controller.refresh(), 1);
   controller.destroy();
+});
+
+test('injected navigation owns completion and stale callbacks cannot release a newer selection', () => {
+  const win = makeWin(800);
+  const steps = [step(1, 0, 500), step(2, 500, 1000), step(3, 1000, 1500)];
+  const navigations = [], calls = [];
+  const controller = createHistoryScroll({
+    steps: steps.map(s => s.element), win, onChapter: n => calls.push(n),
+    scrollTo: (element, options) => navigations.push({ element, ...options }),
+  });
+  controller.select(3, { scroll: true });
+  assert.equal(navigations[0].element, steps[2].element);
+  assert.equal(steps[2].element.lastScroll, undefined, 'injection replaces native scrolling');
+  assert.equal(controller.refresh(), 3);
+  controller.select(2, { scroll: true });
+  navigations[0].onComplete(); navigations[0].onCancel();
+  assert.equal(controller.refresh(), 2, 'old completion cannot release the newer hold');
+  navigations[1].onCancel();
+  assert.equal(controller.refresh(), 1, 'cancelled navigation resumes current position truth');
+  assert.deepEqual(calls, [3, 2, 1]);
+  controller.destroy();
+});
+
+test('synchronous injected completion cannot be overwritten by a later hold assignment', () => {
+  const win = makeWin(800);
+  const steps = [step(1, 0, 500), step(2, 500, 1000)];
+  win.__steps = steps;
+  const controller = createHistoryScroll({
+    steps: steps.map(s => s.element), win,
+    scrollTo: (element, { onComplete }) => {
+      layout(win, [{ number: 1, top: -500, bottom: 0 }, { number: 2, top: 0, bottom: 500 }]);
+      onComplete();
+    },
+  });
+  controller.select(2, { scroll: true });
+  layout(win, [{ number: 1, top: 0, bottom: 500 }, { number: 2, top: 500, bottom: 1000 }]);
+  assert.equal(controller.refresh(), 1, 'completed navigation has no leftover hold');
+  controller.destroy();
+});
+
+test('throwing injected navigation releases its hold and late callbacks after destroy do nothing', () => {
+  const win = makeWin(800), steps = [step(1, 0, 500), step(2, 500, 1000)];
+  const controller = createHistoryScroll({
+    steps: steps.map(s => s.element), win,
+    scrollTo: () => { throw new Error('driver unavailable'); },
+  });
+  assert.doesNotThrow(() => controller.select(2, { scroll: true }));
+  assert.equal(controller.refresh(), 1);
+  controller.destroy();
+  let callbacks;
+  const calls = [];
+  const second = createHistoryScroll({
+    steps: steps.map(s => s.element), win, onChapter: n => calls.push(n),
+    scrollTo: (element, options) => { callbacks = options; },
+  });
+  second.select(2, { scroll: true }); second.destroy();
+  callbacks.onComplete(); callbacks.onCancel();
+  assert.deepEqual(calls, [2]);
 });
