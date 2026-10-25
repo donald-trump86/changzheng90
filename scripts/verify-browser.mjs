@@ -20,13 +20,16 @@ async (page, { phase = 'all' } = {}) => {
     await page.waitForFunction(() => Boolean(globalThis.ChishuiMotion));
   }
   const select = async number => {
-    // Hash navigation exercises the public manual chapter-selection contract without
-    // scrolling the chapter navigation out from under Playwright on mobile.
-    await page.evaluate(n => { location.hash = ['crossing-one', 'crossing-two', 'crossing-three', 'crossing-four'][n - 1]; }, number);
-    await page.waitForFunction(n => document.querySelector(`[data-chapter-choice="${n}"]`).getAttribute('aria-current') === 'true', number);
+    await page.locator(`[data-chapter-choice="${number}"]`).click();
+    await page.waitForFunction(n => {
+      const panel = document.querySelector(`article.chapter-panel[data-chapter="${n}"]`);
+      return document.querySelector(`[data-chapter-choice="${n}"]`).getAttribute('aria-current') === 'true'
+        && Math.abs(panel.getBoundingClientRect().top - 24) < 2;
+    }, number);
   };
   async function shot(name) {
     const path = `/Users/jasondai/changzheng90/artifacts/responsive-crossings/full-${name}.png`;
+    await page.evaluate(() => globalThis.ChishuiMotion?.pause());
     await page.screenshot({ path, fullPage: true, animations: 'disabled' });
     screenshots.push(path);
   }
@@ -89,7 +92,7 @@ async (page, { phase = 'all' } = {}) => {
         await select(4);
         assert(await page.locator('[data-map-all]').getAttribute('aria-pressed') === 'false', 'chapter selection exits all-routes');
         for (const n of [2, 4, 1]) {
-          await page.evaluate(number => { const p = document.querySelector(`[data-chapter="${number}"]`); window.scrollTo({ top: p.getBoundingClientRect().top + scrollY - innerHeight * 0.3, behavior: 'instant' }); }, n);
+          await page.evaluate(number => { const p = document.querySelector(`article.chapter-panel[data-chapter="${number}"]`); window.scrollTo({ top: p.getBoundingClientRect().top + scrollY - innerHeight * 0.3, behavior: 'instant' }); }, n);
           await page.waitForFunction(number => document.querySelector(`[data-chapter-choice="${number}"]`).getAttribute('aria-current') === 'true', n);
         }
         await open('#crossing-three');
@@ -101,7 +104,7 @@ async (page, { phase = 'all' } = {}) => {
       });
     }
     if (phase === 'all' || phase === 'extras') {
-      await check('image dialog actual scaling, scrolling, reset and restored focus at five viewports', async () => {
+      await check('image dialog actual scaling, scrolling, reset and restored focus at eight viewports', async () => {
         const measured = [];
         for (const [label, size] of Object.entries(widths)) {
           await page.setViewportSize({ width: size[0], height: size[1] }); await open();
@@ -151,6 +154,7 @@ async (page, { phase = 'all' } = {}) => {
           `initial hero uses responsive preview (url=${initial.url} iw=${initial.innerWidth} hero=${initial.hero || '<empty>'} heroAttr=${initial.heroAttr} heroComplete=${initial.heroComplete} heroW=${initial.heroW} pngRequests=${JSON.stringify(pngRequests)} requests=${JSON.stringify(initial.requests)})`);
         assert(!initial.terrain && !initial.requests.some(url => url.includes('region-relief.png')), 'terrain absent from initial viewport network');
         const response = page.waitForResponse(r => r.url().includes('/public/map/region-relief.png'));
+        await page.locator('.map-explorer > summary').click();
         await page.locator('.map-canvas').scrollIntoViewIfNeeded();
         assert((await response).status() === 200, 'terrain fetched when approaching map');
         const decoded = await page.locator('.map-relief').evaluate(async node => { const image = new Image(); image.src = node.getAttribute('href'); await image.decode(); return [image.naturalWidth, image.naturalHeight]; });
@@ -173,7 +177,7 @@ async (page, { phase = 'all' } = {}) => {
         try {
           await open('#crossing-three');
           for (const n of [4, 2]) {
-            await page.evaluate(number => { const p = document.querySelector(`[data-chapter="${number}"]`); scrollTo({ top: p.getBoundingClientRect().top + scrollY - innerHeight * 0.3, behavior: 'instant' }); }, n);
+            await page.evaluate(number => { const p = document.querySelector(`article.chapter-panel[data-chapter="${number}"]`); scrollTo({ top: p.getBoundingClientRect().top + scrollY - innerHeight * 0.3, behavior: 'instant' }); }, n);
             await page.waitForFunction(number => document.querySelector(`[data-chapter-choice="${number}"]`).getAttribute('aria-current') === 'true', n);
           }
           return 'fallback tracks forward and backward with module import rejected';
@@ -241,7 +245,9 @@ async (page, { phase = 'all' } = {}) => {
           await frame.locator('.noscript-note').waitFor();
           assert(await frame.locator('.chapter-panel').count() === 4, 'no-script chapters');
           assert(await frame.locator('#sources a[href^="https:"]').count() >= 6, 'no-script sources');
-          assert(await frame.locator('#route-map').evaluate(el => getComputedStyle(el).backgroundImage.includes('region-relief.png')), 'no-script relief fallback');
+          assert(await frame.locator('[data-static-map]').count() === 5, 'no-script static overview and four local maps');
+          assert(await frame.locator('.chapter-map').evaluateAll(maps => maps.every(map => map.getBoundingClientRect().width > 0)), 'all local chapter maps visible without script');
+          assert(await frame.locator('#archives,#source-history,#audio-copyright,#map-method').evaluateAll(nodes => nodes.every(node => node.tagName === 'DETAILS' && !node.open)), 'native supplemental disclosures remain closed');
           assert(!await frame.locator('body').evaluate(el => /戴诗旭|Jason Dai/.test(el.textContent)), 'personal signature');
           return 'sandbox omits allow-scripts; four chapters, source links and CSS map relief visible';
         } finally { await page.locator('iframe[title="noscript"]').evaluate(el => el.remove()); }
@@ -252,6 +258,6 @@ async (page, { phase = 'all' } = {}) => {
     await page.emulateMedia({ reducedMotion: null });
     if (originalViewport) await page.setViewportSize(originalViewport);
   }
-  const expectedChecks = phase === 'all' ? 17 : phase === 'extras' ? 7 : 2;
+  const expectedChecks = phase === 'all' ? 23 : phase === 'extras' ? 7 : phase === 'layout' ? 8 : 2;
   return { pass: checks.length === expectedChecks && checks.every(c => c.pass) && !errors.length, expectedChecks, checks, errors, screenshots, limits: ['Local Chromium only; real phone and WeChat untested.', 'Visibility uses a restored document.hidden fixture; audio remains muted.'] };
 }
