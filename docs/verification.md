@@ -17,9 +17,9 @@ Node 测试93项通过，构建白名单输出38个文件。浏览器检查使�
 | 完全无脚本 | 八种尺寸均通过同源沙箱禁用脚本检查：四章正文、五张静态图存在，四张局部图可见，四项补充资料默认折叠，无横向溢出。沙箱阻止脚本的控制台消息属于故障注入。 |
 | 资料与键盘 | Space打开参考图像、Enter关闭；显式跳转史实来源时只展开目标所在资料。跳到正文后焦点落入main。320×568和1440×900实际展开参考图像、打开原图、缩放、Escape关闭并恢复触发点焦点；弹窗内部保留原生滚动。 |
 
-最终截图逐张核对：[背景与总览](../artifacts/responsive-crossings/final-context-desktop.png)、[手机章节](../artifacts/responsive-crossings/final-chapter-mobile.png)、[桌面章节](../artifacts/responsive-crossings/final-chapter-desktop.png)、[手机资料折叠](../artifacts/responsive-crossings/final-disclosures-mobile.png)。截图在动效收尾后拍摄。图片属于本地验收产物，未加入站点发布包。
+最终截图逐张核对：背景与总览的[桌面图](../artifacts/responsive-crossings/final-context-desktop.png)和[手机图](../artifacts/responsive-crossings/final-context-mobile.png)、[手机章节](../artifacts/responsive-crossings/final-chapter-mobile.png)、[桌面章节](../artifacts/responsive-crossings/final-chapter-desktop.png)、资料折叠的[手机图](../artifacts/responsive-crossings/final-disclosures-mobile.png)和[桌面图](../artifacts/responsive-crossings/final-disclosures-desktop.png)。截图在动效收尾后拍摄。图片属于本地验收产物，未加入站点发布包。
 
-本轮未使用真实iPhone、微信或运营商网络；触控设备的库加载条件有单元测试，浏览器尺寸模拟不能代替真机。音频功能未改动，也未重新评价主观听感。线上发布状态见[部署说明](deployment.md)。
+本轮未使用真实iPhone、微信或运营商网络；触控设备的库加载条件有单元测试，浏览器尺寸模拟不能代替真机。独立CDP inspector／meter未运行，本轮使用上述Brave截图和几何数据，不提供自动设计评分。音频功能未改动，也未重新评价主观听感。线上发布状态见[部署说明](deployment.md)。
 
 ## 2026-10-24：此前验收记录
 

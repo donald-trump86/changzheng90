@@ -1,16 +1,16 @@
 # Responsive Crossings Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **执行方式：** 用户已审核通过，由本会话按Native模式实施；未委派子代理。
 
 **Goal:** 修复手机和短屏上的四渡阅读、深链接与滚动跳动，让长征背景始终对应完整四渡总览；史实出处、参考图像及音乐等补充信息默认收起，由用户手动展开。
 
 **Architecture:** 构建时从既有地图数据生成独立总览和四张章节简图。桌面只保留一个固定位置的交互地图；手机用普通文档流阅读并可展开完整地图。统一程序化滚动入口，桌面精细指针按条件使用Lenis，触摸和失败场景保留原生。
 
-**Tech Stack:** Node.js >=22、原生HTML/CSS/ES modules、SVG、既有Anime.js 4.5.0、拟引入的自托管Lenis 1.3.27、Node test runner、专用Brave MCP。
+**Tech Stack:** Node.js >=22、原生HTML/CSS/ES modules、SVG、既有Anime.js 4.5.0、自托管Lenis 1.3.27、Node test runner、专用Brave MCP。
 
 **Spec:** [四渡赤水滚动与移动端地图设计](../specs/2026-10-25-responsive-crossings-design.md)。执行者须先读设计和本计划。
 
-本计划是待审阅的方案B，复选框尚未执行。上面的执行技能名来自writing-plans模板；当前会话未提供这两个技能，不能假装已调用。用户可选择本会话Native逐项执行，或在具有对应技能的执行环境中使用子代理方式；当前轮次只交付计划。
+本计划的方案B已获用户批准并按Native模式完成实施。源码已推送，现有GitHub Pages已构建本轮产物；自定义域名的自动访问遇Cloudflare验证页，公开页面浏览器验收尚待完成。实际执行范围见[验证记录](../../verification.md)，发布提交见[部署说明](../../deployment.md)。
 
 ## Global Constraints
 
@@ -63,7 +63,7 @@
 - 将 `renderHistory(html, history)` 扩为 `renderHistory(html, history, mapData) -> string`；构建、CLI和测试调用一并更新。
 - 输出总览 `figure.context-overview[data-static-map="overview"]`，四张图 `figure.chapter-map[data-static-map="1".."4"]`；所有ID以前缀 `id` 隔离，不输出live地图data属性。
 
-- [ ] **Step 1: 写行为测试。** 用现有VM方式载入history和map-data，直接比较既有几何，不复制路径常量：
+- [x] **Step 1: 写行为测试。** 用现有VM方式载入history和map-data，直接比较既有几何，不复制路径常量：
 
 ```js
 test('overview has four distinct canonical routes and chapter-independent semantics', () => {
@@ -77,10 +77,10 @@ test('overview has four distinct canonical routes and chapter-independent semant
 
 再断言四张局部图分别含本章detail路径、方向、日期、`不是本阶段全程`；总览与四图合并后title/desc/marker ID唯一、aria引用存在；无效章抛错。渲染测试保留章节、时间线、来源、转义和幂等检查，并增加五张图位置与内容检查。
 
-- [ ] **Step 2: 运行RED。** `node --test tests/static-maps.test.js tests/history-render.test.js`；预期新模块缺失或新结构断言失败，不应因fixture语法错误失败。
-- [ ] **Step 3: 实现渲染与构建调用。** 总览用overview几何，分章用detail几何；重用已有河道、渡口与地名，不加载新的地形图片。总览路径加不同dash与有序文字图例；分章图说明多个渡口代表渡河区域。HTML使用可重复替换的受管理区域，source与dist都生成完整图。不在浏览器动态创建这五张图。
-- [ ] **Step 4: 运行GREEN。** `node --test tests/static-maps.test.js tests/history-render.test.js tests/historical-map.test.js tests/story-map-consistency.test.js`；预期全部通过。再 `npm run build`，确认来源、四条总览路线和四章简图进入dist，第二次渲染完全相同。
-- [ ] **Step 5: 提交独立改动。** `git add scripts/render-static-maps.mjs scripts/render-history.mjs scripts/build.mjs index.html tests/static-maps.test.js tests/history-render.test.js tests/site.test.js`，然后 `git commit -m "feat: render independent overview and chapter maps"`。
+- [x] **Step 2: 运行RED。** `node --test tests/static-maps.test.js tests/history-render.test.js`；预期新模块缺失或新结构断言失败，不应因fixture语法错误失败。
+- [x] **Step 3: 实现渲染与构建调用。** 总览用overview几何，分章用detail几何；重用已有河道、渡口与地名，不加载新的地形图片。总览路径加不同dash与有序文字图例；分章图说明多个渡口代表渡河区域。HTML使用可重复替换的受管理区域，source与dist都生成完整图。不在浏览器动态创建这五张图。
+- [x] **Step 4: 运行GREEN。** `node --test tests/static-maps.test.js tests/history-render.test.js tests/historical-map.test.js tests/story-map-consistency.test.js`；预期全部通过。再 `npm run build`，确认来源、四条总览路线和四章简图进入dist，第二次渲染完全相同。
+- [x] **Step 5: 提交独立改动。** `git add scripts/render-static-maps.mjs scripts/render-history.mjs scripts/build.mjs index.html tests/static-maps.test.js tests/history-render.test.js tests/site.test.js`，然后 `git commit -m "feat: render independent overview and chapter maps"`。
 
 ## Task 2: 稳定图文结构、地图尺寸与补充信息展开
 
@@ -93,7 +93,7 @@ test('overview has four distinct canonical routes and chapter-independent semant
 - 补充项采用 `details#archives`、`details#source-history`、`details#audio-copyright` 与 `details#map-method`，均默认关闭。保留既有archives/audio-copyright锚点、原图放大入口和完整许可文字；史实与图像出处仍合为一项，不另建折叠框架。显式来源链接只打开对应details及所需祖先，再调用共用滚动入口；普通加载与被动事件不打开。
 - 新增内部 `refreshMapLayout() -> void`：按媒体条件与实测高度切换 `data-map-layout="pinned" | "flow"`，不移动节点、不滚动页面；完成后派发既有 `chishui:layout`。
 
-- [ ] **Step 1: 写失败断言。** 在Node结构/地图fixture及浏览器checker中固定以下行为：
+- [x] **Step 1: 写失败断言。** 在Node结构/地图fixture及浏览器checker中固定以下行为：
 
 ```js
 assert.equal(document.querySelectorAll('#route-map').length, 1);
@@ -107,10 +107,10 @@ assert.equal(document.querySelector('.context-overview').outerHTML, initialOverv
 
 在现有结构测试中检查四个补充details默认无open、来源和许可全文仍存在；在浏览器检查初始内容隐藏、点击/Enter/Space开合、Tab可达与无脚本可用。逐项打开后再收起，切章、手滚、播放音乐和旋转均不得重开；点击档案原图/来源/曲目版权或进入对应深链接，只打开目标项并正确定位，图像放大及关闭后的焦点仍可用。
 
-- [ ] **Step 2: 运行RED。** `node --test tests/map-overview.test.js tests/site.test.js`，并在同一专用Brave运行checker的相应阶段；预期旧DOM搬运、响应式或高度断言失败。单任务串行使用浏览器，不新建客户端。
-- [ ] **Step 3: 调整布局与紧凑图。** 背景独立成两列/一列；四渡区宽屏正文左、地图右。移除旧命名区域覆盖、`placeRouteSheet()`、`scrollBy`补偿与899px分支。固定单元只含短标题、日期、必要控件、图面与短图注，长说明在四章之后正常滚动。手机及短屏显示局部简图，增强固定模式隐藏局部简图；无脚本默认仍显示。删除地图旧的手机图面强制高度，让图面宽高比与整个单元预算共同决定高度，窄图文字不强压到16px以下。
-- [ ] **Step 4: 处理展开与重排。** 宽屏增强时只对 `.map-explorer` 先打开details再隐藏summary；窄屏初始折叠、以后不因旋转自动收起。史实与图像出处、参考图像区、音乐版权、地图完整依据在所有尺寸均初始关闭；将原图、长图注及大图入口放进参考图像details，来源链接指向精确目标。使用原生summary和既有展开增强，不新增状态框架，不隐藏播放按钮、正文图或必要短图注。用单个ResizeObserver监测固定单元和视口变化，超预算就flow，不在其回调里改变文章顺序。同一视口尺寸、容器宽度与实际字号周期内，超预算退到flow后保持flow，直到这些输入变化再尝试固定，避免布局反过来改变测量而来回切换。仅在模式变化时写属性并派发既有 `chishui:layout` 通知。
-- [ ] **Step 5: 运行GREEN。** 上述Node测试通过；在390×844、768×1024、900×600、901×600、1280×480、1440×900测量列数、固定单元边界和DOM身份。展开/收起只产生用户可见的正常文档流变化；被动切章不导致补偿滚动。检查本文所列背景与章节截图后提交，提交信息 `fix: stabilize responsive crossing map layout`。
+- [x] **Step 2: 运行RED。** `node --test tests/map-overview.test.js tests/site.test.js`，并在同一专用Brave运行checker的相应阶段；预期旧DOM搬运、响应式或高度断言失败。单任务串行使用浏览器，不新建客户端。
+- [x] **Step 3: 调整布局与紧凑图。** 背景独立成两列/一列；四渡区宽屏正文左、地图右。移除旧命名区域覆盖、`placeRouteSheet()`、`scrollBy`补偿与899px分支。固定单元只含短标题、日期、必要控件、图面与短图注，长说明在四章之后正常滚动。手机及短屏显示局部简图，增强固定模式隐藏局部简图；无脚本默认仍显示。删除地图旧的手机图面强制高度，让图面宽高比与整个单元预算共同决定高度，窄图文字不强压到16px以下。
+- [x] **Step 4: 处理展开与重排。** 宽屏增强时只对 `.map-explorer` 先打开details再隐藏summary；窄屏初始折叠、以后不因旋转自动收起。史实与图像出处、参考图像区、音乐版权、地图完整依据在所有尺寸均初始关闭；将原图、长图注及大图入口放进参考图像details，来源链接指向精确目标。使用原生summary和既有展开增强，不新增状态框架，不隐藏播放按钮、正文图或必要短图注。用单个ResizeObserver监测固定单元和视口变化，超预算就flow，不在其回调里改变文章顺序。同一视口尺寸、容器宽度与实际字号周期内，超预算退到flow后保持flow，直到这些输入变化再尝试固定，避免布局反过来改变测量而来回切换。仅在模式变化时写属性并派发既有 `chishui:layout` 通知。
+- [x] **Step 5: 运行GREEN。** 上述Node测试通过；在390×844、768×1024、900×600、901×600、1280×480、1440×900测量列数、固定单元边界和DOM身份。展开/收起只产生用户可见的正常文档流变化；被动切章不导致补偿滚动。检查本文所列背景与章节截图后提交，提交信息 `fix: stabilize responsive crossing map layout`。
 
 ## Task 3: 统一导航、接入可降级的桌面Lenis
 
@@ -124,7 +124,7 @@ assert.equal(document.querySelector('.context-overview').outerHTML, initialOverv
 - `createHistoryScroll({ ...existing, scrollTo } = {})` 接受可选同签名回调，返回值仍为 `{ select, refresh, destroy }`。未注入时保留原有原生回退与测试；注入后由完成/取消回调释放保持，使用导航token忽略旧回调。
 - 内联 `navigateToChapter(number, { immediate = false } = {}) -> void` 是章节按钮、pager、初始深链和hash变化的唯一显式入口。被动 `activate()` 不调用它。
 
-- [ ] **Step 1: 写滚动行为测试。** 使用注入的假window与假Lenis，不在Node导入时访问真实document。断言短屏落点位于45%阅读线之前；快速1→4→2之后旧回调不改变2；触摸/滚轮/导航键取消后恢复位置判断；导入失败正常原生滚动。至少包含：
+- [x] **Step 1: 写滚动行为测试。** 使用注入的假window与假Lenis，不在Node导入时访问真实document。断言短屏落点位于45%阅读线之前；快速1→4→2之后旧回调不改变2；触摸/滚轮/导航键取消后恢复位置判断；导入失败正常原生滚动。至少包含：
 
 ```js
 test('late Lenis import cannot start after destroy', async () => {
@@ -140,11 +140,11 @@ test('late Lenis import cannot start after destroy', async () => {
 
 其他用例固定粗指针/减少动态/`body[data-motion="off"]`不构造实例；fine模式只建一份；暂停后销毁、恢复动画后按条件重建；隐藏销毁、恢复重建；异常不遗留pending保持；destroy移除监听；同步完成回调不会被随后写入的hold覆盖。
 
-- [ ] **Step 2: 运行RED。** `node --test tests/page-scroll.test.js tests/history-scroll.test.js`；预期新模块/注入行为不存在，原有位置算法测试仍应保留。
-- [ ] **Step 3: 取得固定上游发布物。** 用 `npm pack lenis@1.3.27 --pack-destination artifacts/vendor-source` 获取精确版本，先列出并展开到该任务临时目录，再用read读取package.json、许可和实际ESM入口。核对版本、repository与可获得的gitHead/tag及npm integrity；来源或版本不符就停止该依赖接入，不自动换库。只复制所需的完整ESM与MIT许可；记录原始入口、tarball来源、字节数和SHA-256实值到provenance，文件名使用上述固定版本。将上游必要Lenis CSS规则合并进现有样式，不增加运行时CDN。
-- [ ] **Step 4: 实现统一滚动。** fine+hover、非reduce且body motion未暂停时使用 `autoRaf: true, smoothWheel: true, lerp: 0.12, syncTouch: false, anchors: false, respectReducedMotion: true`。通过媒体监听与仅观察body的 `data-motion` 属性的MutationObserver更新条件，destroy时都移除。原生导航用scrollend或连续两帧到达目标判断完成，并设1500ms兜底释放；用户中断走取消回调。全局CSS取消smooth、根padding归零，章节CSS留白24px；短视口JS按公式缩小。Lenis只负责位置，不另设章节状态或DOM transform。图像对话框内部使用 `data-lenis-prevent`。
-- [ ] **Step 5: 接上导航与失败回退。** 所有显式入口走navigateToChapter；普通链接只拦截无修饰键的本页导航并只写一次history。初始字体校正最多一次，用户活动后失效。scroll控制器使用注入回调，history-scroll导入失败时内联fallback也使用同一滚动driver；driver自身导入失败仍可按相同CSS落点原生导航。减少动态或暂停时显式导航立即完成；媒体变更、隐藏、pagehide销毁Lenis，恢复重建，取消迟到Promise副作用。
-- [ ] **Step 6: 运行GREEN并提交。** `node --test tests/page-scroll.test.js tests/history-scroll.test.js tests/site.test.js`、`npm run build`。白名单加入src/page-scroll与两个vendor文件；现有35个发布文件相应变为38个，若Task 1/2实际增加别的发布文件则按明确清单复核，不能删除计数断言。保留SHA-256缓存策略；版本化动态import文件名不可漂移。提交信息 `feat: unify chapter scrolling with optional Lenis`。
+- [x] **Step 2: 运行RED。** `node --test tests/page-scroll.test.js tests/history-scroll.test.js`；预期新模块/注入行为不存在，原有位置算法测试仍应保留。
+- [x] **Step 3: 取得固定上游发布物。** 用 `npm pack lenis@1.3.27 --pack-destination artifacts/vendor-source` 获取精确版本，先列出并展开到该任务临时目录，再用read读取package.json、许可和实际ESM入口。核对版本、repository与可获得的gitHead/tag及npm integrity；来源或版本不符就停止该依赖接入，不自动换库。只复制所需的完整ESM与MIT许可；记录原始入口、tarball来源、字节数和SHA-256实值到provenance，文件名使用上述固定版本。将上游必要Lenis CSS规则合并进现有样式，不增加运行时CDN。
+- [x] **Step 4: 实现统一滚动。** fine+hover、非reduce且body motion未暂停时使用 `autoRaf: true, smoothWheel: true, lerp: 0.12, syncTouch: false, anchors: false, respectReducedMotion: true`。通过媒体监听与仅观察body的 `data-motion` 属性的MutationObserver更新条件，destroy时都移除。原生导航用scrollend或连续两帧到达目标判断完成，并设1500ms兜底释放；用户中断走取消回调。全局CSS取消smooth、根padding归零，章节CSS留白24px；短视口JS按公式缩小。Lenis只负责位置，不另设章节状态或DOM transform。图像对话框内部使用 `data-lenis-prevent`。
+- [x] **Step 5: 接上导航与失败回退。** 所有显式入口走navigateToChapter；普通链接只拦截无修饰键的本页导航并只写一次history。初始字体校正最多一次，用户活动后失效。scroll控制器使用注入回调，history-scroll导入失败时内联fallback也使用同一滚动driver；driver自身导入失败仍可按相同CSS落点原生导航。减少动态或暂停时显式导航立即完成；媒体变更、隐藏、pagehide销毁Lenis，恢复重建，取消迟到Promise副作用。
+- [x] **Step 6: 运行GREEN并提交。** `node --test tests/page-scroll.test.js tests/history-scroll.test.js tests/site.test.js`、`npm run build`。白名单加入src/page-scroll与两个vendor文件；现有35个发布文件相应变为38个，若Task 1/2实际增加别的发布文件则按明确清单复核，不能删除计数断言。保留SHA-256缓存策略；版本化动态import文件名不可漂移。提交信息 `feat: unify chapter scrolling with optional Lenis`。
 
 ## Task 4: 地图动效收尾与全流程验收
 
@@ -152,7 +152,7 @@ test('late Lenis import cannot start after destroy', async () => {
 
 **Interfaces:** 消费既有 `initEditorialMotion({ root = document, reduced }) -> { pause, resume, destroy }`、`chishui:chapter`、`chishui:map-before`、`chishui:map-after`、`chishui:layout` 与Task 3滚动入口。不改配乐API、地图几何或相机中断语义。
 
-- [ ] **Step 1: 增加真实交互失败断言。** 扩展现有checker，在父任务持有的单一专用Brave执行；先验证旧代码确有对应失败，不用源码字符串冒充交互测试：
+- [x] **Step 1: 增加真实交互失败断言。** 扩展现有checker，在父任务持有的单一专用Brave执行；先验证旧代码确有对应失败，不用源码字符串冒充交互测试：
 
 ```js
 assert.equal(overviewAfter, overviewBefore);
@@ -163,12 +163,12 @@ assert.ok(Math.abs(afterPassiveMapUpdateY - beforePassiveMapUpdateY) <= 1);
 ```
 
 用例覆盖“全部路线”后再点第四渡退出all-routes；手机折叠图仍能点章节、展开图可比较路线；暂停/reduce/隐藏后的路径完整。图片对话框放大并内部滚动时页面位置不变，Escape恢复原焦点。
-- [ ] **Step 2: 实现最小动效修正。** 删除“全部路线”和重播附带的页面居中；折叠、离屏、隐藏时settle路线，已展开可见时才启动播放。保留现有镜头最新状态策略和事件顺序；不在滚动回调里读写交错地调整布局。主题句、图、正文先可读，动画增强失败不隐藏内容。
-- [ ] **Step 3: 跑一次相关全量检查。** `npm test`、`npm run build`、`git diff --check`；预期exit 0，不先把未来结果写成通过。确认最终dist的静态总览、四章、依赖和许可均存在，历史一致性测试未弱化。
-- [ ] **Step 4: 在单浏览器完成验收。** 保持已有 `http://127.0.0.1:4173/` 服务；若没有才启动managed job，不与现有服务抢端口。运行checker新增八个尺寸：320×568、390×844、768×1024、844×390、900×600、901×600、1280×480、1440×900。分别覆盖无脚本、reduce、Lenis故障、history-scroll故障、Anime故障、延迟字体、初始第四渡、正反向手滚、1→4→2、前进后退、旋转与字体放大。检查器若模拟故障，单独记录预期console错误，其他pageerror为0。
-- [ ] **Step 5: 查看截图并写实测记录。** 每个受改动区域至少有一张桌面和一张手机截图，检查图内小字、裁切、阅读顺序、说明完整与控件边界；保存到持久artifacts目录。按design-taste-frontend检查当前素材和受改动区；若指定inspector/meter在当前环境不可运行，明确记录未运行与可用浏览器检查，不伪造评分或归属。真机Safari/微信及实测帧率未做就写未验证。
+- [x] **Step 2: 实现最小动效修正。** 删除“全部路线”和重播附带的页面居中；折叠、离屏、隐藏时settle路线，已展开可见时才启动播放。保留现有镜头最新状态策略和事件顺序；不在滚动回调里读写交错地调整布局。主题句、图、正文先可读，动画增强失败不隐藏内容。
+- [x] **Step 3: 跑一次相关全量检查。** `npm test`、`npm run build`、`git diff --check`；预期exit 0，不先把未来结果写成通过。确认最终dist的静态总览、四章、依赖和许可均存在，历史一致性测试未弱化。
+- [x] **Step 4: 在单浏览器完成验收。** 保持已有 `http://127.0.0.1:4173/` 服务；若没有才启动managed job，不与现有服务抢端口。运行checker新增八个尺寸：320×568、390×844、768×1024、844×390、900×600、901×600、1280×480、1440×900。分别覆盖无脚本、reduce、Lenis故障、history-scroll故障、Anime故障、延迟字体、初始第四渡、正反向手滚、1→4→2、前进后退、旋转与字体放大。检查器若模拟故障，单独记录预期console错误，其他pageerror为0。
+- [x] **Step 5: 查看截图并写实测记录。** 每个受改动区域至少有一张桌面和一张手机截图，检查图内小字、裁切、阅读顺序、说明完整与控件边界；保存到持久artifacts目录。按design-taste-frontend检查当前素材和受改动区；若指定inspector/meter在当前环境不可运行，明确记录未运行与可用浏览器检查，不伪造评分或归属。真机Safari/微信及实测帧率未做就写未验证。
 - [ ] **Step 6: 提交并完成既有发布流程。** 提交信息 `fix: finish map motion and responsive navigation checks`。按审阅时的授权构建并推送既有远程，更新既有根首页；不要另建站点或域名。核对线上HTTP、标题、四渡总览、手机章节与版本资源后提供根首页链接。关闭专用浏览器、收集managed job输出并停止本任务预览服务，不删除用户数据。
 
 ## 执行交接
 
-本轮建议方案B：静态总览和分章简图先保证图文关系，Lenis只增强桌面滚轮。用户审阅后选择本会话Native实施或子代理逐项实施；执行者按Task 1→2→3→4顺序，每项先看到失败证据，再修改和验证。不得把本计划中的建议标成用户已批准，也不得把未来验收标成当前测试结果。
+本方案已由用户批准并按Native模式实施。四个产品提交依次为 `83a011f`、`1abe2cf`、`6b419f7`、`4c9a593`。93项Node测试及本轮Brave场景通过，38个构建文件已推送原站点，Pages构建提交为 `5182db9`。最后的公开页面检查被Cloudflare 403「Just a moment...」验证页拦截；待用户选择自行浏览或授权专用可见浏览器验证，不能将此项记为已通过。
