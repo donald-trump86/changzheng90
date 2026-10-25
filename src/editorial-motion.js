@@ -94,7 +94,6 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   let destroyed = false;
   let departed = false;
   let pendingPlay = true;            // 有新路线待画，进入视口即画
-  let playScheduled = false;         // schedulePlay() 的 rAF 合并标志
   let routeFrame = 0;
   let scrollFrame = 0;
   let progressValue = 0;
@@ -119,6 +118,9 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   };
   const blocked = () => mode() === 'off' || departed || (doc.hidden ?? false);
   const visible = (node) => {
+    if (node.checkVisibility && !node.checkVisibility()) return false;
+    const closed = node.closest('details:not([open])');
+    if (closed && !closed.querySelector(':scope > summary')?.contains(node)) return false;
     const rect = node.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0 && rect.top < win.innerHeight && rect.bottom > 0;
   };
@@ -326,15 +328,9 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   }
 
   function mapInViewport() {
-    if (!mapCanvas) return false;
+    if (!mapCanvas || !visible(mapCanvas)) return false;
     const rect = mapCanvas.getBoundingClientRect();
     return rect.width > 0 && rect.top < win.innerHeight * 0.92 && rect.bottom > win.innerHeight * 0.08;
-  }
-
-  function bringMapIntoView() {
-    if (!mapCanvas || mapInViewport()) return;
-    const rect = mapCanvas.getBoundingClientRect();
-    win.scrollBy({ top: rect.top - (win.innerHeight - rect.height) / 2, behavior: 'auto' });
   }
 
   function pulseMapMarkers() {
@@ -395,11 +391,10 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     run('all-routes', vals, { value: 1 }, { duration: 920, gap: 160, ease: 'outCubic' }, apply, done);
   }
 
-  function playRoute(manual = false) {
+  function playRoute() {
     if (!mapReady()) return;
     invalidateRoute();
     if (blocked()) return;
-    if (manual) bringMapIntoView();
     if (!mapInViewport()) {
       pendingPlay = true; // 等图面进入视口再画：不在画面外放动画
       return;
@@ -444,13 +439,14 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       cancel('ambient');
       return;
     }
-    if (actors.has('ambient')) return;
     if (!river && !art) return;
-    const targets = river && visible(river.closest('svg') || river) ? [river] : [];
-    if (!targets.length && !(art && visible(art))) {
+    const riverVisible = river && visible(river.closest('svg') || river);
+    const artworkVisible = art && visible(art);
+    if (!riverVisible && !artworkVisible) {
       cancel('ambient');
       return;
     }
+    if (actors.has('ambient')) return;
     const phase = { value: 0 };
     run('ambient', [phase], { value: 1 }, { duration: 8000, gap: 0, ease: 'linear', loop: true }, () => {
       if (river) river.style.strokeDashoffset = String(-160 * phase.value);
@@ -503,10 +499,9 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
      合并到下一帧只开画一次，绝不在一次手势里重画两次 */
   function schedulePlay() {
     pendingPlay = true;
-    if (playScheduled) return;
-    playScheduled = true;
-    win.requestAnimationFrame(() => {
-      playScheduled = false;
+    if (routeFrame) return;
+    routeFrame = win.requestAnimationFrame(() => {
+      routeFrame = 0;
       if (pendingPlay && !blocked() && mapInViewport()) playRoute();
     });
   }
@@ -617,7 +612,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       toggle.textContent = fixed ? '系统已减少动态' : (paused || userOff) ? '恢复动画' : '暂停动画';
     }
     doc.dispatchEvent(new CustomEvent('chishui:motion'));
-    if (blocked()) settle();
+    if (blocked() || mode() === 'reduced') settle();
     else {
       renderProgress(readingPosition());
       syncAmbient();
@@ -684,13 +679,13 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     if (typeof win.IntersectionObserver === 'function') {
       observer = new win.IntersectionObserver(safe((entries) => {
         entries.forEach(({ target, isIntersecting }) => {
-          if (!isIntersecting) return;
           if (target === mapCanvas) {
+            if (!isIntersecting) invalidateRoute();
             syncAmbient();
-            if (pendingPlay && mapInViewport()) playRoute();
+            if (isIntersecting && pendingPlay && mapInViewport()) playRoute();
           } else if (target === art) {
             syncAmbient();
-          } else {
+          } else if (isIntersecting) {
             playScene(target);
           }
         });
@@ -738,12 +733,17 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     }
     if (replay) {
       listen(replay, 'click', safe(() => {
-        bringMapIntoView();
-        // 内联脚本随后重发 chishui:chapter；schedulePlay 把两路触发合并为一次开画
+        // Inline chapter events and this request coalesce into one route draw.
         schedulePlay();
       }));
     }
 
+    const explorer = mapCanvas && mapCanvas.closest('details');
+    if (explorer) listen(explorer, 'toggle', safe(() => {
+      if (!explorer.open) invalidateRoute();
+      syncAmbient();
+      if (explorer.open && pendingPlay) schedulePlay();
+    }));
     listen(win, 'scroll', safe(onScroll), { passive: true });
     listen(win, 'resize', safe(() => {
       invalidateRoute();
