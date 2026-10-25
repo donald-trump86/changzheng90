@@ -2,7 +2,7 @@
 
 公开入口为 [https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)，源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。源码维护于 `main`，GitHub Pages 使用 `gh-pages` 分支根目录，自定义域名由 Cloudflare 代理至 GitHub Pages。
 
-本文件描述当前发布方式。本轮响应式四渡页面已推送至 `gh-pages`，部署提交为 `5182db9a1066e1198c2e511cf00a725c72b44b3d`；GitHub Pages 构建状态为 `built`（24.817秒，无错误，完成于2026-10-25 14:25:43，Asia/Shanghai），对应产品源码为 `4c9a5932cf55c93e4dc4375fa43891ce90bc4a3d`。本地最终构建已通过浏览器检查，38个部署文件与构建产物逐个字节一致。14:26通过专用Brave打开原域名根首页时，Cloudflare返回403，页面标题为「Just a moment...」；因此本轮尚未完成自定义域名新版页面的浏览器验收。
+本文件描述当前发布方式。本轮响应式四渡页面已推送至 `gh-pages`，部署提交为 `5182db9a1066e1198c2e511cf00a725c72b44b3d`；GitHub Pages 构建状态为 `built`（24.817秒，无错误，完成于2026-10-25 14:25:43，Asia/Shanghai），对应产品源码为 `4c9a5932cf55c93e4dc4375fa43891ce90bc4a3d`。本地最终构建已通过浏览器检查，38个部署文件与构建产物逐个字节一致。14:26通过专用Brave打开原域名根首页时，Cloudflare返回403，页面标题为「Just a moment...」；因此本轮尚未完成自定义域名新版页面的自动浏览器验收。用户已选择按当前发布结果交付，并自行查看公开页面。
 
 ## 构建与本地检查
 

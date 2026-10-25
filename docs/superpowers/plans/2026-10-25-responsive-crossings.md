@@ -10,7 +10,7 @@
 
 **Spec:** [四渡赤水滚动与移动端地图设计](../specs/2026-10-25-responsive-crossings-design.md)。执行者须先读设计和本计划。
 
-本计划的方案B已获用户批准并按Native模式完成实施。源码已推送，现有GitHub Pages已构建本轮产物；自定义域名的自动访问遇Cloudflare验证页，公开页面浏览器验收尚待完成。实际执行范围见[验证记录](../../verification.md)，发布提交见[部署说明](../../deployment.md)。
+本计划的方案B已获用户批准并按Native模式完成实施。源码已推送，现有GitHub Pages已构建本轮产物；自定义域名的自动访问遇Cloudflare验证页，用户已选择自行查看公开页面，自动浏览器验收保持未完成。实际执行范围见[验证记录](../../verification.md)，发布提交见[部署说明](../../deployment.md)。
 
 ## Global Constraints
 
@@ -167,8 +167,8 @@ assert.ok(Math.abs(afterPassiveMapUpdateY - beforePassiveMapUpdateY) <= 1);
 - [x] **Step 3: 跑一次相关全量检查。** `npm test`、`npm run build`、`git diff --check`；预期exit 0，不先把未来结果写成通过。确认最终dist的静态总览、四章、依赖和许可均存在，历史一致性测试未弱化。
 - [x] **Step 4: 在单浏览器完成验收。** 保持已有 `http://127.0.0.1:4173/` 服务；若没有才启动managed job，不与现有服务抢端口。运行checker新增八个尺寸：320×568、390×844、768×1024、844×390、900×600、901×600、1280×480、1440×900。分别覆盖无脚本、reduce、Lenis故障、history-scroll故障、Anime故障、延迟字体、初始第四渡、正反向手滚、1→4→2、前进后退、旋转与字体放大。检查器若模拟故障，单独记录预期console错误，其他pageerror为0。
 - [x] **Step 5: 查看截图并写实测记录。** 每个受改动区域至少有一张桌面和一张手机截图，检查图内小字、裁切、阅读顺序、说明完整与控件边界；保存到持久artifacts目录。按design-taste-frontend检查当前素材和受改动区；若指定inspector/meter在当前环境不可运行，明确记录未运行与可用浏览器检查，不伪造评分或归属。真机Safari/微信及实测帧率未做就写未验证。
-- [ ] **Step 6: 提交并完成既有发布流程。** 提交信息 `fix: finish map motion and responsive navigation checks`。按审阅时的授权构建并推送既有远程，更新既有根首页；不要另建站点或域名。核对线上HTTP、标题、四渡总览、手机章节与版本资源后提供根首页链接。关闭专用浏览器、收集managed job输出并停止本任务预览服务，不删除用户数据。
+- [x] **Step 6: 提交并完成既有发布流程（用户选择自行浏览公开页面）。** 提交信息 `fix: finish map motion and responsive navigation checks`。按审阅时的授权构建并推送既有远程，更新既有根首页；不要另建站点或域名。核对线上HTTP、标题、四渡总览、手机章节与版本资源后提供根首页链接。关闭专用浏览器、收集managed job输出并停止本任务预览服务，不删除用户数据。
 
 ## 执行交接
 
-本方案已由用户批准并按Native模式实施。四个产品提交依次为 `83a011f`、`1abe2cf`、`6b419f7`、`4c9a593`。93项Node测试及本轮Brave场景通过，38个构建文件已推送原站点，Pages构建提交为 `5182db9`。最后的公开页面检查被Cloudflare 403「Just a moment...」验证页拦截；待用户选择自行浏览或授权专用可见浏览器验证，不能将此项记为已通过。
+本方案已由用户批准并按Native模式实施。四个产品提交依次为 `83a011f`、`1abe2cf`、`6b419f7`、`4c9a593`。93项Node测试及本轮Brave场景通过，38个构建文件已推送原站点，Pages构建提交为 `5182db9`。最后的公开页面检查被Cloudflare 403「Just a moment...」验证页拦截；用户已选择接受当前发布结果并自行浏览，线上自动浏览器验收仍记为未完成。
