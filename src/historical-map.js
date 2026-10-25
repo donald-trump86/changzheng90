@@ -3,7 +3,7 @@
    an Anime actor. */
 (() => {
   'use strict';
-  const LABEL_PX = 14.5;
+  const LABEL_PX = 16;
   const TWEEN_MS = 520;
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -44,7 +44,6 @@
     let view = 'overview';
     let allRoutes = false;
     let allView = null; // View to restore when the all-routes reading mode ends.
-    let allRoutesBlock = null;
     let fitting = false;
     let geometry = data.geometry(chapter, view);
     let camera = null;
@@ -63,12 +62,7 @@
       if (fitting) return;
       fitting = true;
       try {
-        // Toolbar height is measured after wrapping. The canvas, not its notes,
-        // is bounded so native replay can bring every moving point into view.
-        const toolbar = document.querySelector('.study-toolbar');
-        const available = Math.max(1, innerHeight - (toolbar?.getBoundingClientRect().height || 0) - 16);
-        canvas.style.setProperty('--map-max-width', `${available * 1.22}px`);
-        canvas.style.maxHeight = `${available}px`;
+        const available = Math.max(1, innerHeight - 32);
         const matrix = svg.getScreenCTM();
         const scale = overrideScale || (matrix ? Math.hypot(matrix.a, matrix.b) : 0);
         if (!scale) return;
@@ -218,7 +212,6 @@
       $('map-relation').hidden = ![2, 4].includes(chapter);
       buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.mapView === view)));
       allButtons.forEach((button) => button.setAttribute('aria-pressed', String(allRoutes)));
-      if (allRoutesBlock) allRoutesBlock.open = allRoutes;
       fit();
     }
     /* ---- camera: eased viewBox glide, instantly cancellable ---- */
@@ -316,13 +309,13 @@
     }
     /* Accessible reading of the four-leg sequence, text sourced from stage data. */
     function mountOverviewDescription() {
-      const block = document.createElement('details');
+      const block = document.createElement('section');
       block.className = 'map-all-routes';
       const sequence = data.stages.map((stage, index) => {
         const direction = (stage.chronology.match(/西渡|东渡/) || [''])[0];
         return `${names[index]}${direction}`;
       }).join('、');
-      block.innerHTML = `<summary>四渡路线序列：${sequence}</summary>`
+      block.innerHTML = `<h4>四渡路线序列：${sequence}</h4>`
         + '<p>以下按阶段列出路线时序，方向用语取自各阶段史料摘要，不补充地图之外的地理细节。</p><ol>'
         + data.stages.map((stage, index) => `<li><strong>${names[index]}</strong>（${stage.chronology}）：${stage.summary}</li>`).join('')
         + '</ol>';
@@ -331,7 +324,6 @@
       const existing = document.querySelector('.map-all-routes');
       if (existing) existing.remove(); // Re-entrant: a second create() replaces, never stacks.
       host.appendChild(block);
-      allRoutesBlock = block;
     }
     // Fallback toggle for [data-map-all]: if the page wires its own handler that
     // runs first and flips the state, this deferred one stands down.
@@ -344,8 +336,6 @@
     mountOverviewDescription();
     commit();
     document.querySelector('.map-view-controls').hidden = false;
-    document.querySelector('.map-details').open = false;
-    document.querySelector('.map-caption').textContent = '现代地点作方位参照；渡口区域、河道与行军连线经概化，不表示1935年精确测绘。';
     return { setChapter, setView, setAllRoutes, fit };
   }
   globalThis.ChishuiHistoricalMap = { create };

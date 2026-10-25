@@ -54,6 +54,20 @@ async function withFixture(run) {
   }
 }
 
+test('supplemental references default closed while chapters keep their own maps', async () => {
+  const html = await readFile(join(root, 'index.html'), 'utf8');
+  for (const id of ['archives', 'source-history', 'audio-copyright', 'map-method']) {
+    const tag = html.match(new RegExp(`<details\\b[^>]*\\bid="${id}"[^>]*>`))?.[0];
+    assert.ok(tag, `${id} is a native disclosure`);
+    assert.doesNotMatch(tag, /\\bopen(?:\\s|>)/, `${id} defaults closed`);
+  }
+  assert.equal((html.match(/<svg id="route-map"/g) || []).length, 1);
+  assert.equal((html.match(/data-static-map=/g) || []).length, 5);
+  assert.match(html, /九溪口绝对坐标未核/);
+  assert.match(html, /CC BY-SA 4\.0/);
+  assert.match(html, /'The Great Sea' by Scott Buckley/);
+});
+
 test('custom domain is exact in source and deployment root', async () => {
   assert.equal(await readFile(join(root, 'public/CNAME'), 'utf8'), domain);
   assert.equal(await readFile(join(dist, 'CNAME'), 'utf8'), domain);

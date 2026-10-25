@@ -181,7 +181,7 @@ function buildEnv({ reduce = false, motionOff = false, previousRoutes = 3 } = {}
   }
   make('text', { id: 'map-river-label', className: 'map-type river-name', parent: svg });
   make('figcaption', { className: 'map-caption', parent: figure });
-  const notes = make('div', { className: 'map-notes', parent: figure });
+  const notes = make('details', { id: 'map-method', className: 'map-notes', parent: body });
   make('p', { id: 'map-stage-note', parent: notes });
   make('p', { id: 'map-view-note', parent: notes });
   make('p', { id: 'map-stage-summary', parent: notes });
@@ -337,7 +337,7 @@ test('camera glides between detail windows and settles exactly', () => {
   assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, 1,
     'map-after fires once, after settle');
   const settled = env.svg.getScreenCTM();
-  const settledFont = `${14.5 / Math.hypot(settled.a, settled.b)}px`;
+  const settledFont = `${16 / Math.hypot(settled.a, settled.b)}px`;
   for (const item of env.visibleLabels()) assert.equal(item.style.fontSize, settledFont);
   if (midFont) assert.notEqual(midFont, settledFont, 'label size tracks the camera to stay readable mid-flight');
   map.setChapter(2);
@@ -449,9 +449,9 @@ test('an accessible four-leg west/east description is mounted near the map from 
   const html = block.innerHTML;
   for (const stage of data.stages) assert.ok(html.includes(stage.summary), 'leg text comes from stage summaries');
   assert.match(html, /一渡西渡、二渡东渡、三渡西渡、四渡东渡/, 'the west/east/west/east sequence is described');
-  assert.equal(block.open, false);
+  assert.equal(block.tagName, 'SECTION');
   map.setAllRoutes(true);
-  assert.equal(block.open, true, 'the description opens together with the mode');
+  assert.equal(env.document.getElementById('map-method').open, false, 'all-routes mode keeps supplemental sources closed');
   env.create();
   assert.equal(env.document.querySelectorAll('.map-all-routes').length, 1,
     'a second create() replaces the description instead of stacking it');

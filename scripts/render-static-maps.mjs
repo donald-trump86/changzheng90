@@ -36,7 +36,7 @@ export function renderStaticMap({ id, chapter = null, mapData, chapters }) {
               <figcaption id="${id}-caption"><strong>${e(title)}</strong><p>${e(notice)}</p></figcaption>
               <svg viewBox="${geometry.viewBox.join(' ')}" role="img" aria-labelledby="${id}-title ${id}-desc" xmlns="http://www.w3.org/2000/svg">
                 <title id="${id}-title">${e(title)}</title><desc id="${id}-desc">${e(notice)}</desc>
-                <defs><marker id="${marker}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10Z" fill="currentColor"/></marker></defs>
+                <defs><marker id="${marker}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="${overview ? 42 : 13}" markerHeight="${overview ? 42 : 13}" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10Z" fill="currentColor"/></marker></defs>
                 <g aria-hidden="true"><path class="static-river" d="${e(mapData.path(mapData.river.points))}"/>${areas}${paths}${placeNames}</g>
               </svg>${legend}
             </figure>`;

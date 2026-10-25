@@ -1,6 +1,6 @@
 async (page, { phase = 'all' } = {}) => {
-  const widths = { '320': [320, 844], '390': [390, 844], '768': [768, 1024], '1440': [1440, 1000], landscape: [844, 390] };
-  if (phase !== 'all' && phase !== 'extras' && !widths[phase]) throw new Error(`Unknown QA phase: ${phase}`);
+  const widths = { '320': [320, 568], '390': [390, 844], '768': [768, 1024], landscape: [844, 390], '900': [900, 600], '901': [901, 600], short: [1280, 480], '1440': [1440, 900] };
+  if (phase !== 'all' && phase !== 'extras' && phase !== 'layout' && !widths[phase]) throw new Error(`Unknown QA phase: ${phase}`);
   const base = 'http://127.0.0.1:4173/';
   const originalViewport = page.viewportSize();
   const checks = [], errors = [], screenshots = [];
@@ -26,13 +26,13 @@ async (page, { phase = 'all' } = {}) => {
     await page.waitForFunction(n => document.querySelector(`[data-chapter-choice="${n}"]`).getAttribute('aria-current') === 'true', number);
   };
   async function shot(name) {
-    const path = `/tmp/dsh-browser-output/brave-agent/museum-${name}.png`;
+    const path = `/Users/jasondai/changzheng90/artifacts/responsive-crossings/full-${name}.png`;
     await page.screenshot({ path, fullPage: true, animations: 'disabled' });
     screenshots.push(path);
   }
   try { await page.unrouteAll(); } catch { /* no stale interceptors */ }
   try {
-    for (const [label, size] of Object.entries(widths).filter(([key]) => phase === 'all' || phase === key)) {
+    for (const [label, size] of Object.entries(widths).filter(([key]) => phase === 'all' || phase === 'layout' || phase === key)) {
       await check(`${label}: layout, full narrative and decoded local images`, async () => {
         await page.setViewportSize({ width: size[0], height: size[1] });
         await open();
@@ -55,9 +55,23 @@ async (page, { phase = 'all' } = {}) => {
         assert(!evidence.badControls.length && !evidence.badText.length, `readability ${JSON.stringify(evidence)}`);
         assert(evidence.chapters === 4 && evidence.h1 === '赤水河，为什么要渡四次？' && evidence.ending === '山河为证', 'narrative structure');
         assert(evidence.images.length >= 3 && evidence.images.every(img => img.width > 0), 'real image decoding');
+        const layout = await page.evaluate(() => ({
+          contextColumns: getComputedStyle(document.querySelector('.context-layout')).gridTemplateColumns.split(/\s+/).length,
+          mode: document.body.dataset.mapLayout,
+          mapHeight: document.querySelector('.map-explorer').getBoundingClientRect().height,
+          staticMaps: document.querySelectorAll('[data-static-map]').length,
+          liveMaps: document.querySelectorAll('#route-map').length,
+          closed: [...document.querySelectorAll('#archives,#source-history,#audio-copyright,#map-method')].every(el => !el.open),
+        }));
+        assert(layout.contextColumns === (size[0] >= 901 ? 2 : 1), `context columns ${JSON.stringify(layout)}`);
+        assert(layout.staticMaps === 5 && layout.liveMaps === 1 && layout.closed, `map or disclosure structure ${JSON.stringify(layout)}`);
+        if (size[0] <= 900 || size[1] < 600) assert(layout.mode === 'flow', 'small viewport remains in flow');
+        if (layout.mode === 'pinned') assert(layout.mapHeight <= size[1] - 32, `whole map unit fits ${layout.mapHeight}`);
+        evidence.layout = layout;
         await shot(label);
         return evidence;
       });
+      if (phase === 'layout') continue;
       await check(`${label}: chapter direction, all routes, reverse scroll and deep links`, async () => {
         await open();
         const states = [];
@@ -68,6 +82,7 @@ async (page, { phase = 'all' } = {}) => {
           states.push({ n, direction, route: await page.locator('#current-route').getAttribute('d') });
         }
         assert(new Set(states.slice(0, 4).map(s => s.route)).size === 4, 'four distinct route geometries');
+        if (!await page.locator('.map-explorer').evaluate(el => el.open)) await page.locator('.map-explorer > summary').click();
         await page.locator('[data-map-all]').click();
         assert(await page.locator('[data-map-all]').getAttribute('aria-pressed') === 'true', 'all-routes control');
         assert(await page.locator('[data-previous-route]').evaluateAll(nodes => nodes.filter(n => getComputedStyle(n).display !== 'none').length) === 3, 'three contextual routes');

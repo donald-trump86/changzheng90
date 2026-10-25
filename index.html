@@ -69,7 +69,6 @@
     .chapter-link time { font-size: 16px; font-variant-numeric: tabular-nums; }
     .chapter-link[aria-current="true"] { background: var(--accent); color: var(--surface); }
     .chapter-link:hover:not([aria-current="true"]) { background: var(--surface); }
-    .reading-workspace { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: "context map" "crossings map"; gap: 0 40px; align-items: start; }
     .route-sheet { margin: 0; padding: 26px 28px 24px; background: var(--map-paper); min-width: 0; }
     .route-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; align-items: baseline; }
     .route-head h3 { font-family: var(--sans); font-size: 18px; font-weight: 600; }
@@ -148,7 +147,6 @@
       .opening-meta { max-width: 18em; }
       .chapter-link { flex-direction: column; align-items: start; gap: 2px; }
       .reader { padding: 28px; }
-      .reading-workspace { gap: 24px; }
       .route-sheet { padding: 24px; }
       .continuation { gap: 36px; }
       .after-route { padding: 28px; }
@@ -163,11 +161,9 @@
       .context { padding: 28px; margin-top: 44px; }
       .section-heading { display: block; }
       .section-heading p { margin-top: 14px; max-width: 42em; }
-      .reading-workspace { grid-template-columns: 1fr; grid-template-areas: "context" "map" "crossings"; gap: 20px; }
-      .route-sheet { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 12px 24px; }
+      .route-sheet { display: block; }
       .route-text { align-self: start; padding-top: 12px; }
-      .map-canvas { margin-top: 0; grid-column: 2; grid-row: 1 / span 2; }
-      .map-caption { align-self: end; grid-column: 1; }
+      .map-canvas { margin-top: 12px; }
       .route-head { display: block; }
       .route-direction { display: block; margin-top: 6px; }
       .route-date { margin-top: 10px; }
@@ -264,12 +260,6 @@
       .river-bank { stroke: Canvas; }
     }
 
-    /* Task 1 narrative layout (print-atlas.css refines; never use the
-       grid-template shorthand on .reading-workspace, it wipes these areas) */
-    .reading-workspace { grid-template-areas: "context map" "crossings map"; }
-    .context { grid-area: context; }
-    .crossings { grid-area: crossings; }
-    .route-sheet { grid-area: map; position: sticky; top: 16px; align-self: start; }
     .chapter-theme { margin: -2px 0 14px; color: var(--muted); font-size: 17px; }
     .dialog-tools { display: flex; gap: 4px; margin-left: auto; }
     .dialog-tools button { min-height: 44px; padding: 8px 14px; font-size: 16px; }
@@ -280,8 +270,8 @@
 
   </style>
   <link rel="stylesheet" href="./src/editorial-motion.css?v=f444638c">
-  <link rel="stylesheet" href="./src/print-atlas.css?v=02f3105c">
-  <link rel="stylesheet" href="./src/historical-map.css?v=61fbdd14">
+  <link rel="stylesheet" href="./src/print-atlas.css?v=b9e9a7c0">
+  <link rel="stylesheet" href="./src/historical-map.css?v=25028781">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到正文</a>
@@ -326,8 +316,8 @@
       </figure>
     </section>
 
-    <div class="reading-workspace">
-    <section class="context" aria-labelledby="context-title">
+    <section class="context context-layout" aria-labelledby="context-title">
+      <div class="context-history">
       <div class="context-intro">
         <h2 id="context-title">把四渡放回长征</h2>
         <p class="context-lead">长征历时1934—1936年。四渡赤水是其中的关键战役；1935年中央红军到达陕北，与1936年红军三大主力会师，是两个不同的历史节点。</p>
@@ -339,16 +329,33 @@
         <li><time datetime="1935-10">1935年10月</time><p>中央红军到达陕北。</p></li>
         <li><time datetime="1936-10">1936年10月</time><p>红军三大主力会师，长征胜利结束。</p></li>
       </ol><!-- history:timeline:end -->
+      </div>
       <!-- history:context-overview:start --><figure class="static-map context-overview" data-static-map="overview" aria-labelledby="context-map-caption">
               <figcaption id="context-map-caption"><strong>四渡赤水总览</strong><p>四条线按渡次区分，表示阶段行军概括连线，不是逐日精确路线。现代地点仅作方位参照，河道与渡河区域经概化。</p></figcaption>
               <svg viewBox="0 220 1000 600" role="img" aria-labelledby="context-map-title context-map-desc" xmlns="http://www.w3.org/2000/svg">
                 <title id="context-map-title">四渡赤水总览</title><desc id="context-map-desc">四条线按渡次区分，表示阶段行军概括连线，不是逐日精确路线。现代地点仅作方位参照，河道与渡河区域经概化。</desc>
-                <defs><marker id="context-map-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10Z" fill="currentColor"/></marker></defs>
+                <defs><marker id="context-map-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="42" markerHeight="42" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10Z" fill="currentColor"/></marker></defs>
                 <g aria-hidden="true"><path class="static-river" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/><ellipse class="static-ford" cx="470" cy="345" rx="25" ry="15"/><ellipse class="static-ford" cx="497" cy="390" rx="27" ry="16.2"/><ellipse class="static-ford" cx="520" cy="458" rx="26" ry="15.6"/><ellipse class="static-ford" cx="575" cy="455" rx="25" ry="15"/><ellipse class="static-ford" cx="650" cy="600" rx="28" ry="16.8"/><path class="static-route static-route-1" data-static-route="1" d="M550 381L497 390L250 480L84.822 599.36" marker-end="url(#context-map-arrow)"/><path class="static-route static-route-2" data-static-route="2" d="M84.822 599.36L300 540L520 458L660 430L858.152 453.614L875 535L903.217 658.236" marker-end="url(#context-map-arrow)"/><path class="static-route static-route-3" data-static-route="3" d="M903.217 658.236L770 610L650 600L540 550L390 430" marker-end="url(#context-map-arrow)"/><path class="static-route static-route-4" data-static-route="4" d="M390 430L450 470L520 458L640 510L730 770" marker-end="url(#context-map-arrow)"/><circle class="static-place" cx="84.822" cy="599.36" r="7"/><text class="static-place-name" x="84.822" y="664.36" text-anchor="start">扎西地区</text><circle class="static-place" cx="903.217" cy="658.236" r="7"/><text class="static-place-name" x="903.217" y="723.236" text-anchor="end">遵义</text></g>
               </svg><ol class="static-route-key" aria-label="四渡路线与日期"><li><span class="static-line-key static-line-key-1" aria-hidden="true"></span><div><strong>一渡 · 西渡</strong><span>1935年1月29日拂晓</span><span>元厚渡河区、土城渡河区</span></div></li><li><span class="static-line-key static-line-key-2" aria-hidden="true"></span><div><strong>二渡 · 东渡</strong><span>1935年2月18—21日</span><span>太平渡一带、二郎滩一带</span></div></li><li><span class="static-line-key static-line-key-3" aria-hidden="true"></span><div><strong>三渡 · 西渡</strong><span>1935年3月16—17日</span><span>茅台渡河区</span></div></li><li><span class="static-line-key static-line-key-4" aria-hidden="true"></span><div><strong>四渡 · 东渡</strong><span>1935年3月21—22日</span><span>太平渡一带、二郎滩一带</span></div></li></ol>
             </figure><!-- history:context-overview:end -->
     </section>
 
+
+
+    <section id="crossings" class="crossings" aria-labelledby="crossings-title">
+      <div class="section-heading">
+        <h2 id="crossings-title">四次渡河，形势在变</h2>
+        <p>选择一渡至四渡，对照日期和渡河方向，再展开当时的行动与结果。四次渡河是在变化的形势中作出的调整。</p>
+      </div>
+      <!-- history:chapter-nav:start --><nav class="chapter-nav" aria-label="选择四渡赤水章节">
+        <a class="chapter-link" href="#crossing-one" data-chapter-choice="1" aria-current="true"><strong>一渡</strong><time datetime="1935-01-29">1.29</time></a>
+        <a class="chapter-link" href="#crossing-two" data-chapter-choice="2"><strong>二渡</strong><time datetime="1935-02-18">2.18—21</time></a>
+        <a class="chapter-link" href="#crossing-three" data-chapter-choice="3"><strong>三渡</strong><time datetime="1935-03-16">3.16—17</time></a>
+        <a class="chapter-link" href="#crossing-four" data-chapter-choice="4"><strong>四渡</strong><time datetime="1935-03-21">3.21—22</time></a>
+      </nav><!-- history:chapter-nav:end -->
+<div class="crossings-layout">
+        <details class="map-explorer" id="map-explorer">
+          <summary>交互地图：比较路线、查看渡口</summary>
         <figure class="route-sheet" aria-labelledby="map-heading">
           <div class="route-text">
             <div class="route-head"><h3 id="map-heading">四渡赤水区域图</h3><!-- history:route-direction:start --><p class="route-direction" id="route-direction">一渡 · 西渡</p><!-- history:route-direction:end --></div>
@@ -417,45 +424,9 @@
               </g>
             </svg>
           </div>
-          <figcaption class="map-caption">第一渡静态区域图。现代地点作方位参照；渡河区域、河道与连线经概化。其余各渡见完整正文。</figcaption>
-          <div class="map-notes">
-            <ul class="map-legend" aria-label="地图图例">
-              <li><span class="map-key place" aria-hidden="true"></span>现代地点参照</li><li><span class="map-key ford" aria-hidden="true"></span>渡河区域</li>
-              <li><span class="map-key water" aria-hidden="true"></span>概化河流</li><li><span class="map-key current" aria-hidden="true"></span>本阶段概括线</li>
-              <li><span class="map-key previous" aria-hidden="true"></span>此前阶段</li>
-            </ul>
-            <!-- history:map-chronology:start --><p id="map-stage-note" class="map-stage-note">1月29日西渡；2月上旬向扎西集中。</p><!-- history:map-chronology:end -->
-            <!-- history:map-summary:start --><p id="map-stage-summary" class="map-stage-summary">土城、猿猴场（今元厚）地区分路西渡，向川南机动，随后在扎西地区集中。连线概括阶段顺序，不是1月29日当天全程。</p><!-- history:map-summary:end -->
-            <p id="map-relation" class="map-relation" hidden><strong>太平河段关系</strong>：太平渡上游约5千米为九溪口，二渡、四渡均涉及这一渡口组。此处只列关系；九溪口绝对坐标未核。太平渡、二郎滩是并列渡口，不是沿红线依次到访。</p>
-            <details class="map-details" open>
-              <summary>地点、河段与行军线怎样阅读</summary>
-              <p>图中十个实点是现代参照：元厚、土城、太平、二郎、茅台、扎西、古蔺、习水、桐梓、遵义。空心区域表示渡河的大致地区，不是1935年浮桥或渡口测点。太平渡口与现代镇政府相距约1.8千米，二郎滩渡口约550米；图上不将镇点当作历史渡口。</p>
-              <!-- history:map-history-list:start --><ul>
-                <li>一渡：土城南北、猿猴场（今元厚）地区西渡，向川南转移，随后在川滇边扎西地区集中。</li>
-                <li>二渡：太平渡、二郎滩、九溪口等分路东渡；2月24日桐梓，25—26日娄山关战斗，28日再占遵义。</li>
-                <li>三渡：遵义地区西进，茅台及附近西渡，再向镇龙山、大村、铁厂等川南地区机动。“川南机动区”是宽泛区域，不表示进入古蔺县城。</li>
-                <li>四渡：从川南折返，经太平渡、二郎滩、九溪口等东渡，随后向南；3月31日南渡乌江属于后续行动。</li>
-              </ul><!-- history:map-history-list:end -->
-              <p>九溪口在太平渡上游约5千米，未核绝对坐标，未落地理点。娄山关只按桐梓南、遵义北的关系标为概略通道，未核定关口坐标。手机省略的次要标签可在本资料区查阅。</p>
-              <p>赤水河源出镇雄，下游在合江入长江。图上河道是依据现代地点方位及茅台在二郎上游等关系绘制的原创概化线；未取得测绘河线，也不虚构支流汇入口。当地河湾两岸不能永久等同“川南／黔北”。</p>
-              <p>依据：<a href="https://www.zggzswdsyjs.cn/yjddesdslzk/202210/t20221017_76757074.html" target="_blank" rel="noopener noreferrer">贵州党史资料（2022）</a>、<a href="https://www.dswxyjy.org.cn/BIG5/n1/2026/0930/c244516-40808291.html" target="_blank" rel="noopener noreferrer">党史和文献研究院（2026）</a>、<a href="https://www.cac.gov.cn/2016-08/22/c_1119430867.htm" target="_blank" rel="noopener noreferrer">《四渡赤水出奇兵》</a>、<a href="http://scdfz.sc.gov.cn/ztzl/hjczzsc/zztp/hjzzzlz/content_20517" target="_blank" rel="noopener noreferrer">四川省情网渡口资料</a>、<a href="https://zyhc.gov.cn/hmzc/rwhc/lyjd/201906/t20190612_2682987.html" target="_blank" rel="noopener noreferrer">汇川区娄山关资料</a>。</p>
-            </details>
-            <p class="map-credit">地形：<a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo / Copernicus GLO-90</a>，<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>；10×9点粗采样经插值、晕渲修改，210—1845米，不是90米分辨率地图或1935年地表复原。</p>
-            <p class="map-credit">现代参照：<a href="https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=query&amp;prop=coordinates" target="_blank" rel="noopener noreferrer">维基百科贡献者 / GeoData</a>（<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>）、<a href="https://www.wikidata.org/wiki/Wikidata:Licensing" target="_blank" rel="noopener noreferrer">Wikidata（CC0）</a>，2026-10-23读取；现代点不等于历史测点。地图数据与自绘图形经概化，以CC BY-SA 4.0提供；原照片和字体另依各自许可。</p>
-          </div>
+          <figcaption class="map-caption">方向、河道与行军连线均为概略示意。<a href="#map-method">地图依据与完整说明</a></figcaption>
         </figure>
-
-    <section id="crossings" class="crossings" aria-labelledby="crossings-title">
-      <div class="section-heading">
-        <h2 id="crossings-title">四次渡河，形势在变</h2>
-        <p>选择一渡至四渡，对照日期和渡河方向，再展开当时的行动与结果。四次渡河是在变化的形势中作出的调整。</p>
-      </div>
-      <!-- history:chapter-nav:start --><nav class="chapter-nav" aria-label="选择四渡赤水章节">
-        <a class="chapter-link" href="#crossing-one" data-chapter-choice="1" aria-current="true"><strong>一渡</strong><time datetime="1935-01-29">1.29</time></a>
-        <a class="chapter-link" href="#crossing-two" data-chapter-choice="2"><strong>二渡</strong><time datetime="1935-02-18">2.18—21</time></a>
-        <a class="chapter-link" href="#crossing-three" data-chapter-choice="3"><strong>三渡</strong><time datetime="1935-03-16">3.16—17</time></a>
-        <a class="chapter-link" href="#crossing-four" data-chapter-choice="4"><strong>四渡</strong><time datetime="1935-03-21">3.21—22</time></a>
-      </nav><!-- history:chapter-nav:end -->
+        </details>
         <div class="reader">
           <!-- history:chapters:start --><article id="crossing-one" class="chapter-panel" data-chapter="1" data-direction-label="西渡" aria-labelledby="chapter-one-title">
             <p class="chapter-date"><span>一渡</span><time datetime="1935-01-29">1935年1月29日拂晓</time></p>
@@ -535,8 +506,32 @@
             <button type="button" class="pager-button" id="next-chapter">下一渡 →</button>
           </div>
         </div>
+      </div>
+          <details id="map-method" class="map-notes map-method"><summary>地图依据与完整说明</summary>
+            <ul class="map-legend" aria-label="地图图例">
+              <li><span class="map-key place" aria-hidden="true"></span>现代地点参照</li><li><span class="map-key ford" aria-hidden="true"></span>渡河区域</li>
+              <li><span class="map-key water" aria-hidden="true"></span>概化河流</li><li><span class="map-key current" aria-hidden="true"></span>本阶段概括线</li>
+              <li><span class="map-key previous" aria-hidden="true"></span>此前阶段</li>
+            </ul>
+            <!-- history:map-chronology:start --><p id="map-stage-note" class="map-stage-note">1月29日西渡；2月上旬向扎西集中。</p><!-- history:map-chronology:end -->
+            <!-- history:map-summary:start --><p id="map-stage-summary" class="map-stage-summary">土城、猿猴场（今元厚）地区分路西渡，向川南机动，随后在扎西地区集中。连线概括阶段顺序，不是1月29日当天全程。</p><!-- history:map-summary:end -->
+            <p id="map-relation" class="map-relation" hidden><strong>太平河段关系</strong>：太平渡上游约5千米为九溪口，二渡、四渡均涉及这一渡口组。此处只列关系；九溪口绝对坐标未核。太平渡、二郎滩是并列渡口，不是沿红线依次到访。</p>
+            <div class="map-details">
+              <p>图中十个实点是现代参照：元厚、土城、太平、二郎、茅台、扎西、古蔺、习水、桐梓、遵义。空心区域表示渡河的大致地区，不是1935年浮桥或渡口测点。太平渡口与现代镇政府相距约1.8千米，二郎滩渡口约550米；图上不将镇点当作历史渡口。</p>
+              <!-- history:map-history-list:start --><ul>
+                <li>一渡：土城南北、猿猴场（今元厚）地区西渡，向川南转移，随后在川滇边扎西地区集中。</li>
+                <li>二渡：太平渡、二郎滩、九溪口等分路东渡；2月24日桐梓，25—26日娄山关战斗，28日再占遵义。</li>
+                <li>三渡：遵义地区西进，茅台及附近西渡，再向镇龙山、大村、铁厂等川南地区机动。“川南机动区”是宽泛区域，不表示进入古蔺县城。</li>
+                <li>四渡：从川南折返，经太平渡、二郎滩、九溪口等东渡，随后向南；3月31日南渡乌江属于后续行动。</li>
+              </ul><!-- history:map-history-list:end -->
+              <p>九溪口在太平渡上游约5千米，未核绝对坐标，未落地理点。娄山关只按桐梓南、遵义北的关系标为概略通道，未核定关口坐标。手机省略的次要标签可在本资料区查阅。</p>
+              <p>赤水河源出镇雄，下游在合江入长江。图上河道是依据现代地点方位及茅台在二郎上游等关系绘制的原创概化线；未取得测绘河线，也不虚构支流汇入口。当地河湾两岸不能永久等同“川南／黔北”。</p>
+              <p>依据：<a href="https://www.zggzswdsyjs.cn/yjddesdslzk/202210/t20221017_76757074.html" target="_blank" rel="noopener noreferrer">贵州党史资料（2022）</a>、<a href="https://www.dswxyjy.org.cn/BIG5/n1/2026/0930/c244516-40808291.html" target="_blank" rel="noopener noreferrer">党史和文献研究院（2026）</a>、<a href="https://www.cac.gov.cn/2016-08/22/c_1119430867.htm" target="_blank" rel="noopener noreferrer">《四渡赤水出奇兵》</a>、<a href="http://scdfz.sc.gov.cn/ztzl/hjczzsc/zztp/hjzzzlz/content_20517" target="_blank" rel="noopener noreferrer">四川省情网渡口资料</a>、<a href="https://zyhc.gov.cn/hmzc/rwhc/lyjd/201906/t20190612_2682987.html" target="_blank" rel="noopener noreferrer">汇川区娄山关资料</a>。</p>
+            </div>
+            <p class="map-credit">地形：<a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo / Copernicus GLO-90</a>，<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>；10×9点粗采样经插值、晕渲修改，210—1845米，不是90米分辨率地图或1935年地表复原。</p>
+            <p class="map-credit">现代参照：<a href="https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=query&amp;prop=coordinates" target="_blank" rel="noopener noreferrer">维基百科贡献者 / GeoData</a>（<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>）、<a href="https://www.wikidata.org/wiki/Wikidata:Licensing" target="_blank" rel="noopener noreferrer">Wikidata（CC0）</a>，2026-10-23读取；现代点不等于历史测点。地图数据与自绘图形经概化，以CC BY-SA 4.0提供；原照片和字体另依各自许可。</p>
+          </details>
     </section>
-    </div>
 
     <section id="continuation" class="continuation continuation-layout" aria-labelledby="continuation-title">
       <div class="continuation-copy">
@@ -553,22 +548,23 @@
       </div>
     </section>
 
-    <section id="archives" class="archives" aria-labelledby="archives-title">
-      <div class="archives-heading"><h2 id="archives-title">在原图中读历史</h2><p>两幅红军时期的历史照片，保留完整画面与原有比例。图中的部队、事件和时间各有归属，图注随原图一同阅读。</p></div>
+    <details id="archives" class="archives supplemental" aria-labelledby="archives-title">
+      <summary><span id="archives-title">参考图像</span><span class="supplement-hint">两幅历史图像</span></summary>
+      <div class="archives-heading"><p>两幅红军时期的历史照片，保留完整画面与原有比例。图中的部队、事件和时间各有归属，图注随原图一同阅读。</p></div>
       <div class="archives-grid">
         <figure class="archive-primary">
           <a class="image-link" href="./design-study/long-march-gathering.jpg?v=dcc1807e" data-image-view data-image-title="红军集会 · 1930年代" data-image-caption="红军集会，1930年代。具体年份、地点与人物未详，不能确认为四渡赤水现场。这幅集会照为四次机动提供队伍生活的背景，不据此指认某一渡的部队或事件。来源：Wikimedia Commons，File:Long-march.jpg；文件页标记 PD-China 和 PD-US1996。标记的适用范围与限制见‘史实与图像出处’。" aria-label="查看完整原图：红军集会，1930年代，具体年份地点人物未详"><picture><source type="image/webp" srcset="./public/images/gathering-320.webp?v=74e2dae3 320w, ./public/images/gathering-585.webp?v=19790716 585w" sizes="(min-width: 1024px) 42vw, (min-width: 768px) 46vw, calc(100vw - 48px)"><img src="./public/images/gathering-585.webp?v=19790716" alt="1930年代红军集会历史照片，具体年份、地点与人物未详，完整画面保留。" width="585" height="310" loading="lazy"></picture></a>
-          <figcaption><strong>红军集会 · 1930年代</strong>具体年份、地点与人物未详，不能确认为四渡赤水现场。这幅集会照为四次机动提供队伍生活的背景，不据此指认某一渡的部队或事件。<a class="image-caption-action" href="#sources">查看来源与复用状态</a></figcaption>
+          <figcaption><strong>红军集会 · 1930年代</strong>具体年份、地点与人物未详，不能确认为四渡赤水现场。这幅集会照为四次机动提供队伍生活的背景，不据此指认某一渡的部队或事件。<a class="image-caption-action" href="#source-history">查看来源与复用状态</a></figcaption>
         </figure>
         <figure class="archive-secondary">
           <a class="image-link" href="./design-study/sixth-army-1935.jpg?v=ee2238bf" data-image-view data-image-title="红六军团领导人在湖南新化合影 · 1935年11月29日" data-image-caption="1935年11月29日，红六军团领导人在湖南新化合影。读完四渡，借此回望参与长征的其他红军队伍。此图不是中央红军四渡赤水现场，也不是1936年三大主力会师。来源：Wikimedia Commons，File:Hongerliujuntuan.jpg；原始出版来源为解放军出版社1993年《中国人民解放军历史资料丛书·红军长征 图片》，文件页标记 PD-China。标记的适用范围与限制见‘史实与图像出处’。" aria-label="查看完整原图：1935年11月29日红六军团领导人在湖南新化合影"><picture><source type="image/webp" srcset="./public/images/sixth-army-320.webp?v=0c57ae11 320w, ./public/images/sixth-army-698.webp?v=cc5405fc 698w" sizes="(min-width: 1024px) 42vw, (min-width: 768px) 46vw, calc(100vw - 48px)"><img src="./public/images/sixth-army-698.webp?v=cc5405fc" alt="1935年11月29日红六军团领导人在湖南新化合影，完整画面保留。" width="698" height="357" loading="lazy"></picture></a>
-          <figcaption><strong>红六军团领导人在湖南新化合影 · 1935年11月29日</strong>读完四渡，借此回望参与长征的其他红军队伍。此图不是中央红军四渡赤水现场，也不是1936年三大主力会师。<a class="image-caption-action" href="#sources">查看来源与复用状态</a></figcaption>
+          <figcaption><strong>红六军团领导人在湖南新化合影 · 1935年11月29日</strong>读完四渡，借此回望参与长征的其他红军队伍。此图不是中央红军四渡赤水现场，也不是1936年三大主力会师。<a class="image-caption-action" href="#source-history">查看来源与复用状态</a></figcaption>
         </figure>
       </div>
-    </section>
+    </details>
 
     <section id="sources" class="sources" aria-label="史料来源与配乐说明">
-      <details class="disclosure" open data-disclosure>
+      <details id="source-history" class="disclosure" data-disclosure>
         <summary><span>史实与图像出处</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
         <div class="disclosure-body"><div class="disclosure-inner">
           <ul class="source-list">
@@ -583,7 +579,7 @@
           <p>赤水渡口木刻插画为原创生成艺术示意（参考1930年代黑白套朱砂版画风格），不作为史料。地图沿用已核对的西、东、西、东关系及概略路线，只表示教学关系，没有测绘坐标或精确地形含义。</p>
         </div></div>
       </details>
-      <details class="disclosure" id="audio-copyright" open data-disclosure>
+      <details class="disclosure" id="audio-copyright" data-disclosure>
         <summary><span>配乐与版权说明（The Great Sea）</span><svg class="disclosure-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><path class="icon-vertical" d="M12 4v16"/></svg></summary>
         <div class="disclosure-body"><div class="disclosure-inner">
           <p>页面背景配乐确认采用 <strong>Scott Buckley —《The Great Sea》</strong>，控制栏位于页面开篇处，默认静音关闭，由访客手动选择开启或关闭。音频由本站本地托管，保持作者发布的原始 MP3 字节完整（无剪辑、无重新编码），播放时仅作音量调节与整曲循环。</p>
@@ -604,13 +600,13 @@
   </dialog>
   <script src="./src/history-data.js?v=f8fc0980"></script>
   <script src="./src/historical-map-data.js?v=2f83ac0f"></script>
-  <script src="./src/historical-map.js?v=18f501dc"></script>
+  <script src="./src/historical-map.js?v=60fd0f9e"></script>
   <script>
     (() => {
       'use strict';
       const body = document.body;
       const status = document.getElementById('study-status');
-      const panels = Array.from(document.querySelectorAll('[data-chapter]'));
+      const panels = Array.from(document.querySelectorAll('article.chapter-panel[data-chapter]'));
       const chapterLinks = Array.from(document.querySelectorAll('[data-chapter-choice]'));
       const previous = document.getElementById('previous-chapter');
       const next = document.getElementById('next-chapter');
@@ -618,13 +614,14 @@
       const routeDate = document.getElementById('route-date');
       const routeDirection = document.getElementById('route-direction');
       const routeSheet = document.querySelector('.route-sheet');
-      const workspace = document.querySelector('.reading-workspace');
+      const workspace = document.querySelector('.crossings-layout');
       const reader = document.querySelector('.reader');
       const crossings = document.getElementById('crossings');
       const names = ['一渡', '二渡', '三渡', '四渡'];
       const count = panels.length;
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-      const mobileQuery = window.matchMedia('(max-width: 899px)');
+      const wideQuery = window.matchMedia('(min-width: 901px)');
+      const mapExplorer = document.querySelector('.map-explorer');
       let currentChapter = 0;
       let historyScroll = null;
       let scrollFallback = false;
@@ -655,10 +652,6 @@
 
       function fitMapLabels() {
         try {
-          const size = Math.max(14, Math.min(20, ((mapSVG && mapSVG.clientWidth) || 720) * 0.022));
-          document.querySelectorAll('[data-map-label]').forEach(function (label) {
-            label.setAttribute('font-size', String(size));
-          });
           if (historicalMap && typeof historicalMap.fit === 'function') historicalMap.fit();
         } catch (error) {
           /* label fitting is optional */
@@ -699,21 +692,35 @@
         });
       });
 
-      function placeRouteSheet() {
-        if (!routeSheet || !workspace || !reader || !crossings) return;
-        const panel = panels[currentChapter - 1];
-        const mobile = mobileQuery.matches && Boolean(panel);
-        const parent = mobile ? reader : workspace;
-        const nextNode = mobile ? panel.nextSibling : crossings;
-        if (routeSheet.parentNode === parent && routeSheet.nextSibling === nextNode) return;
-        const before = panel ? panel.getBoundingClientRect().top : 0;
-        parent.insertBefore(routeSheet, nextNode);
-        if (panel && crossings.getBoundingClientRect().bottom > 0) {
-          const delta = panel.getBoundingClientRect().top - before;
-          if (delta) window.scrollBy(0, delta);
+      let layoutFrame = 0;
+      let rejectedLayout = '';
+      let wasWide = false;
+      function refreshMapLayout() {
+        layoutFrame = 0;
+        const wide = wideQuery.matches;
+        if (wide && !wasWide && historicalMap) mapExplorer.open = true;
+        wasWide = wide;
+        const old = body.dataset.mapLayout;
+        const height = window.visualViewport?.height || innerHeight;
+        const heading = routeSheet.querySelector('h3');
+        const control = routeSheet.querySelector('button');
+        const signature = [innerWidth, height, workspace.clientWidth,
+          getComputedStyle(heading).fontSize, getComputedStyle(control).fontSize,
+          getComputedStyle(routeDate).fontSize].join('|');
+        let mode = 'flow';
+        if (historicalMap && wide && height >= 600 && mapExplorer.open && signature !== rejectedLayout) {
+          body.dataset.mapLayout = 'pinned';
+          if (mapExplorer.getBoundingClientRect().height <= height - 32) mode = 'pinned';
+          else rejectedLayout = signature;
         }
+        body.dataset.mapLayout = mode;
         fitMapLabels();
+        if (old !== mode) document.dispatchEvent(new CustomEvent('chishui:layout'));
       }
+      function scheduleMapLayout() {
+        if (!layoutFrame) layoutFrame = requestAnimationFrame(refreshMapLayout);
+      }
+      mapExplorer.addEventListener('toggle', scheduleMapLayout);
 
       function scrollToPanel(number) {
         const panel = panels[number - 1];
@@ -747,7 +754,6 @@
         if (next) next.disabled = number >= count;
         if (pagerCount) pagerCount.textContent = names[number - 1] + ' / 四渡';
         if (allRoutesOn) setAllRoutes(false);
-        placeRouteSheet();
         if (audioController && typeof audioController.setChapter === 'function') audioController.setChapter(number);
         document.dispatchEvent(new CustomEvent('chishui:chapter', {
           detail: { number: number, mapReady: Boolean(historicalMap) },
@@ -774,10 +780,27 @@
         return index >= 0 ? index + 1 : 0;
       }
 
+      function revealTarget(hash) {
+        let target;
+        try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch { return null; }
+        let details = target?.closest('details');
+        while (details) {
+          details.open = true;
+          details = details.parentElement?.closest('details');
+        }
+        return target;
+      }
+      document.addEventListener('click', function (event) {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest('a[href^="#"]');
+        if (link) revealTarget(link.hash);
+      });
       window.addEventListener('hashchange', function () {
+        revealTarget(location.hash);
         const number = chapterFromHash();
         if (number) activateChapter(number);
       });
+      revealTarget(location.hash);
 
       document.querySelectorAll('[data-disclosure]').forEach(function (details) {
         const summary = details.querySelector('summary');
@@ -901,11 +924,16 @@
       window.addEventListener('resize', function () {
         document.dispatchEvent(new CustomEvent('chishui:map-before', { detail: { reason: 'resize' } }));
         fitMapLabels();
-        placeRouteSheet();
       });
-      if (typeof ResizeObserver === 'function' && mapSVG) new ResizeObserver(fitMapLabels).observe(mapSVG);
-      if (document.fonts) document.fonts.ready.then(fitMapLabels).catch(function () {});
-      if (typeof mobileQuery.addEventListener === 'function') mobileQuery.addEventListener('change', placeRouteSheet);
+      if (typeof ResizeObserver === 'function') {
+        const layoutObserver = new ResizeObserver(scheduleMapLayout);
+        layoutObserver.observe(routeSheet);
+        layoutObserver.observe(workspace);
+      }
+      if (document.fonts) document.fonts.ready.then(scheduleMapLayout).catch(function () {});
+      wideQuery.addEventListener('change', scheduleMapLayout);
+      window.addEventListener('resize', scheduleMapLayout);
+      window.visualViewport?.addEventListener('resize', scheduleMapLayout);
 
       // Same reading-line rule as src/history-scroll.js, kept as a tiny inline
       // fallback so chapter chrome and scroll tracking survive even if the
@@ -991,7 +1019,7 @@
         window.addEventListener('load', reanchorDeepLink);
       }
       document.documentElement.classList.add('enhanced');
-      fitMapLabels();
+      refreshMapLayout();
     })();
   </script>
   <script type="module" src="./src/editorial-motion.js?v=19bdabc1"></script>
