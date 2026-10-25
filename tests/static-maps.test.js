@@ -20,6 +20,19 @@ test('overview renders four canonical routes with independent semantics', () => 
   assert.doesNotMatch(html, /id="(?:route-map|current-route)"|data-chapter=/);
 });
 
+test('overview identifies every reference town, all four stages and north', () => {
+  const html = renderStaticMap({ id: 'overview-labels', mapData, chapters });
+  for (const [key, place] of Object.entries(mapData.places)) {
+    const [x, y] = mapData.node(key);
+    assert.ok(html.includes(`data-static-place="${key}" cx="${x}" cy="${y}"`), key);
+    assert.ok(html.includes(place.name), place.name);
+  }
+  assert.equal((html.match(/data-static-stage=/g) || []).length, 4);
+  for (const n of [1, 2, 3, 4]) assert.ok(html.includes(`marker-end="url(#overview-labels-arrow-${n})"`));
+  assert.match(html, /赤水河/);
+  assert.match(html, />北</);
+});
+
 test('each chapter uses its own crossing geometry and keeps historical limits visible', () => {
   for (const chapter of [1, 2, 3, 4]) {
     const html = renderStaticMap({ id: `chapter-map-${chapter}`, chapter, mapData, chapters });

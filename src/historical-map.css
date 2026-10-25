@@ -121,37 +121,59 @@
 .map-credit { color: var(--muted); font-size: 14px; }
 .map-credit a { display: inline; text-underline-offset: .2em; }
 /* Native-flow maps remain readable before scripting or when enhancement fails. */
-.static-map { min-width: 0; color: var(--ink); }
+.static-map { min-width: 0; color: var(--ink); --stage-1: #9b302b; --stage-2: #3e5f7a; --stage-3: #835c22; --stage-4: #426445; }
 .static-map figcaption { font-size: 16px; line-height: 1.7; }
 .static-map figcaption strong { display: block; font-family: var(--display); font-size: var(--t-title); font-weight: 400; }
 .static-map figcaption p { margin-top: 8px; }
-.static-map svg { width: 100%; height: auto; aspect-ratio: 5 / 3; overflow: hidden; color: var(--accent); background: var(--map-paper); margin-top: 16px; }
+.static-map svg { width: 100%; height: auto; aspect-ratio: 5 / 3; overflow: hidden; background: var(--map-paper); margin-top: 16px; }
+.context-overview { container: chishui-overview / inline-size; }
+.context-overview .static-map-drawing { aspect-ratio: 5 / 4; }
 .chapter-map { margin-block: 20px 28px; }
 .chapter-map svg { aspect-ratio: 5 / 4; }
-.static-river { fill: none; stroke: var(--river); stroke-width: 8; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: .7; }
-.static-route { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.context-overview .static-route-2 { stroke-dasharray: 10 6; }
-.context-overview .static-route-3 { stroke-dasharray: 2 6; }
-.context-overview .static-route-4 { stroke-dasharray: 14 5 2 5; }
+.static-river { fill: none; stroke: var(--river); stroke-width: 8; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: .6; }
+.static-route { fill: none; stroke: var(--stage-color); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.static-route-1, .static-stage-1 { --stage-color: var(--stage-1); }
+.static-route-2, .static-stage-2 { --stage-color: var(--stage-2); }
+.static-route-3, .static-stage-3 { --stage-color: var(--stage-3); }
+.static-route-4, .static-stage-4 { --stage-color: var(--stage-4); }
+.static-route-2 { stroke-dasharray: 10 6; }
+.static-route-3 { stroke-dasharray: 2 6; }
+.static-route-4 { stroke-dasharray: 14 5 2 5; }
 .static-ford { fill: var(--paper); fill-opacity: .75; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
-.static-ford-name, .static-place-name { fill: var(--ink); font-family: var(--display); paint-order: stroke fill; stroke: var(--map-paper); stroke-width: 4; stroke-linejoin: round; }
+.static-ford-name, .static-place-name, .static-river-name, .static-north text { fill: var(--ink); font-family: var(--display); paint-order: stroke fill; stroke: var(--map-paper); stroke-width: 6; stroke-linejoin: round; }
 .static-ford-name { font-size: 20px; }
-.static-place-name { font-size: 64px; }
-.static-place { fill: var(--ink); }
+.static-place-name, .static-river-name, .static-north text { font-size: 68px; }
+.static-place { fill: var(--ink); stroke: var(--map-paper); stroke-width: 4; }
+.static-label-leader { fill: none; stroke: var(--muted); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: .55; }
+.static-north path { fill: none; stroke: var(--ink); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.static-stage-badge circle { fill: var(--map-paper); stroke: var(--stage-color); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.static-stage-badge text { fill: var(--stage-color); font-family: var(--sans); font-size: 68px; font-weight: 700; }
 .static-route-key { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; padding: 0; margin-top: 20px; font-size: 16px; line-height: 1.7; }
 .static-route-key li { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
-.static-route-key strong, .static-route-key span:not(.static-line-key) { display: block; }
-.static-route-key strong { color: var(--accent); }
-.static-line-key { display: inline-block; width: 24px; height: 0; border-top: 3px solid var(--accent); flex: none; }
-.static-line-key-2 { border-top-style: dashed; }
-.static-line-key-3 { border-top-style: dotted; }
-.static-line-key-4 { height: 5px; border-top: 1px solid var(--accent); border-bottom: 2px solid var(--accent); }
+.static-route-key strong, .static-route-key span { display: block; }
+.static-route-key strong { color: var(--stage-color); }
+.static-map .static-line-key { width: 44px; height: 12px; aspect-ratio: auto; margin: 0; background: none; overflow: visible; flex: none; }
+@container chishui-overview (min-width: 330px) {
+  .static-place-name, .static-river-name, .static-north text, .static-stage-badge text { font-size: 50px; }
+  .static-stage-badge circle { r: 28px; }
+  .static-place { r: 9px; }
+}
+@container chishui-overview (min-width: 500px) {
+  .static-place-name, .static-river-name, .static-north text, .static-stage-badge text { font-size: 34px; }
+  .static-stage-badge circle { r: 20px; }
+  .static-place { r: 6px; }
+}
 @media (max-width: 650px) {
   .map-view-controls button { flex: 1; }
   .map-legend { gap: 6px 14px; }
   .static-route-key { grid-template-columns: minmax(0, 1fr); }
 }
 @media (forced-colors: active) {
+  .static-map { --stage-1: CanvasText; --stage-2: CanvasText; --stage-3: CanvasText; --stage-4: CanvasText; }
+  .static-route { stroke: CanvasText; }
+  .static-place-name, .static-ford-name, .static-river-name, .static-north text { fill: CanvasText; stroke: Canvas; }
+  .static-stage-badge circle { fill: Canvas; stroke: CanvasText; }
+  .static-stage-badge text { fill: CanvasText; }
   .map-relief { display: none; }
   #route-map .map-type { stroke: Canvas; fill: CanvasText; }
   .map-place { fill: CanvasText; }

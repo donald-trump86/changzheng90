@@ -76,6 +76,61 @@ test('overview and local crossing paths are continuous and stay inside their own
   assert.throws(() => data.geometry(1, 'bogus'), /Unknown map view/);
 });
 
+test('fourth crossing continues south on the east bank and differs from the second', () => {
+  assert.notEqual(data.geometry(2, 'detail').path, data.geometry(4, 'detail').path);
+  const riverX = y => {
+    for (let i = 1; i < data.river.points.length; i++) {
+      const a = data.river.points[i - 1], b = data.river.points[i];
+      if (y >= a[1] && y <= b[1]) return a[0] + (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]);
+    }
+    throw new Error(`No river reference at ${y}`);
+  };
+  for (const mode of ['overview', 'detail']) {
+    const points = data.geometry(4, mode).points;
+    const [a, b] = points.slice(-2);
+    assert.ok(b[1] > a[1], `${mode}: continues south`);
+    for (let i = 0; i <= 20; i++) {
+      const t = i / 20, x = a[0] + (b[0] - a[0]) * t, y = a[1] + (b[1] - a[1]) * t;
+      assert.ok(x > riverX(y), `${mode}: east bank at ${x}, ${y}`);
+    }
+  }
+});
+
+test('every stage crosses the drawn river once at its representative ford', () => {
+  const cross = (a, b) => a[0] * b[1] - a[1] * b[0];
+  const subtract = (a, b) => [a[0] - b[0], a[1] - b[1]];
+  for (const mode of ['overview', 'detail']) for (let chapter = 1; chapter <= 4; chapter++) {
+    const route = data.geometry(chapter, mode).points, hits = [];
+    for (let i = 1; i < route.length; i++) for (let j = 1; j < data.river.points.length; j++) {
+      const p = route[i - 1], q = data.river.points[j - 1];
+      const r = subtract(route[i], p), s = subtract(data.river.points[j], q);
+      const denominator = cross(r, s);
+      if (Math.abs(denominator) < 1e-9) continue;
+      const difference = subtract(q, p), t = cross(difference, s) / denominator, u = cross(difference, r) / denominator;
+      if (t >= -1e-9 && t <= 1 + 1e-9 && u >= -1e-9 && u <= 1 + 1e-9) {
+        const hit = [p[0] + t * r[0], p[1] + t * r[1]];
+        if (!hits.some(a => Math.hypot(a[0] - hit[0], a[1] - hit[1]) < .001)) hits.push(hit);
+      }
+    }
+    assert.equal(hits.length, 1, `${chapter}/${mode}: ${JSON.stringify(hits)}`);
+    const ford = data.fords[data.stages[chapter - 1].focus].xy;
+    assert.ok(Math.hypot(hits[0][0] - ford[0], hits[0][1] - ford[1]) < .001, `${chapter}/${mode}: crosses at its ford`);
+  }
+});
+
+test('overview stage badges leave space for one another and the route-end arrows', () => {
+  const routes = [1, 2, 3, 4].map(n => data.geometry(n, 'overview'));
+  const badges = data.overview.badges.map(({ segment, t }, i) => {
+    const a = routes[i].points[segment], b = routes[i].points[segment + 1];
+    return a.map((value, axis) => value + (b[axis] - value) * t);
+  });
+  const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  for (let i = 0; i < badges.length; i++) {
+    for (let j = i + 1; j < badges.length; j++) assert.ok(distance(badges[i], badges[j]) > 90, `badges ${i + 1}/${j + 1}`);
+    for (const route of routes) assert.ok(distance(badges[i], route.points.at(-1)) > 80, `badge ${i + 1} covers an arrow`);
+  }
+});
+
 test('terrain provenance contains the complete 90-point grid and explicit coarse license', () => {
   assert.equal(createHash('sha256').update(JSON.stringify(data.terrain.elevations)).digest('hex'),
     '459895dcfd12754008296c53afdaaf0f6dc01e7e342285dfea6edcb03ace345d');

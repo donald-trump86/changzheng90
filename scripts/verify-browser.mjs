@@ -70,7 +70,39 @@ async (page, { phase = 'all' } = {}) => {
         assert(layout.staticMaps === 5 && layout.liveMaps === 1 && layout.closed, `map or disclosure structure ${JSON.stringify(layout)}`);
         if (size[0] <= 900 || size[1] < 600) assert(layout.mode === 'flow', 'small viewport remains in flow');
         if (layout.mode === 'pinned') assert(layout.mapHeight <= size[1] - 32, `whole map unit fits ${layout.mapHeight}`);
+        const cartography = await page.evaluate(() => {
+          const svg = document.querySelector('.context-overview .static-map-drawing');
+          const labels = [...svg.querySelectorAll('.static-place-name')];
+          const bounds = svg.getBoundingClientRect();
+          const boxes = labels.map(el => el.getBoundingClientRect());
+          const conflicts = [];
+          for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+            const a = boxes[i], b = boxes[j];
+            if (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top) conflicts.push([labels[i].textContent, labels[j].textContent]);
+          }
+          const badgeBoxes = [...svg.querySelectorAll('[data-static-stage]')].map(el => el.getBoundingClientRect());
+          const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+          for (let i = 0; i < badgeBoxes.length; i++) {
+            for (let j = i + 1; j < badgeBoxes.length; j++) if (overlaps(badgeBoxes[i], badgeBoxes[j])) conflicts.push([i + 1, j + 1]);
+            for (let j = 0; j < boxes.length; j++) if (overlaps(badgeBoxes[i], boxes[j])) conflicts.push([i + 1, labels[j].textContent]);
+          }
+          const minimumFont = Math.min(...labels.map(el => parseFloat(getComputedStyle(el).fontSize) * svg.getScreenCTM().a));
+          const clipped = boxes.some(b => b.left < bounds.left || b.right > bounds.right || b.top < bounds.top || b.bottom > bounds.bottom);
+          const wrongPlaces = [...svg.querySelectorAll('[data-static-place]')].filter(el => {
+            const [x, y] = globalThis.ChishuiMapData.node(el.dataset.staticPlace);
+            return Math.abs(Number(el.getAttribute('cx')) - x) > .001 || Math.abs(Number(el.getAttribute('cy')) - y) > .001;
+          }).length;
+          const mismatchedStyles = [...svg.querySelectorAll('[data-static-route]')].filter(el => {
+            const n = el.dataset.staticRoute, route = getComputedStyle(el);
+            const key = getComputedStyle(document.querySelector(`.static-line-key .static-route-${n}`));
+            const arrow = getComputedStyle(svg.querySelector(`#context-map-arrow-${n} path`));
+            return route.stroke !== key.stroke || route.strokeDasharray !== key.strokeDasharray || route.stroke !== arrow.fill;
+          }).length;
+          return { labels: labels.length, places: svg.querySelectorAll('[data-static-place]').length, badges: svg.querySelectorAll('[data-static-stage]').length, minimumFont, conflicts, clipped, wrongPlaces, mismatchedStyles };
+        });
+        assert(cartography.labels === 10 && cartography.places === 10 && cartography.badges === 4 && cartography.minimumFont >= 16 && !cartography.conflicts.length && !cartography.clipped && !cartography.wrongPlaces && !cartography.mismatchedStyles, `cartography ${JSON.stringify(cartography)}`);
         evidence.layout = layout;
+        evidence.cartography = cartography;
         await shot(label);
         return evidence;
       });
