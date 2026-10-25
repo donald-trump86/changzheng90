@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 修复手机和短屏上的四渡阅读、深链接与滚动跳动，让长征背景始终对应完整四渡总览。
+**Goal:** 修复手机和短屏上的四渡阅读、深链接与滚动跳动，让长征背景始终对应完整四渡总览；史实出处、参考图像及音乐等补充信息默认收起，由用户手动展开。
 
 **Architecture:** 构建时从既有地图数据生成独立总览和四张章节简图。桌面只保留一个固定位置的交互地图；手机用普通文档流阅读并可展开完整地图。统一程序化滚动入口，桌面精细指针按条件使用Lenis，触摸和失败场景保留原生。
 
@@ -21,6 +21,7 @@
 - 手机原生触摸，`syncTouch: false`；Lenis固定 `1.3.27`，MIT许可随资源保存，不自动换版本。
 - 减少动态、暂停、隐藏页、模块加载失败与无脚本时，图文完整、导航可用、路线可见。配乐默认关闭。
 - 保留区域总览、渡河细看、全部路线、重播、图像放大、键盘、真实hash和前进后退。
+- 史实与图像出处、参考图像列表、音乐版权、地图完整依据用原生details默认折叠，桌面和手机一致；普通加载、被动滚动、切章和尺寸变化均不展开。正文与章节图、简短图注、音乐播放按钮保持可见，展开后保留完整来源、署名和许可。
 - 静态图ID必须独立，不能复制live地图选择器；说明保留历史与现代地点区别、九溪口未落点、概化地图依据和CC BY-SA 4.0。
 - 当前轮次不实施、不发布；审阅通过后的完整实施按项目既有发布授权处理，最新用户限制优先。
 
@@ -81,14 +82,15 @@ test('overview has four distinct canonical routes and chapter-independent semant
 - [ ] **Step 4: 运行GREEN。** `node --test tests/static-maps.test.js tests/history-render.test.js tests/historical-map.test.js tests/story-map-consistency.test.js`；预期全部通过。再 `npm run build`，确认来源、四条总览路线和四章简图进入dist，第二次渲染完全相同。
 - [ ] **Step 5: 提交独立改动。** `git add scripts/render-static-maps.mjs scripts/render-history.mjs scripts/build.mjs index.html tests/static-maps.test.js tests/history-render.test.js tests/site.test.js`，然后 `git commit -m "feat: render independent overview and chapter maps"`。
 
-## Task 2: 稳定图文结构与地图尺寸
+## Task 2: 稳定图文结构、地图尺寸与补充信息展开
 
 **Files:** 修改 [index.html](../../../index.html)、[print-atlas.css](../../../src/print-atlas.css)、[historical-map.css](../../../src/historical-map.css)、[historical-map.js](../../../src/historical-map.js)、[map-overview.test.js](../../../tests/map-overview.test.js)、[site.test.js](../../../tests/site.test.js)、[verify-browser.mjs](../../../scripts/verify-browser.mjs)。
 
 **Interfaces:**
 
 - 使用Task 1的五张静态图；保留 `ChishuiHistoricalMap.create()`、`setChapter(number, options)`、`setView(view)`、`setAllRoutes(on)` 和 `#route-map`、`#current-route` 的单实例语义。
-- 新增结构 `section.context-layout`、`div.crossings-layout`、`details.map-explorer` 和后置 `#map-method` 说明区。`details` 初始不带open；增强成功的宽屏模式打开它，折叠入口有44px以上点击区。
+- 新增结构 `section.context-layout`、`div.crossings-layout`、`details.map-explorer` 和后置 `details#map-method` 说明区。`details` 初始不带open；增强成功的宽屏模式只打开 `.map-explorer`，折叠入口有44px以上点击区。
+- 补充项采用 `details#archives`、`details#source-history`、`details#audio-copyright` 与 `details#map-method`，均默认关闭。保留既有archives/audio-copyright锚点、原图放大入口和完整许可文字；史实与图像出处仍合为一项，不另建折叠框架。显式来源链接只打开对应details及所需祖先，再调用共用滚动入口；普通加载与被动事件不打开。
 - 新增内部 `refreshMapLayout() -> void`：按媒体条件与实测高度切换 `data-map-layout="pinned" | "flow"`，不移动节点、不滚动页面；完成后派发既有 `chishui:layout`。
 
 - [ ] **Step 1: 写失败断言。** 在Node结构/地图fixture及浏览器checker中固定以下行为：
@@ -103,9 +105,11 @@ assert.equal(document.querySelector('.context-overview').outerHTML, initialOverv
 
 这些断言须在1→4→2、全部路线、区域/细看后仍成立。浏览器增加900px单列、901px可双列、1280×480普通流、字体放大导致固定单元超预算后退回flow。修改既有手机高度测试，使其检查完整固定单元而非只有canvas。
 
+在现有结构测试中检查四个补充details默认无open、来源和许可全文仍存在；在浏览器检查初始内容隐藏、点击/Enter/Space开合、Tab可达与无脚本可用。逐项打开后再收起，切章、手滚、播放音乐和旋转均不得重开；点击档案原图/来源/曲目版权或进入对应深链接，只打开目标项并正确定位，图像放大及关闭后的焦点仍可用。
+
 - [ ] **Step 2: 运行RED。** `node --test tests/map-overview.test.js tests/site.test.js`，并在同一专用Brave运行checker的相应阶段；预期旧DOM搬运、响应式或高度断言失败。单任务串行使用浏览器，不新建客户端。
 - [ ] **Step 3: 调整布局与紧凑图。** 背景独立成两列/一列；四渡区宽屏正文左、地图右。移除旧命名区域覆盖、`placeRouteSheet()`、`scrollBy`补偿与899px分支。固定单元只含短标题、日期、必要控件、图面与短图注，长说明在四章之后正常滚动。手机及短屏显示局部简图，增强固定模式隐藏局部简图；无脚本默认仍显示。删除地图旧的手机图面强制高度，让图面宽高比与整个单元预算共同决定高度，窄图文字不强压到16px以下。
-- [ ] **Step 4: 处理展开与重排。** 宽屏增强时先打开details再隐藏summary；窄屏初始折叠、以后不因旋转自动收起。用单个ResizeObserver监测固定单元和视口变化，超预算就flow，不在其回调里改变文章顺序。同一视口尺寸、容器宽度与实际字号周期内，超预算退到flow后保持flow，直到这些输入变化再尝试固定，避免布局反过来改变测量而来回切换。仅在模式变化时写属性并派发既有 `chishui:layout` 通知。
+- [ ] **Step 4: 处理展开与重排。** 宽屏增强时只对 `.map-explorer` 先打开details再隐藏summary；窄屏初始折叠、以后不因旋转自动收起。史实与图像出处、参考图像区、音乐版权、地图完整依据在所有尺寸均初始关闭；将原图、长图注及大图入口放进参考图像details，来源链接指向精确目标。使用原生summary和既有展开增强，不新增状态框架，不隐藏播放按钮、正文图或必要短图注。用单个ResizeObserver监测固定单元和视口变化，超预算就flow，不在其回调里改变文章顺序。同一视口尺寸、容器宽度与实际字号周期内，超预算退到flow后保持flow，直到这些输入变化再尝试固定，避免布局反过来改变测量而来回切换。仅在模式变化时写属性并派发既有 `chishui:layout` 通知。
 - [ ] **Step 5: 运行GREEN。** 上述Node测试通过；在390×844、768×1024、900×600、901×600、1280×480、1440×900测量列数、固定单元边界和DOM身份。展开/收起只产生用户可见的正常文档流变化；被动切章不导致补偿滚动。检查本文所列背景与章节截图后提交，提交信息 `fix: stabilize responsive crossing map layout`。
 
 ## Task 3: 统一导航、接入可降级的桌面Lenis
