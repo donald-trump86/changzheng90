@@ -18,7 +18,7 @@
 
 验收截图：[手机路线演示中](../artifacts/mobile-motion-20261026/mobile-map.png)、[手机诗图](../artifacts/mobile-motion-20261026/mobile-poems.png)、[平板策略](../artifacts/mobile-motion-20261026/tablet-strategy.png)、[桌面二渡](../artifacts/mobile-motion-20261026/desktop-map.png)。截图是本地验收产物，不加入发布包。
 
-本轮使用同一个专用Brave，未另启独立inspect／scenes浏览器，因此没有自动设计评分。未使用实体手机、Safari或微信内核；没有主观评价音频听感。当前修改尚未提交或发布。
+本轮使用同一个专用Brave，未另启独立inspect／scenes浏览器，因此没有自动设计评分。未使用实体手机、Safari或微信内核；没有主观评价音频听感。用户确认发布后，源码已推送至 `main`（`c8a8bd0`），55个文件经路径与SHA-256核对后推送至 `gh-pages`（`7539c00`）；构建和线上检查结果见[部署记录](deployment.md)。
 
 ## 2026-10-26：遵义会议、十六字令与指挥艺术木刻专题
 
