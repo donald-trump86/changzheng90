@@ -256,8 +256,41 @@ test('enable then destroy: pending play() settles into silence, no further state
   assert.equal(audios[0].playCalls, 1, 'no play() after destroy');
 });
 
-test('visibilitychange hidden stops playback and aborts a pending play()', async () => {
-  await withBrowserEnv(async ({ doc }) => {
+test('hidden tabs and window blur keep enabled audio playing without restarting it', async () => {
+  await withBrowserEnv(async ({ doc, win }) => {
+    const { createAudio, audios } = fakeFactory();
+    const states = [];
+    const controller = createAudioController({ tracks: fakeTracks, createAudio, onState: (state) => states.push(state) });
+
+    controller.enable();
+    await flush();
+    const seen = states.length;
+    doc.hidden = true;
+    doc.dispatch('visibilitychange');
+    win.dispatch('blur');
+    await flush();
+
+    assert.equal(audios[0].paused, false);
+    assert.equal(audios[0].volume, 0.18);
+    assert.equal(audios[0].pauseCalls, 0, 'hiding or blurring never calls pause()');
+    assert.equal(states.length, seen, 'playing state is unchanged while hidden');
+    assert.equal(states.at(-1).status, 'playing');
+
+    doc.hidden = false;
+    doc.dispatch('visibilitychange');
+    win.dispatch('focus');
+    await flush();
+    assert.equal(audios[0].playCalls, 1, 'returning does not restart playback');
+
+    controller.pause();
+    assert.equal(audios[0].paused, true, 'explicit pause still stops playback');
+    assert.equal(states.at(-1).status, 'paused');
+    controller.destroy();
+  });
+});
+
+test('hidden tabs and window blur do not cancel a pending play()', async () => {
+  await withBrowserEnv(async ({ doc, win }) => {
     const { createAudio, audios } = fakeFactory(['defer-resolve']);
     const states = [];
     const controller = createAudioController({ tracks: fakeTracks, createAudio, onState: (state) => states.push(state) });
@@ -265,12 +298,17 @@ test('visibilitychange hidden stops playback and aborts a pending play()', async
     controller.enable();
     doc.hidden = true;
     doc.dispatch('visibilitychange');
+    win.dispatch('blur');
+    assert.equal(states.at(-1).status, 'loading');
+    assert.equal(audios[0].pauseCalls, 0);
     audios[0].resolvePlay();
     await flush();
 
-    assert.equal(audios[0].paused, true, 'hidden tab stays silent even if play() resolves late');
-    assert.equal(states.at(-1).status, 'paused');
-    assert.equal(states.some((state) => state.status === 'playing'), false);
+    assert.equal(audios[0].paused, false, 'pending play() completes while hidden');
+    assert.equal(audios[0].playCalls, 1);
+    assert.deepEqual(states.map((state) => state.status), ['off', 'loading', 'playing']);
+    controller.destroy();
+    assert.equal(audios[0].paused, true, 'destroy still stops hidden playback');
   });
 });
 
@@ -466,13 +504,13 @@ test('destroy removes document/window listeners and tears elements down', async 
     const states = [];
     const controller = createAudioController({ tracks: fakeTracks, createAudio, onState: (state) => states.push(state) });
 
-    assert.equal(doc.count(), 1);
+    assert.equal(doc.count(), 0, 'visibility changes need no audio listener');
     assert.equal(win.count(), 1);
     controller.enable();
     await flush();
 
     controller.destroy();
-    assert.equal(doc.count(), 0, 'visibilitychange listener removed');
+    assert.equal(doc.count(), 0, 'no document listener remains');
     assert.equal(win.count(), 0, 'pagehide listener removed');
     assert.equal(audios[0].paused, true);
     assert.equal(audios.every((audio) => audio.volume === 0), true);

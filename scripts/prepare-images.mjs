@@ -56,8 +56,8 @@ const sources = [
   {
     id: 'mao-mountain-poem', role: 'generated-woodcut-artwork',
     path: 'design-study/mao-mountain-poem.png',
-    format: 'PNG', width: 1024, height: 1536, bytes: 3745082,
-    sha256: '73fbe6152f5ee6918c7eee5a2d10308e1a95a15c10464a0d6ed4623a1c011c11',
+    format: 'PNG', width: 1024, height: 1536, bytes: 4037782,
+    sha256: '074bff523df56b0f8539c97cab9cf4339e8432f5a4d0eb2224deffb34b1e199a',
     widths: [480, 768, 1024],
   },
   {

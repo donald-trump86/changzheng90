@@ -120,6 +120,7 @@ function overviewFixture(t, initEditorialMotion, { reduced = false, scenes = fal
   overview.appendChild(svg);
   const timelineItems = [node('li'), node('li'), node('li')];
   const timeline = node('ol', {}, { li: timelineItems });
+  timelineItems.forEach(item => timeline.appendChild(item));
   const timelineFocus = timelineItems[1];
   const continuationHeading = node('h2');
   const continuationLine = node('span');
@@ -128,13 +129,25 @@ function overviewFixture(t, initEditorialMotion, { reduced = false, scenes = fal
   const continuationCopy = node('div', {}, {
     'h2 > span, h2, .statement, p, .quiet-link': [continuationHeading, continuationLine, continuationParagraph],
   });
+  continuationCopy.appendChild(continuationHeading);
+  continuationCopy.appendChild(continuationParagraph);
   const afterItems = [node('li'), node('li'), node('li')];
   const afterRoute = node('ol', {}, { li: afterItems });
+  afterItems.forEach(item => afterRoute.appendChild(item));
+  const plateImage = node('img');
+  const plateFrame = node('div');
+  plateFrame.appendChild(plateImage);
+  plateImage.closest = () => plateFrame;
+  const plateFigure = node('figure', {}, { img: [plateImage] });
+  plateFigure.appendChild(plateFrame);
+  const archives = node('div', {}, { figure: [plateFigure] });
+  archives.appendChild(plateFigure);
   const root = {
     ownerDocument: doc,
     querySelector: selector => ({ '.context-overview': overview, '.context .timeline-focus': scenes ? timelineFocus : null })[selector] || null,
     querySelectorAll: selector => scenes ? ({
       '.context .timeline': [timeline], '.continuation-copy': [continuationCopy], '#continuation .after-route ol': [afterRoute],
+      '.archives-grid': [archives],
     })[selector] || [] : [],
   };
 
@@ -155,7 +168,7 @@ function overviewFixture(t, initEditorialMotion, { reduced = false, scenes = fal
   return {
     frames, controller, observer, overview, svg, paths, badges, legends, fine, forced, reduced: reducedQuery, doc, win,
     timeline, timelineItems, timelineFocus, continuationCopy, continuationHeading, continuationLine,
-    continuationParagraph, afterRoute, afterItems, dispose,
+    continuationParagraph, afterRoute, afterItems, archives, plateImage, plateFrame, dispose,
     setTop(value) { svgTop = value; },
     intersect(target = svg, isIntersecting = true) { observer.callback([{ target, isIntersecting }]); },
     advance(value) {
@@ -391,6 +404,104 @@ testOverview('coarse timeline and continuation scenes animate leaf nodes, horizo
   f.advance(1030);
   assert.ok(f.timelineItems.every(node => node.style.transform === undefined && node.style.opacity === undefined));
   assert.equal(f.frames.size, 0);
+});
+
+testOverview('scene exits cancel their own actors and timeline focus, then permit another entrance', (t, initEditorialMotion) => {
+  const f = overviewFixture(t, initEditorialMotion, { scenes: true });
+  f.intersect(f.timeline);
+  f.intersect(f.continuationCopy);
+  f.advance(220);
+  f.intersect(f.timeline, false);
+  assert.ok(f.timelineItems.every(node => node.style.opacity === undefined && node.style.transform === undefined));
+  assert.ok(Number(f.continuationLine.style.opacity) > 0, 'another scene keeps its current entrance');
+  f.intersect(f.timeline);
+  assert.ok(f.timelineItems.every(node => node.style.opacity === '0'));
+  f.advance(770);
+  assert.equal(f.timelineFocus.style.transform, 'translateX(6px)');
+  f.intersect(f.timeline, false);
+  assert.equal(f.timelineFocus.style.transform, undefined, 'the completed scene also owns its follow-up emphasis');
+  assert.equal(f.frames.size, 0);
+  f.intersect(f.timeline);
+  assert.ok(f.timelineItems.every(node => node.style.opacity === '0'));
+});
+
+testOverview('plate scene exits remove the running sheet and image styles before another entrance', (t, initEditorialMotion) => {
+  const f = overviewFixture(t, initEditorialMotion, { scenes: true });
+  f.intersect(f.archives);
+  assert.equal(f.plateFrame.children.length, 2);
+  assert.equal(f.plateFrame.style.overflow, 'clip');
+  assert.equal(f.plateImage.style.opacity, '0.15');
+  f.intersect(f.archives, false);
+  assert.equal(f.plateFrame.children.length, 1);
+  assert.equal(f.plateFrame.style.position, undefined);
+  assert.equal(f.plateFrame.style.overflow, undefined);
+  assert.equal(f.plateImage.style.opacity, undefined);
+  assert.equal(f.plateImage.style.transform, undefined);
+  assert.equal(f.frames.size, 0);
+  f.intersect(f.archives);
+  assert.equal(f.plateFrame.children.length, 2);
+  f.controller.destroy();
+  assert.equal(f.plateFrame.children.length, 1);
+  assert.equal(f.plateImage.style.opacity, undefined);
+});
+
+testOverview('scene scroll motion reverses at viewport edges without replacing child entrances or nesting transforms', (t, initEditorialMotion) => {
+  const f = overviewFixture(t, initEditorialMotion, { scenes: true });
+  let top = 780;
+  f.continuationCopy.getBoundingClientRect = () => ({ top, bottom: top + 300, width: 600, height: 300 });
+  f.continuationCopy.appendChild(f.afterRoute);
+  f.intersect(f.continuationCopy);
+  f.win.emit('scroll'); f.win.emit('scroll');
+  assert.equal(f.frames.size, 2, 'one entrance actor and one coalesced scroll frame');
+  f.advance(0);
+  assert.ok(Number(f.continuationCopy.style.opacity) >= .65 && Number(f.continuationCopy.style.opacity) < 1);
+  assert.equal(f.continuationCopy.style.transform, 'translateY(14px)');
+  assert.equal(f.continuationLine.style.transform, 'translateY(10px)');
+  assert.equal(f.afterRoute.style.transform, undefined, 'nested scenes share their outer scroll container');
+  top = 200;
+  f.win.emit('scroll'); f.advance(220);
+  assert.equal(f.continuationCopy.style.opacity, '1');
+  assert.equal(f.continuationCopy.style.transform, 'translateY(0px)');
+  top = -280;
+  f.win.emit('scroll'); f.advance(221);
+  assert.equal(f.continuationCopy.style.transform, 'translateY(-14px)');
+  const upperOpacity = f.continuationCopy.style.opacity;
+  top = 200;
+  f.win.emit('scroll'); f.advance(222);
+  assert.equal(f.continuationCopy.style.opacity, '1');
+  top = -280;
+  f.win.emit('scroll'); f.advance(223);
+  assert.equal(f.continuationCopy.style.opacity, upperOpacity);
+  top = -400;
+  f.win.emit('scroll'); f.advance(224);
+  f.intersect(f.continuationCopy, false);
+  assert.equal(f.continuationCopy.style.opacity, undefined);
+  assert.equal(f.continuationCopy.style.transform, undefined);
+  assert.equal(f.continuationLine.style.opacity, undefined);
+  assert.equal(f.continuationLine.style.transform, undefined);
+  assert.equal(f.frames.size, 0);
+});
+
+testOverview('scene scroll styles and pending frames settle on pause, reduced, forced colors, hidden, or destroy', (t, initEditorialMotion) => {
+  for (const state of ['pause', 'reduced', 'forced', 'hidden', 'destroy']) {
+    const f = overviewFixture(t, initEditorialMotion, { scenes: true });
+    f.timeline.getBoundingClientRect = () => ({ top: 780, bottom: 1080, width: 600, height: 300 });
+    f.win.emit('scroll'); f.advance(0);
+    assert.equal(f.timeline.style.transform, 'translateY(14px)');
+    f.win.emit('scroll');
+    if (state === 'pause') f.controller.pause();
+    else if (state === 'reduced') { f.reduced.matches = true; f.reduced.emit('change'); }
+    else if (state === 'forced') { f.forced.matches = true; f.forced.emit('change'); }
+    else if (state === 'hidden') { f.doc.hidden = true; f.doc.emit('visibilitychange'); }
+    else f.controller.destroy();
+    assert.equal(f.timeline.style.opacity, undefined, state);
+    assert.equal(f.timeline.style.transform, undefined, state);
+    assert.equal(f.frames.size, 0, state);
+    f.win.emit('scroll');
+    f.intersect(f.timeline);
+    assert.equal(f.frames.size, 0, state);
+    f.dispose();
+  }
 });
 
 testOverview('initial reduced motion keeps overview, badges, timeline, and continuation fully static', (t, initEditorialMotion) => {

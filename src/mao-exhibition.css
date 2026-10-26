@@ -7,44 +7,44 @@
   scroll-margin-top: 2rem;
 }
 .mao-exhibition :is(h2, h3, h4, p, figure, blockquote, dl, dd) { margin: 0; }
-.mao-exhibition :is(h2, h3, h4) { font-family: var(--display, var(--serif)); font-weight: 400; text-wrap: balance; }
-.mao-exhibition h2 { font-size: clamp(2.5rem, 6.5vw, 6rem); line-height: 1.15; letter-spacing: -.035em; }
-.mao-exhibition h3 { font-size: clamp(1.75rem, 3.3vw, 3rem); line-height: 1.3; letter-spacing: -.025em; }
-.mao-exhibition h4 { font-size: clamp(1.65rem, 2.8vw, 2.35rem); line-height: 1.4; }
-.mao-exhibition p { font-size: 1.0625rem; line-height: 1.9; text-wrap: pretty; }
+.mao-exhibition :is(h2, h3, h4) { font-family: var(--display); font-weight: 400; text-wrap: balance; }
+.mao-exhibition h2 { font-size: var(--t-display); line-height: 1.15; letter-spacing: -.035em; }
+.mao-exhibition h3 { font-size: var(--t-title); line-height: 1.3; letter-spacing: -.025em; }
+.mao-exhibition h4 { font-size: var(--t-title); line-height: 1.4; }
+.mao-exhibition p { font-size: var(--t-body); line-height: 1.9; text-wrap: pretty; }
 .mao-exhibition p + p { margin-top: 1em; }
 .mao-exhibition a { text-underline-offset: .25em; }
 .mao-exhibition :is(a, summary):focus-visible { outline: 3px solid var(--accent); outline-offset: 6px; }
 .mao-exhibition :is(a, summary):active { opacity: .65; }
-.mao-exhibition .woodcut-subtitle { font-family: var(--display, var(--serif)); font-size: clamp(1.25rem, 2vw, 1.7rem); line-height: 1.6; margin-top: 1rem; }
-.mao-exhibition .woodcut-small { font-size: .9375rem; line-height: 1.8; }
-.woodcut-text-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 1.3rem; font-size: 1rem; font-weight: 600; }
+.mao-exhibition .woodcut-subtitle { font-family: var(--display, var(--serif)); font-size: var(--t-title); line-height: 1.6; margin-top: 1rem; }
+.mao-exhibition .woodcut-small { font-size: var(--t-meta); line-height: 1.8; }
+.woodcut-text-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 1.3rem; font-size: var(--t-meta); font-weight: 600; }
 .woodcut-incision { display: block; height: 20px; width: 100%; fill: var(--accent); margin-block: 0 3.5rem; transform-origin: left center; }
 .woodcut-plate { min-width: 0; }
 .woodcut-window { position: relative; overflow: hidden; }
 .woodcut-reveal-cover { position: absolute; inset: 0; background: var(--paper); transform-origin: center bottom; pointer-events: none; }
 .woodcut-plate picture, .woodcut-plate img { display: block; width: 100%; }
 .woodcut-plate img { height: auto; }
-.woodcut-plate figcaption { font-size: .875rem; line-height: 1.75; margin-top: .8rem; color: var(--muted); }
-.woodcut-plate figcaption span { display: block; font-size: .8125rem; margin-top: .25rem; }
+.woodcut-plate figcaption { font-size: var(--t-meta); line-height: 1.75; margin-top: .8rem; color: var(--muted); }
+.woodcut-plate figcaption span { display: block; font-size: var(--t-meta); margin-top: .25rem; }
 
 /* Prologue: a large meeting print beside a spare title. */
 .zunyi-opening { display: grid; grid-template-columns: .78fr 1.65fr; gap: var(--exhibit-gap); align-items: center; }
 .zunyi-heading { padding-block: 1rem; }
 .zunyi-heading h2 { white-space: nowrap; }
-.mao-exhibition .woodcut-date { display: flex; flex-direction: column; gap: .2rem; margin-top: 1.5rem; font-size: 1rem; }
+.mao-exhibition .woodcut-date { display: flex; flex-direction: column; gap: .2rem; margin-top: 1.5rem; font-size: var(--t-meta); }
 .zunyi-plate { align-self: start; }
 .zunyi-account { display: grid; grid-template-columns: 1fr 1.35fr; gap: var(--exhibit-gap); margin-top: 3rem; scroll-margin-top: 2rem; }
-.zunyi-account > p { font-family: var(--display, var(--serif)); font-size: clamp(1.35rem, 2.2vw, 1.85rem); line-height: 1.75; }
-.zunyi-questions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .9rem 2rem; padding: 1.7rem 0; margin: 2rem 0 0; list-style: none; color: var(--accent); font-family: var(--display, var(--serif)); font-size: clamp(1.25rem, 2.2vw, 1.8rem); }
+.zunyi-account > p { font-family: var(--display, var(--serif)); font-size: var(--t-title); line-height: 1.75; }
+.zunyi-questions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .9rem 2rem; padding: 1.7rem 0; margin: 2rem 0 0; list-style: none; color: var(--accent); font-family: var(--display, var(--serif)); font-size: var(--t-title); }
 .zunyi-departure { margin-top: 2.5rem; padding: 2rem clamp(1.25rem, 3vw, 2.5rem); background: var(--map-paper); }
-.zunyi-departure h3 { font-size: clamp(1.5rem, 2.8vw, 2.25rem); }
+.zunyi-departure h3 { font-size: var(--t-title); }
 .zunyi-departure ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; padding: 0; margin: 1.5rem 0 0; list-style: none; }
-.zunyi-departure time { display: block; font-family: var(--display, var(--serif)); font-size: 1.4rem; margin-bottom: .5rem; }
+.zunyi-departure time { display: block; font-family: var(--display, var(--serif)); font-size: var(--t-title); margin-bottom: .5rem; }
 
 /* Poetry: a fixed mountain print with three successive, unboxed verses. */
 .poems-heading { display: grid; grid-template-columns: 1fr 1fr; gap: var(--exhibit-gap); align-items: end; margin-bottom: 2.5rem; }
-.poems-heading h2 { font-size: clamp(2.1rem, 4.8vw, 4.25rem); white-space: nowrap; }
+.poems-heading h2 { font-size: var(--t-display); white-space: nowrap; }
 .poems-heading > p { max-width: 31em; }
 .poems-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(2rem, 7vw, 7rem); align-items: start; }
 .poems-plate { position: sticky; top: 1.5rem; }
@@ -52,14 +52,14 @@
 .poems-text { padding-top: .5rem; }
 .mountain-verse { padding-block: 1.5rem 2.75rem; }
 .mountain-verse + .mountain-verse { padding-top: 2.75rem; }
-.mountain-verse h3 { font-family: var(--sans); font-size: 1rem; color: var(--muted); margin-bottom: 1.1rem; }
+.mountain-verse h3 { font-family: var(--sans); font-size: var(--t-title); color: var(--muted); margin-bottom: 1.1rem; }
 .mountain-verse blockquote { font-family: var(--display, var(--serif)); }
-.mountain-verse blockquote p { font-size: clamp(1.6rem, 2.7vw, 2.2rem); line-height: 1.85; }
+.mountain-verse blockquote p { font-size: var(--t-title); line-height: 1.85; }
 .mountain-verse blockquote span { display: block; white-space: nowrap; }
 .mountain-verse blockquote span:first-child { margin-bottom: .45rem; }
-.mao-exhibition .poems-attribution { font-size: .9375rem; margin-top: 0; }
+.mao-exhibition .poems-attribution { font-size: var(--t-meta); margin-top: 0; }
 .poems-return { display: grid; grid-template-columns: .85fr 1.35fr; gap: 1rem var(--exhibit-gap); margin-block: 3.5rem 3rem; }
-.poems-return h3 { grid-row: span 3; font-size: clamp(1.5rem, 2.5vw, 2.25rem); }
+.poems-return h3 { align-self: start; grid-row: span 3; font-size: var(--t-title); }
 .poems-return p + p { margin-top: 0; }
 .poems-return .woodcut-text-link { margin-top: 0; justify-self: start; }
 .mountain-poems > .woodcut-incision { margin: 0; }
@@ -67,15 +67,15 @@
 /* Portrait and historical leadership: large image, then an editorial register. */
 .command-entrance { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--exhibit-gap); align-items: center; }
 .command-portrait img { aspect-ratio: 1.04; object-fit: cover; object-position: 22% center; }
-.command-entrance h2 { font-size: clamp(2.8rem, 5.2vw, 4.9rem); }
+.command-entrance h2 { font-size: var(--t-display); }
 .command-entrance h2 span { display: block; white-space: nowrap; }
 .command-entrance header > p:not(.woodcut-subtitle) { margin-top: 1.25rem; max-width: 29em; }
 .command-context { display: grid; grid-template-columns: .8fr 1.6fr; gap: 1.5rem var(--exhibit-gap); margin-top: 5rem; }
 .command-context-heading p { margin-top: 1.25rem; max-width: 18em; }
 .command-timeline { display: grid; grid-template-columns: 1fr 1fr; gap: 2.25rem 2rem; }
-.command-timeline dt > :first-child { display: block; font-size: 1rem; color: var(--accent); margin-bottom: .6rem; }
-.command-timeline dt strong { display: block; font-family: var(--display, var(--serif)); font-size: 1.5rem; font-weight: 400; line-height: 1.5; }
-.command-timeline dd { margin-top: .6rem; font-size: 1.0625rem; line-height: 1.85; }
+.command-timeline dt > :first-child { display: block; font-size: var(--t-meta); color: var(--accent); margin-bottom: .6rem; }
+.command-timeline dt strong { display: block; font-family: var(--display, var(--serif)); font-size: var(--t-title); font-weight: 400; line-height: 1.5; }
+.command-timeline dd { margin-top: .6rem; font-size: var(--t-body); line-height: 1.85; }
 .command-collective { grid-column: 2; }
 .command-march { margin-top: 3rem !important; }
 .command-march img { aspect-ratio: 3 / 1; object-fit: cover; }
@@ -83,11 +83,11 @@
 /* Shared geometry, independent selection: never mutates the original map. */
 .command-strategy { margin-block: 5rem 4rem; }
 .command-strategy > header { margin-bottom: 2rem; }
-.command-strategy > header h3 { font-size: clamp(2.5rem, 5vw, 4rem); }
+.command-strategy > header h3 { font-size: var(--t-title); }
 .command-strategy-layout { display: grid; grid-template-columns: 1.12fr 1fr; gap: var(--exhibit-gap); align-items: start; }
 .command-map-sticky { position: sticky; top: 1.5rem; }
 .command-strategy-nav { display: flex; flex-wrap: wrap; gap: .25rem 1.3rem; margin-bottom: .75rem; }
-.command-strategy-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: 1.0625rem; text-decoration: none; }
+.command-strategy-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--t-body); text-decoration: none; }
 .command-strategy-nav a[aria-current="true"] { color: var(--accent); text-decoration: underline; text-decoration-thickness: 3px; }
 .command-map { background: var(--map-paper); padding: clamp(.8rem, 2vw, 1.6rem); }
 .command-map svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -101,19 +101,19 @@
 .command-map[data-strategy="initiative"] [data-command-route="4"] { stroke: var(--accent); opacity: 1; }
 .command-map-places circle { fill: var(--ink); }
 .command-map-places text { font-family: var(--display, var(--serif)); font-size: 34px; fill: var(--ink); }
-.command-map figcaption { font-size: .875rem; line-height: 1.75; margin-top: 1rem; }
-.command-map figcaption strong { display: block; font-size: 1.0625rem; font-weight: 500; margin-bottom: .35rem; }
+.command-map figcaption { font-size: var(--t-meta); line-height: 1.75; margin-top: 1rem; }
+.command-map figcaption strong { display: block; font-size: var(--t-meta); font-weight: 500; margin-bottom: .35rem; }
 .command-map figcaption span { display: block; }
 .command-map figcaption a { display: inline-flex; min-height: 44px; align-items: center; }
 .command-decisions article { padding: 1rem 0 3rem; scroll-margin-top: 2.5rem; }
 .command-decisions article + article { padding-top: 2rem; }
 .command-decisions h4 { margin-bottom: 1rem; }
-.mao-exhibition .decision-lead { font-family: var(--display, var(--serif)); font-size: 1.35rem; line-height: 1.65; margin-bottom: 1rem; }
+.mao-exhibition .decision-lead { font-family: var(--display, var(--serif)); font-size: var(--t-title); line-height: 1.65; margin-bottom: 1rem; }
 
 /* The one dark spread: words and art get their own space. */
 .command-theme { background: var(--ink); color: var(--paper); padding-block: clamp(3rem, 6vw, 6rem); }
 .command-theme-inner { width: calc(100% - var(--frame, 24px) * 2); max-width: var(--page, 1328px); margin-inline: auto; display: grid; grid-template-columns: 1.05fr 1fr; gap: var(--exhibit-gap); align-items: center; }
-.command-theme-copy h3 { font-size: clamp(1.75rem, 3.75vw, 3.5rem); line-height: 1.4; letter-spacing: -.035em; }
+.command-theme-copy h3 { font-size: var(--t-display); line-height: 1.4; letter-spacing: -.035em; }
 .command-theme-copy h3 span { display: block; white-space: nowrap; }
 .command-theme-copy h3 span + span { margin-top: .35em; }
 .command-theme-copy > p { max-width: 28em; margin-top: 1.8rem; }
@@ -127,18 +127,18 @@
 
 .command-outro { margin-top: 4rem; }
 .command-outro-heading { display: grid; grid-template-columns: 1fr 1fr; gap: var(--exhibit-gap); align-items: end; margin-bottom: 2rem; }
-.command-outro-heading h3 { font-size: clamp(1.75rem, 3.8vw, 3.5rem); }
+.command-outro-heading h3 { font-size: var(--t-title); }
 .command-landscape img { max-height: 68svh; object-fit: cover; object-position: center 62%; }
 .command-last-words { margin-top: 2.5rem; text-align: center; }
-.command-last-words p { font-family: var(--display, var(--serif)); font-size: clamp(1.15rem, 2.3vw, 2rem); line-height: 1.65; }
+.command-last-words p { font-family: var(--display, var(--serif)); font-size: var(--t-title); line-height: 1.65; }
 .command-last-words p + p { margin-top: .5rem; }
 .outro-mobile-break { display: none; }
 .exhibition-sources { margin-top: 3rem; background: var(--map-paper); padding: 1.1rem clamp(1.1rem, 2vw, 2rem); }
-.exhibition-sources summary { min-height: 44px; cursor: pointer; align-content: center; font-size: 1.0625rem; }
+.exhibition-sources summary { min-height: 44px; cursor: pointer; align-content: center; font-size: var(--t-meta); }
 .exhibition-sources > div { padding-block: 1.5rem .5rem; max-width: 56rem; }
-.exhibition-sources h3 { font-size: 1.35rem; margin-block: 1.7rem .8rem; }
+.exhibition-sources h3 { font-size: var(--t-title); margin-block: 1.7rem .8rem; }
 .exhibition-sources h3:first-child { margin-top: 0; }
-.exhibition-sources li { font-size: 1rem; line-height: 1.9; margin-bottom: .4rem; }
+.exhibition-sources li { font-size: var(--t-meta); line-height: 1.9; margin-bottom: .4rem; }
 .exhibition-sources a { overflow-wrap: anywhere; }
 
 @media (min-width: 901px) and (min-height: 650px) {
@@ -146,8 +146,8 @@
   .command-decisions article { min-height: 25rem; }
 }
 @media (max-width: 1050px) and (min-width: 901px) {
-  .command-entrance h2 { font-size: 3rem; }
-  .command-theme-copy h3 { font-size: 2rem; }
+  .command-entrance h2 { font-size: var(--t-display); }
+  .command-theme-copy h3 { font-size: var(--t-display); }
   .command-map-places text { font-size: 46px; }
 }
 @media (max-width: 900px) {
@@ -162,29 +162,29 @@
   .poems-plate img { max-height: 78svh; }
   .mountain-verse { padding-block: 1rem 1.5rem; }
   .mountain-verse + .mountain-verse { padding-top: 1.5rem; }
-  .mountain-verse blockquote p { font-size: 1.6rem; }
+  .mountain-verse blockquote p { font-size: var(--t-title); }
   .command-context { grid-template-columns: 1fr; }
   .command-context-heading p { max-width: none; }
   .command-collective { grid-column: 1; }
   .command-entrance { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
-  .command-entrance h2 { font-size: clamp(2rem, 5vw, 3rem); }
+  .command-entrance h2 { font-size: var(--t-display); }
   .command-portrait img { aspect-ratio: .8; }
   .command-strategy-layout { grid-template-columns: 1fr; }
   .command-map-sticky { position: static; }
   .command-map { max-width: 42rem; margin-inline: auto !important; }
   .command-decisions { display: grid; gap: 2rem; max-width: 42rem; margin-inline: auto; }
   .command-decisions article, .command-decisions article + article { padding: 0; }
-  .command-decisions p { font-size: 1rem; }
-  .command-decisions .decision-lead { font-size: 1.2rem; }
+  .command-decisions p { font-size: var(--t-body); }
+  .command-decisions .decision-lead { font-size: var(--t-title); }
   .command-theme-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-  .command-theme-copy h3 { font-size: clamp(1.5rem, 3.9vw, 2rem); }
+  .command-theme-copy h3 { font-size: var(--t-display); }
 }
 @media (max-width: 599px) {
   .mao-exhibition { padding-block: 2.75rem; }
-  .mao-exhibition h2 { font-size: 2.65rem; }
-  .mao-exhibition h3 { font-size: 1.8rem; }
-  .mao-exhibition p { font-size: 1rem; line-height: 1.85; }
-  .mao-exhibition .woodcut-subtitle { font-size: 1.25rem; }
+  .mao-exhibition h2 { font-size: var(--t-display); }
+  .mao-exhibition h3 { font-size: var(--t-title); }
+  .mao-exhibition p { font-size: var(--t-body); line-height: 1.85; }
+  .mao-exhibition .woodcut-subtitle { font-size: var(--t-title); }
   .woodcut-incision { height: 13px; margin-bottom: 2rem; }
   .zunyi-heading { display: block; }
   .zunyi-heading .woodcut-subtitle { margin-top: .75rem; }
@@ -192,69 +192,69 @@
   .zunyi-heading .woodcut-text-link { margin-top: .6rem; }
   .zunyi-opening { gap: 1.3rem; }
   .zunyi-account { grid-template-columns: 1fr; gap: 1.25rem; margin-top: 1.75rem; }
-  .zunyi-account > p { font-size: 1.3rem; }
-  .zunyi-questions { display: block; margin-top: 1.25rem; padding-block: .75rem; font-size: 1.35rem; }
+  .zunyi-account > p { font-size: var(--t-title); }
+  .zunyi-questions { display: block; margin-top: 1.25rem; padding-block: .75rem; font-size: var(--t-title); }
   .zunyi-questions li + li { margin-top: .6rem; }
   .zunyi-departure { margin-top: 1.5rem; padding: 1.25rem; }
-  .zunyi-departure h3 { font-size: 1.5rem; }
+  .zunyi-departure h3 { font-size: var(--t-title); }
   .zunyi-departure ol { grid-template-columns: 1fr; gap: 1.1rem; }
-  .zunyi-departure time { font-size: 1.2rem; margin-bottom: .25rem; }
+  .zunyi-departure time { font-size: var(--t-title); margin-bottom: .25rem; }
   .poems-heading { margin-bottom: 1.5rem; }
-  .poems-heading h2 { font-size: clamp(1.9rem, 7.8vw, 2.65rem); }
+  .poems-heading h2 { font-size: var(--t-display); }
   .poems-layout { grid-template-columns: 1fr; gap: 1.5rem; }
   .poems-plate { position: static; }
   .poems-plate img { max-height: min(62svh, 30rem); width: 100%; object-position: center; }
   .poems-text { padding: .25rem clamp(.5rem, 4vw, 1.25rem) 0; }
   .mountain-verse { padding-block: .5rem 1.5rem; }
   .mountain-verse + .mountain-verse { padding-top: 2rem; }
-  .mountain-verse h3 { font-size: .9375rem; margin-bottom: .7rem; }
-  .mountain-verse blockquote p { font-size: clamp(1.35rem, 6.1vw, 1.5rem); line-height: 1.95; }
-  .mao-exhibition .poems-attribution { font-size: .875rem; }
+  .mountain-verse h3 { font-size: var(--t-title); margin-bottom: .7rem; }
+  .mountain-verse blockquote p { font-size: var(--t-title); line-height: 1.95; }
+  .mao-exhibition .poems-attribution { font-size: var(--t-meta); }
   .poems-return { display: block; margin-block: 2.5rem 2rem; }
-  .poems-return h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+  .poems-return h3 { font-size: var(--t-title); margin-bottom: 1rem; }
   .poems-return .woodcut-small { margin-top: 1rem; }
   .poems-return .woodcut-text-link { margin-top: .6rem; }
   .command-entrance { display: flex; flex-direction: column; gap: 1.5rem; align-items: stretch; }
   .command-entrance header { order: -1; }
-  .command-entrance h2 { font-size: 2.65rem; }
+  .command-entrance h2 { font-size: var(--t-display); }
   .command-entrance header > p:not(.woodcut-subtitle) { margin-top: 1rem; }
   .command-portrait img { aspect-ratio: 1.15; object-position: 22% center; }
   .command-context { margin-top: 2.5rem; gap: 1.5rem; }
-  .command-context h3 { font-size: 1.8rem; }
+  .command-context h3 { font-size: var(--t-title); }
   .command-context-heading p { margin-top: .6rem; }
   .command-timeline { grid-template-columns: 1fr; gap: 1.6rem; }
   .command-timeline dt > :first-child { margin-bottom: .3rem; }
-  .command-timeline dt strong { font-size: 1.35rem; }
-  .command-timeline dd { font-size: 1rem; margin-top: .4rem; }
+  .command-timeline dt strong { font-size: var(--t-title); }
+  .command-timeline dd { font-size: var(--t-body); margin-top: .4rem; }
   .command-march { margin-top: 2rem !important; }
   .command-march img { aspect-ratio: 2 / 1; object-position: 35% center; }
   .command-strategy { margin-block: 2.5rem; }
-  .command-strategy > header h3 { font-size: 2.65rem; }
+  .command-strategy > header h3 { font-size: var(--t-title); }
   .command-strategy-nav { gap: .25rem 1rem; }
-  .command-strategy-nav a { font-size: 1rem; }
+  .command-strategy-nav a { font-size: var(--t-body); }
   .command-map { padding: .75rem; }
   .command-map-places text { font-size: 62px; }
-  .command-map figcaption { font-size: .8125rem; }
+  .command-map figcaption { font-size: var(--t-meta); }
   .command-decisions { display: block; }
   .command-decisions article + article { padding-top: 2rem; }
-  .command-decisions h4 { font-size: 1.65rem; margin-bottom: .6rem; }
-  .mao-exhibition .decision-lead { font-size: 1.25rem; }
+  .command-decisions h4 { font-size: var(--t-title); margin-bottom: .6rem; }
+  .mao-exhibition .decision-lead { font-size: var(--t-title); }
   .command-theme { padding-block: 2.5rem; }
   .command-theme-inner { display: flex; flex-direction: column; align-items: stretch; gap: 1.75rem; }
-  .command-theme-copy h3 { font-size: clamp(1.65rem, 7.3vw, 2.65rem); }
+  .command-theme-copy h3 { font-size: var(--t-display); }
   .command-theme-copy > p { margin-top: 1.25rem; }
-  .command-theme-copy .woodcut-small { font-size: .875rem; }
+  .command-theme-copy .woodcut-small { font-size: var(--t-meta); }
   .command-theme-art img { aspect-ratio: 1.4; }
   .command-red-thread { height: 32px; margin-top: .75rem; }
   .command-outro { margin-top: 2.5rem; }
   .command-outro-heading { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-  .command-outro-heading h3 { font-size: clamp(1.6rem, 6.6vw, 2.2rem); white-space: nowrap; }
+  .command-outro-heading h3 { font-size: var(--t-title); white-space: nowrap; }
   .command-landscape img { max-height: none; aspect-ratio: 1; object-position: 45% center; }
   .command-last-words { margin-top: 1.5rem; }
-  .command-last-words p { font-size: clamp(1rem, 4.4vw, 1.35rem); line-height: 1.8; }
+  .command-last-words p { font-size: var(--t-title); line-height: 1.8; }
   .outro-mobile-break { display: inline; }
   .exhibition-sources { margin-top: 2rem; padding: 1rem; }
-  .exhibition-sources h3 { font-size: 1.25rem; }
+  .exhibition-sources h3 { font-size: var(--t-title); }
 }
 @media (max-height: 649px) {
   .poems-plate, .command-map-sticky { position: static; }
@@ -288,3 +288,9 @@ body:is([data-motion="off"], [data-motion="reduced"]) .woodcut-reveal-cover { di
   .command-theme-copy .woodcut-small { color: var(--ink); }
   .mountain-verse, .command-decisions article { min-height: 0; }
 }
+
+/* Typography follows the same five roles as the rest of the atlas. */
+.mao-exhibition h4 { font-family: var(--sans); font-weight: 600; }
+.mao-exhibition .mountain-verse h3 { font-family: var(--sans); font-size: var(--t-meta); }
+.mao-exhibition .woodcut-small, .woodcut-plate figcaption, .command-map figcaption { font-size: var(--t-meta); }
+.mao-exhibition .disclosure-inner { max-width: none; }

@@ -36,7 +36,15 @@
 }
 
 #motion-toggle {
+  width: 132px;
+  height: 46px;
+  flex: 0 0 132px;
+  margin-left: 0;
+  padding: 8px 12px;
+  white-space: nowrap;
   background: var(--toolbar);
+  font-size: var(--t-body);
+  transform: none;
 }
 
 .site-nav {
@@ -111,7 +119,7 @@
   }
 
   #motion-toggle {
-    margin-left: auto;
+    margin-left: 0;
     padding-inline: 12px;
   }
 }

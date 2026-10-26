@@ -53,7 +53,7 @@
     .read-time { font-size: 16px; color: var(--muted); }
     .hero-art { min-width: 0; }
     .hero-emblem { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 16px; }
-    .hero-emblem-backing { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 6px; background: #7A1E1A; border: 1px solid rgba(253, 207, 48, 0.42); box-shadow: inset 0 0 0 1px rgba(24, 16, 14, 0.35); flex: none; }
+    .hero-emblem-backing { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 6px; background: #7A1E1A; flex: none; }
     .hero-emblem-mark { width: 100%; height: 100%; display: block; }
     figcaption { font-size: 16px; line-height: 1.75; }
     .hero-art figcaption { padding-top: 12px; color: var(--muted); }
@@ -272,25 +272,24 @@
     :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
   </style>
-  <link rel="stylesheet" href="./src/editorial-motion.css?v=5f7d7c7a">
-  <link rel="stylesheet" href="./src/print-atlas.css?v=e9923eb2">
+  <link rel="stylesheet" href="./src/editorial-motion.css?v=4350e256">
+  <link rel="stylesheet" href="./src/print-atlas.css?v=cb2450c4">
   <link rel="stylesheet" href="./src/historical-map.css?v=0c175f6e">
-  <link rel="stylesheet" href="./src/mao-exhibition.css?v=d743aa07">
+  <link rel="stylesheet" href="./src/mao-exhibition.css?v=4e125efc">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到正文</a>
-  <header class="site-header frame">
-    <a class="site-name" href="#main">纪念长征胜利90周年</a>
-    <nav class="site-nav" aria-label="页面导航">
+  <details class="side-navigation" data-side-navigation>
+    <summary aria-label="打开或收起章节目录">目录</summary>
+    <nav aria-label="页面导航">
       <a href="#zunyi">遵义会议</a>
       <a href="#mountain-poems">诗词木刻</a>
       <a href="#crossings">四渡阅读</a>
       <a href="#mao-command">指挥艺术</a>
       <a href="#continuation">后续历程</a>
       <a href="#archives">档案原图</a>
-      <button type="button" id="motion-toggle" class="motion-control" data-motion aria-pressed="false" hidden>暂停动画</button>
     </nav>
-  </header>
+  </details>
   <div class="reading-progress" id="reading-progress" role="progressbar" aria-label="页面阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span></span></div>
   <main id="main" class="frame">
     <noscript><style>#route-map { background-image: url("./public/map/region-relief.png?v=03101e4a"); background-size: 100% 136.667%; background-position: center bottom; background-repeat: no-repeat; }</style><p class="noscript-note">四章内容完整展开，可用渡次链接定位阅读。</p></noscript>
@@ -308,6 +307,7 @@
           <div class="opening-actions">
             <a href="#context-title" class="primary-action" data-start-reading>从长征读起<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h17m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></a>
             <span class="read-time">约3分钟</span>
+            <button type="button" id="motion-toggle" class="motion-control" data-motion aria-pressed="false" hidden>暂停动画</button>
           </div>
           <div class="audio-controls opening-audio" data-audio-controls hidden role="region" aria-label="背景配乐控制">
             <button type="button" class="audio-toggle-btn" data-audio-toggle aria-pressed="false"><span class="audio-wave" aria-hidden="true"><i></i><i></i><i></i></span><span data-audio-toggle-label>开启配乐</span></button>
@@ -318,8 +318,8 @@
         </div>
       </div>
       <figure class="hero-art">
-        <div class="art-window"><a class="image-link" href="./design-study/chishui-valley-study.png?v=3c3772ce" data-image-view data-image-title="原创赤水渡口示意插画 · 黑白朱砂木刻风格" data-image-caption="原创赤水渡口示意插画 · 黑白朱砂木刻风格，1774×887 完整原图。参考1930年代版画刀刻与朱砂套色表现赤水河深冬峡谷、赤砂岩岸与木船浮桥意象；此图不是1935年历史原件，也不复原某一具体渡口。具体渡口与行军关系见下方概略图。" aria-label="查看完整原图：原创赤水渡口示意插画，黑白朱砂木刻风格"><picture><source type="image/webp" srcset="./public/images/valley-480.webp?v=8edd5c63 480w, ./public/images/valley-960.webp?v=413cb5ae 960w, ./public/images/valley-1440.webp?v=8f60c093 1440w, ./public/images/valley-1774.webp?v=f5111084 1774w" sizes="(min-width: 1024px) 78vw, calc(100vw - 48px)"><img src="./public/images/valley-960.webp?v=413cb5ae" alt="黑白朱砂木刻风格的赤水河峡谷示意插画：两侧陡峭赤砂岩岸与冬雾之间，木船与浮桥横跨河面。" width="1774" height="887" fetchpriority="high"></picture></a></div>
-        <figcaption>原创赤水渡口示意插画 · 黑白朱砂木刻风格（非1935年历史原件）。具体渡口与行军关系见下方概略图。</figcaption>
+        <div class="art-window"><a class="image-link" href="./design-study/chishui-valley-study.png?v=3c3772ce" data-image-view data-image-title="原创赤水渡口示意插画 · 黑白朱砂木刻风格" data-image-caption="原创赤水渡口示意插画 · 黑白朱砂木刻风格，1774×887 完整原图。参考1930年代版画刀刻与朱砂套色表现赤水河深冬峡谷、赤砂岩岸与木船浮桥意象；具体渡口与行军方向见下方地图。" aria-label="查看完整原图：原创赤水渡口示意插画，黑白朱砂木刻风格"><picture><source type="image/webp" srcset="./public/images/valley-480.webp?v=8edd5c63 480w, ./public/images/valley-960.webp?v=413cb5ae 960w, ./public/images/valley-1440.webp?v=8f60c093 1440w, ./public/images/valley-1774.webp?v=f5111084 1774w" sizes="(min-width: 1024px) 78vw, calc(100vw - 48px)"><img src="./public/images/valley-960.webp?v=413cb5ae" alt="黑白朱砂木刻风格的赤水河峡谷示意插画：两侧陡峭赤砂岩岸与冬雾之间，木船与浮桥横跨河面。" width="1774" height="887" fetchpriority="high"></picture></a></div>
+        <figcaption>赤水河谷与渡口 · 黑白朱砂木刻。沿下方地图阅读四次渡河。</figcaption>
       </figure>
     </section>
 
@@ -350,10 +350,9 @@
 
 
     <!-- history:zunyi-prologue:start --><section id="zunyi" class="mao-exhibition zunyi-scene" aria-labelledby="zunyi-title">
-      <svg class="woodcut-incision" viewBox="0 0 1200 38" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 122 13 293 20 454 7 593 16 742 10 916 20 1069 8 1200 13 1200 23 1048 18 912 29 735 20 589 26 439 16 289 29 121 22 0 28Z"/></svg>
       <div class="zunyi-opening">
         <header class="zunyi-heading"><h2 id="zunyi-title">遵义会议</h2><p class="woodcut-subtitle">在危局中寻找新的方向</p><p class="woodcut-date"><time datetime="1935-01-15">1935年1月15日—17日</time><span>贵州遵义</span></p><a class="woodcut-text-link" href="#zunyi-account">走进这场转折</a></header>
-        <figure class="woodcut-plate zunyi-plate"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/zunyi-meeting-480.webp?v=77556205 480w, ./public/images/zunyi-meeting-960.webp?v=959c85ea 960w, ./public/images/zunyi-meeting-1536.webp?v=5c30c8bc 1536w" sizes="(min-width: 901px) 64vw, calc(100vw - 40px)"><img src="./public/images/zunyi-meeting-960.webp?v=959c85ea" alt="原创木刻：旧式木屋中，中央领导集体围桌讨论，窗外是群山与山城。" width="1536" height="1024" loading="lazy" decoding="async"></picture></div><figcaption>遵义会议的艺术意象：在共同讨论中寻找出路。<span>AI生成木刻艺术插画；人物、陈设与山河为艺术构图，不是历史照片或现场复原。</span></figcaption></figure>
+        <figure class="woodcut-plate zunyi-plate"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/zunyi-meeting-480.webp?v=77556205 480w, ./public/images/zunyi-meeting-960.webp?v=959c85ea 960w, ./public/images/zunyi-meeting-1536.webp?v=5c30c8bc 1536w" sizes="(min-width: 901px) 64vw, calc(100vw - 40px)"><img src="./public/images/zunyi-meeting-960.webp?v=959c85ea" alt="原创木刻：旧式木屋中，中央领导集体围桌讨论，窗外是群山与山城。" width="1536" height="1024" loading="lazy" decoding="async"></picture></div><figcaption>遵义会议的艺术意象：在共同讨论中寻找出路。</figcaption></figure>
       </div>
       <div id="zunyi-account" class="zunyi-account">
         <p>第五次反“围剿”失利，长征初期又遭受严重损失。1935年1月，中央红军进入遵义，迫切需要回答：下一步，往哪里走，又该怎样打？</p>
@@ -365,11 +364,10 @@
     <!-- history:mountain-poems:start --><section id="mountain-poems" class="mao-exhibition mountain-poems" aria-labelledby="mountain-poems-title">
       <header class="poems-heading"><div><h2 id="mountain-poems-title">十六字令三首</h2><p class="woodcut-subtitle">山与长征的精神意象</p></div><p>群山高峻，起伏如潮。《十六字令三首》把山的雄姿与人的气魄写在一起，让长征途中迎难向前的身影，留在寥寥数语之间。</p></header>
       <div class="poems-layout">
-        <figure class="woodcut-plate poems-plate"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/mao-mountain-poem-480.webp?v=c2dee512 480w, ./public/images/mao-mountain-poem-768.webp?v=2d3e81f1 768w, ./public/images/mao-mountain-poem-1024.webp?v=16c806dd 1024w" sizes="(min-width: 901px) 46vw, (min-width: 600px) 65vw, calc(100vw - 40px)"><img src="./public/images/mao-mountain-poem-768.webp?v=2d3e81f1" alt="原创竖幅木刻：群山层叠，长征时期的毛泽东与行军者沿山间小径向前。" width="1024" height="1536" loading="lazy" decoding="async"></picture></div><figcaption>山高路远，脚步仍向前。<span>AI生成木刻艺术插画；人物、陈设与山河为艺术构图，不是历史照片或现场复原。</span></figcaption></figure>
+        <figure class="woodcut-plate poems-plate"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/mao-mountain-poem-480.webp?v=8940bcff 480w, ./public/images/mao-mountain-poem-768.webp?v=b937b189 768w, ./public/images/mao-mountain-poem-1024.webp?v=26f72639 1024w" sizes="(min-width: 901px) 46vw, (min-width: 600px) 65vw, calc(100vw - 40px)"><img src="./public/images/mao-mountain-poem-768.webp?v=b937b189" alt="原创竖幅木刻：群山层叠，长征时期的毛泽东与行军者沿山间小径向前。" width="1024" height="1536" loading="lazy" decoding="async"></picture></div><figcaption>山高路远，脚步仍向前。</figcaption></figure>
         <div class="poems-text"><article class="mountain-verse" aria-labelledby="verse-1-title"><h3 id="verse-1-title">其一</h3><blockquote cite="http://zt.txssw.com/libmzdwk/shicijianshang/17171.html"><p><span>山，</span><span>快马加鞭未下鞍。</span><span>惊回首，</span><span>离天三尺三。</span></p></blockquote></article><article class="mountain-verse" aria-labelledby="verse-2-title"><h3 id="verse-2-title">其二</h3><blockquote cite="http://zt.txssw.com/libmzdwk/shicijianshang/17171.html"><p><span>山，</span><span>倒海翻江卷巨澜。</span><span>奔腾急，</span><span>万马战犹酣。</span></p></blockquote></article><article class="mountain-verse" aria-labelledby="verse-3-title"><h3 id="verse-3-title">其三</h3><blockquote cite="http://zt.txssw.com/libmzdwk/shicijianshang/17171.html"><p><span>山，</span><span>刺破青天锷未残。</span><span>天欲堕，</span><span>赖以拄其间。</span></p></blockquote></article><p class="poems-attribution">毛泽东《十六字令三首》<br>长征途中所作（1934—1935年）</p></div>
       </div>
       <div class="poems-return"><h3>从诗中的群山，回到战局</h3><p>遵义会议后，中央红军原拟北渡长江；土城战斗未获预期战果，行军方向随之调整。1月29日拂晓，红军西渡赤水，在重围中寻找新的机动。</p><p class="woodcut-small">这里是文学意象的插章，展陈顺序不表示三首词写于遵义至土城之间。<a href="#exhibition-sources">诗词原文与出处</a></p><a class="woodcut-text-link" href="#crossing-one">进入一渡赤水</a></div>
-      <svg class="woodcut-incision" viewBox="0 0 1200 38" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 122 13 293 20 454 7 593 16 742 10 916 20 1069 8 1200 13 1200 23 1048 18 912 29 735 20 589 26 439 16 289 29 121 22 0 28Z"/></svg>
     </section><!-- history:mountain-poems:end -->
 
     <section id="crossings" class="crossings" aria-labelledby="crossings-title">
@@ -537,7 +535,7 @@
           </div>
         </div>
       </div>
-          <details id="map-method" class="map-notes map-method"><summary>地图依据与完整说明</summary>
+          <details id="map-method" class="map-notes map-method" data-disclosure><summary>地图依据与完整说明</summary>
             <ul class="map-legend" aria-label="地图图例">
               <li><span class="map-key place" aria-hidden="true"></span>现代地点参照</li><li><span class="map-key ford" aria-hidden="true"></span>渡河区域</li>
               <li><span class="map-key water" aria-hidden="true"></span>概化河流</li><li><span class="map-key current" aria-hidden="true"></span>本阶段概括线</li>
@@ -564,17 +562,16 @@
     </section>
 
     <!-- history:mao-exhibition:start --><section id="mao-command" class="mao-exhibition command-exhibition" aria-labelledby="mao-command-title">
-      <svg class="woodcut-incision" viewBox="0 0 1200 38" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 122 13 293 20 454 7 593 16 742 10 916 20 1069 8 1200 13 1200 23 1048 18 912 29 735 20 589 26 439 16 289 29 121 22 0 28Z"/></svg>
       <div class="command-entrance">
-        <figure class="woodcut-plate command-portrait"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/mao-command-portrait-480.webp?v=0a80e898 480w, ./public/images/mao-command-portrait-960.webp?v=bcf507ae 960w, ./public/images/mao-command-portrait-1536.webp?v=a8dde40f 1536w" sizes="(min-width: 901px) 50vw, calc(100vw - 40px)"><img src="./public/images/mao-command-portrait-960.webp?v=bcf507ae" alt="原创木刻：长征时期的毛泽东半身像，目光沉静，身旁是群山与朱红河流。" width="1536" height="1024" loading="lazy" decoding="async"></picture></div><figcaption>毛泽东与山河：一幅关于判断与行动的木刻。<span>AI生成木刻艺术插画；人物、陈设与山河为艺术构图，不是历史照片或现场复原。</span></figcaption></figure>
+        <figure class="woodcut-plate command-portrait"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/mao-command-portrait-480.webp?v=0a80e898 480w, ./public/images/mao-command-portrait-960.webp?v=bcf507ae 960w, ./public/images/mao-command-portrait-1536.webp?v=a8dde40f 1536w" sizes="(min-width: 901px) 50vw, calc(100vw - 40px)"><img src="./public/images/mao-command-portrait-960.webp?v=bcf507ae" alt="原创木刻：长征时期的毛泽东半身像，目光沉静，身旁是群山与朱红河流。" width="1536" height="1024" loading="lazy" decoding="async"></picture></div><figcaption>毛泽东与山河：一幅关于判断与行动的木刻。</figcaption></figure>
         <header><h2 id="mao-command-title"><span>毛泽东</span><span>与四渡赤水</span></h2><p class="woodcut-subtitle">在运动中争取主动</p><p>一条河，渡了四次。每一次改变方向，都面对新的敌情与新的选择。</p><p>遵义会议后，毛泽东在中央红军军事指挥中逐步发挥重要作用。与中央其他领导和红军指挥员一道，他在复杂局势中判断、调整，寻找新的行动空间。</p><a class="woodcut-text-link" href="#command-strategy">读懂四次转向</a></header>
       </div>
       <section class="command-context" aria-labelledby="command-context-title"><div class="command-context-heading"><h3 id="command-context-title">从遵义到赤水</h3><p>军事领导的调整，有一个逐步展开的过程。</p></div><dl class="command-timeline"><div><dt><time datetime="1935-01-15">1月15—17日</time><strong>进入中央领导核心</strong></dt><dd>遵义会议增选毛泽东为中央政治局常委。</dd></div><div><dt><span>会后分工</span><strong>参与军事指挥</strong></dt><dd>毛泽东成为周恩来在军事指挥上的帮助者；张闻天代替博古负总的责任。</dd></div><div><dt><time datetime="1935-03-04">3月4日</time><strong>担任前敌政治委员</strong></dt><dd>设立前敌司令部，朱德任前敌司令员，毛泽东任前敌政治委员。</dd></div><div><dt><span>3月中旬</span><strong>三人军事指挥小组</strong></dt><dd>毛泽东、周恩来、王稼祥组成三人军事指挥小组，负责全军军事行动。</dd></div></dl><p class="woodcut-small command-collective">三人军事指挥小组成立于二渡之后、三渡之前；不能把它提前到遵义会议期间或一渡之前。<a href="#exhibition-sources">查看成立时间考证</a></p></section>
-      <figure class="woodcut-plate command-march"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/march-mountains-banner-720.webp?v=02cd3100 720w, ./public/images/march-mountains-banner-1440.webp?v=6308c2fc 1440w, ./public/images/march-mountains-banner-2172.webp?v=8c9458eb 2172w" sizes="(min-width: 1440px) 1328px, calc(100vw - 40px)"><img src="./public/images/march-mountains-banner-1440.webp?v=6308c2fc" alt="原创横幅木刻：红军行军队伍穿行山岭，远处朱红河流在群山间转折。" width="2172" height="724" loading="lazy" decoding="async"></picture></div><figcaption>山岭间的队伍与河流。<span>AI生成木刻艺术插画；人物、陈设与山河为艺术构图，不是历史照片或现场复原。</span></figcaption></figure>
+      <figure class="woodcut-plate command-march"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/march-mountains-banner-720.webp?v=02cd3100 720w, ./public/images/march-mountains-banner-1440.webp?v=6308c2fc 1440w, ./public/images/march-mountains-banner-2172.webp?v=8c9458eb 2172w" sizes="(min-width: 1440px) 1328px, calc(100vw - 40px)"><img src="./public/images/march-mountains-banner-1440.webp?v=6308c2fc" alt="原创横幅木刻：红军行军队伍穿行山岭，远处朱红河流在群山间转折。" width="2172" height="724" loading="lazy" decoding="async"></picture></div><figcaption>山岭间的队伍与河流。</figcaption></figure>
       <section id="command-strategy" class="command-strategy" aria-labelledby="command-strategy-title"><header><h3 id="command-strategy-title">何以四渡？</h3><p class="woodcut-subtitle">胜负不在一条既定的行军路线上。</p></header><div class="command-strategy-layout"><div class="command-map-sticky"><nav class="command-strategy-nav" aria-label="阅读指挥艺术的三个切面"><a href="#strategy-judge" data-strategy-choice="judge" aria-current="true">审时度势</a><a href="#strategy-divert" data-strategy-choice="divert">调动敌军</a><a href="#strategy-initiative" data-strategy-choice="initiative">争取主动</a></nav><figure class="command-map" data-command-map data-strategy="judge"><svg viewBox="0 220 1000 600" role="img" aria-labelledby="command-map-title command-map-description"><title id="command-map-title">四渡赤水行动方向概化图</title><desc id="command-map-description">与前文共用地图数据，展示一渡西行、二渡东返、三渡再西、四渡再东与南下的方向关系。不是精确行军轨迹。</desc><path class="command-river" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/><g class="command-map-routes"><path class="command-route" data-command-route="1" d="M550 381L497 390L250 480L84.822 599.36"><title>一渡·西渡</title></path><path class="command-route" data-command-route="2" d="M84.822 599.36L300 540L520 458L660 430L858.152 453.614L875 535L903.217 658.236"><title>二渡·东渡</title></path><path class="command-route" data-command-route="3" d="M903.217 658.236L770 610L650 600L540 550L390 430"><title>三渡·西渡</title></path><path class="command-route" data-command-route="4" d="M390 430L450 470L520 458L640 430L850 770"><title>四渡·东渡</title></path></g><g class="command-map-places"><circle cx="496.983" cy="380.793" r="9"/><text x="438" y="330">土城</text><circle cx="84.822" cy="599.36" r="9"/><text x="125" y="690">扎西</text><circle cx="659.796" cy="594.112" r="9"/><text x="660" y="654">茅台</text><circle cx="903.217" cy="658.236" r="9"/><text x="820" y="735">遵义</text><circle cx="516.465" cy="452.496" r="9"/><text x="410" y="494">太平渡</text><text x="650" y="280">赤水河</text><text x="25" y="280">北 ↑</text></g></svg><figcaption><strong data-strategy-caption>一渡西行，二渡东返</strong><span>路线与前文共用概化数据；朱红表示当前讨论的行动，灰线保留前后关系，不表示兵力部署或精确测绘。</span><a href="#map-method">地图依据与许可</a></figcaption></figure></div><div class="command-decisions"><article id="strategy-judge" data-strategy-scene="judge"><h4>审时度势</h4><p class="decision-lead">原有计划，随战场实际而改变。</p><p>土城战斗未获预期战果后，中央红军西渡赤水，向扎西地区机动。敌情变化之际，毛泽东等又把目光转回黔北。</p><p>二渡赤水，回师东进；随后攻取桐梓、娄山关，再占遵义。方向的调整，是为了在实际局势中寻找战机。</p></article><article id="strategy-divert" data-strategy-scene="divert"><h4>调动敌军</h4><p class="decision-lead">让对方的判断，追随自己的变化。</p><p>三渡赤水后，红军再入川南。敌军随之向河西集中，红军主力却迅速折返，四渡赤水，重新回到东岸。</p><p>西去与东返，既是位置的变化，也影响着敌军判断与兵力调动，为继续南下争取空间。</p></article><article id="strategy-initiative" data-strategy-scene="initiative"><h4>争取主动</h4><p class="decision-lead">每一次机动，都为下一步创造条件。</p><p>四渡之后，中央红军转而南下，南渡乌江、威逼贵阳，再向云南机动，最终于5月初渡过金沙江。</p><p>主动并非渡河瞬间就全部到手，而是在接连的判断与行动中逐步争取。</p></article></div></div></section>
       <section class="command-theme full-bleed" aria-labelledby="command-theme-title"><div class="command-theme-inner"><div class="command-theme-copy"><h3 id="command-theme-title"><span data-theme-line>不是“用兵如神”</span><span data-theme-line>而是“神在用兵”</span></h3><p>这里的“神”，是对战略判断、灵活机动和因势而变的指挥艺术的文学概括。</p><p>高超的指挥艺术，不意味着预知一切。它是在复杂多变的战场上不断判断、调整、行动，从变化中寻找主动。</p><p class="woodcut-small">本专题创作性主题文案，非毛泽东原话。</p></div><div class="command-theme-art" data-theme-art><picture><source type="image/webp" srcset="./public/images/mao-command-portrait-480.webp?v=0a80e898 480w, ./public/images/mao-command-portrait-960.webp?v=bcf507ae 960w, ./public/images/mao-command-portrait-1536.webp?v=a8dde40f 1536w" sizes="(min-width: 901px) 50vw, calc(100vw - 40px)"><img src="./public/images/mao-command-portrait-960.webp?v=bcf507ae" alt="人物与山河融合的原创木刻，强调沉静思考与行军方向的变化。" width="1536" height="1024" loading="lazy" decoding="async"></picture><svg class="command-red-thread" viewBox="0 0 600 100" aria-hidden="true"><path d="M0 56C75 88 101 12 177 46S265 96 334 50 438 3 487 46 557 77 600 30"/></svg><p class="woodcut-small">AI生成木刻艺术插画</p></div></div></section>
-      <section class="command-outro" aria-labelledby="command-outro-title"><div class="command-outro-heading"><h3 id="command-outro-title">从赤水河到金沙江</h3><p>四渡结束，行军仍在继续。此后的南渡乌江、威逼贵阳与巧渡金沙江，把新的方向一步步变成现实。</p></div><figure class="woodcut-plate command-landscape"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/chishui-river-landscape-480.webp?v=051c0f8c 480w, ./public/images/chishui-river-landscape-960.webp?v=d8c9807d 960w, ./public/images/chishui-river-landscape-1536.webp?v=d2d03aef 1536w" sizes="(min-width: 1440px) 1328px, calc(100vw - 40px)"><img src="./public/images/chishui-river-landscape-960.webp?v=d8c9807d" alt="原创山河木刻：朱红河流穿过层叠峡谷，向远山延伸。" width="1536" height="1024" loading="lazy" decoding="async"></picture></div><figcaption>赤水与远山的艺术意象，不作金沙江地貌复原。<span>AI生成木刻艺术插画；人物、陈设与山河为艺术构图，不是历史照片或现场复原。</span></figcaption></figure><div class="command-last-words"><p>山河之间，行军路线不断改变。</p><p>改变的不只是方向，<br class="outro-mobile-break">还有战场上的主动与被动。</p></div></section>
-      <details id="exhibition-sources" class="exhibition-sources"><summary>专题史料、诗词与艺术创作说明</summary><div><h3>领导调整与行动次序</h3><p>遵义会议为1935年1月15—17日；1月19日军委纵队离开遵义，1月28日土城战斗，1月29日拂晓一渡。军事领导安排逐步调整，不能将整个过程写成一人独自作出全部决策。</p><p>三人军事指挥小组正文采用“3月中旬”。下列军网与人民网材料支持3月12日、苟坝的考证，处于二渡与三渡之间。</p><ul><li><a href="http://www.81.cn/yw_208727/16459284.html" target="_blank" rel="noopener noreferrer">中国军网／《解放军报》：四渡赤水期间的重要会议</a></li><li><a href="http://dangshi.people.com.cn/BIG5/n1/2016/0715/c85037-28556165.html" target="_blank" rel="noopener noreferrer">人民网：《三人军事指挥小组探源》</a>（可读的繁体同篇）</li><li><a href="https://www.dswxyjy.org.cn/n1/2026/1012/c462662-40812896.html" target="_blank" rel="noopener noreferrer">党史和文献研究院：遵义会议实现伟大的历史转折</a>（来源《中国共产党简史》）</li></ul><h3>诗词原文</h3><p><a href="http://zt.txssw.com/libmzdwk/shicijianshang/17171.html" target="_blank" rel="noopener noreferrer">韶山毛泽东图书馆：《十六字令 三首》</a>，作品标注1934—1935年。三首全文保持原文，展陈位置不推定具体创作地点或日期。</p><h3>木刻画面的性质</h3><p>五幅木刻为本项目通过图像生成工具制作的原创构图，以1930年代新兴木刻语言呈现历史与文学意象。它们不是历史照片，不据画面指认与会者座次、人物动作、服装细节、行军地点或真实河湾。正式文字均由网页排版。</p><p>“不是‘用兵如神’，而是‘神在用兵’”为本专题创作性主题文案，不是史料引语或毛泽东原话。地图沿用本项目概化数据与<a href="#map-method">CC BY-SA 4.0等来源说明</a>；图片、字体与配乐分别适用各自来源说明。</p></div></details>
+      <section class="command-outro" aria-labelledby="command-outro-title"><div class="command-outro-heading"><h3 id="command-outro-title">从赤水河到金沙江</h3><p>四渡结束，行军仍在继续。此后的南渡乌江、威逼贵阳与巧渡金沙江，把新的方向一步步变成现实。</p></div><figure class="woodcut-plate command-landscape"><div class="woodcut-window" data-woodcut-reveal><picture><source type="image/webp" srcset="./public/images/chishui-river-landscape-480.webp?v=051c0f8c 480w, ./public/images/chishui-river-landscape-960.webp?v=d8c9807d 960w, ./public/images/chishui-river-landscape-1536.webp?v=d2d03aef 1536w" sizes="(min-width: 1440px) 1328px, calc(100vw - 40px)"><img src="./public/images/chishui-river-landscape-960.webp?v=d8c9807d" alt="原创山河木刻：朱红河流穿过层叠峡谷，向远山延伸。" width="1536" height="1024" loading="lazy" decoding="async"></picture></div><figcaption>赤水穿行群山，水势向远方延伸。</figcaption></figure><div class="command-last-words"><p>山河之间，行军路线不断改变。</p><p>改变的不只是方向，<br class="outro-mobile-break">还有战场上的主动与被动。</p></div></section>
+      <details id="exhibition-sources" class="exhibition-sources" data-disclosure><summary>专题史料、诗词与创作说明</summary><div class="disclosure-body"><div class="disclosure-inner"><h3>领导调整与行动次序</h3><p>遵义会议为1935年1月15—17日；1月19日军委纵队离开遵义，1月28日土城战斗，1月29日拂晓一渡。军事领导安排逐步调整，不能将整个过程写成一人独自作出全部决策。</p><p>三人军事指挥小组正文采用“3月中旬”。下列军网与人民网材料支持3月12日、苟坝的考证，处于二渡与三渡之间。</p><ul><li><a href="http://www.81.cn/yw_208727/16459284.html" target="_blank" rel="noopener noreferrer">中国军网／《解放军报》：四渡赤水期间的重要会议</a></li><li><a href="http://dangshi.people.com.cn/BIG5/n1/2016/0715/c85037-28556165.html" target="_blank" rel="noopener noreferrer">人民网：《三人军事指挥小组探源》</a>（可读的繁体同篇）</li><li><a href="https://www.dswxyjy.org.cn/n1/2026/1012/c462662-40812896.html" target="_blank" rel="noopener noreferrer">党史和文献研究院：遵义会议实现伟大的历史转折</a>（来源《中国共产党简史》）</li></ul><h3>诗词原文</h3><p><a href="http://zt.txssw.com/libmzdwk/shicijianshang/17171.html" target="_blank" rel="noopener noreferrer">韶山毛泽东图书馆：《十六字令 三首》</a>，作品标注1934—1935年。三首全文保持原文，展陈位置不推定具体创作地点或日期。</p><h3>木刻创作</h3><p>木刻插画由本项目借助 AI 图像工具创作，以黑白刻线与朱红表现山河、行军和诗词意象。</p><p>“不是‘用兵如神’，而是‘神在用兵’”为本专题创作性主题文案，不是史料引语或毛泽东原话。地图沿用本项目概化数据与<a href="#map-method">CC BY-SA 4.0等来源说明</a>；图片、字体与配乐分别适用各自来源说明。</p></div></div></details>
     </section><!-- history:mao-exhibition:end -->
 
     <section id="continuation" class="continuation continuation-layout" aria-labelledby="continuation-title">
@@ -592,7 +589,7 @@
       </div>
     </section>
 
-    <details id="archives" class="archives supplemental" aria-labelledby="archives-title">
+    <details id="archives" class="archives supplemental" aria-labelledby="archives-title" data-disclosure>
       <summary><span id="archives-title">参考图像</span><span class="supplement-hint">两幅历史图像</span></summary>
       <div class="archives-heading"><p>两幅红军时期的历史照片，保留完整画面与原有比例。图中的部队、事件和时间各有归属，图注随原图一同阅读。</p></div>
       <div class="archives-grid">
@@ -635,12 +632,13 @@
         </div></div>
       </details>
     </section>
-    <footer class="footer"><p>长征胜利90周年互动阅读</p><p>长征路上 <a href="#main">回到开篇 ↑</a></p></footer>
+    <footer class="footer"><a class="footer-return" href="#main"><span>长征路上，四渡赤水</span><span>重读这段历程 <span aria-hidden="true">↑</span></span></a></footer>
   </main>
   <p class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="study-status"></p>
-  <dialog class="image-dialog" id="image-dialog" data-lenis-prevent aria-labelledby="dialog-title">
-    <div class="dialog-bar"><h2 id="dialog-title">完整档案原图</h2><div class="dialog-tools"><button type="button" data-dialog-zoom="out">缩小</button><button type="button" data-dialog-zoom="reset">复原</button><button type="button" data-dialog-zoom="in">放大</button></div><form method="dialog"><button class="dialog-close" type="submit">关闭</button></form></div>
-    <figure><div class="dialog-viewport" data-lenis-prevent tabindex="0" aria-label="原图浏览区域，可横向和纵向滚动"><img id="dialog-image" alt="" hidden></div><figcaption id="dialog-caption"></figcaption></figure>
+  <dialog class="image-dialog" id="image-dialog" data-lenis-prevent aria-labelledby="dialog-title" aria-describedby="dialog-help">
+    <h2 class="sr-only" id="dialog-title">完整档案原图</h2>
+    <p class="sr-only" id="dialog-help">滚轮缩放，拖动查看，双击适配。也可用加减号缩放、方向键移动；点击图片外侧或按 Escape 退出。</p>
+    <figure><div class="dialog-viewport" data-lenis-prevent tabindex="0" aria-label="图片浏览区域"><img id="dialog-image" alt="" hidden></div><figcaption class="sr-only" id="dialog-caption"></figcaption></figure>
   </dialog>
   <script src="./src/history-data.js?v=f8fc0980"></script>
   <script src="./src/historical-map-data.js?v=2f35fe94"></script>
@@ -924,28 +922,81 @@
       window.addEventListener('popstate', followHash);
       revealTarget(location.hash);
 
+      const sideNavigation = document.querySelector('[data-side-navigation]');
+      sideNavigation?.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () { sideNavigation.open = false; });
+      });
+      document.addEventListener('click', function (event) {
+        if (sideNavigation?.open && !sideNavigation.contains(event.target)) sideNavigation.open = false;
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && sideNavigation?.open) {
+          sideNavigation.open = false;
+          sideNavigation.querySelector('summary').focus();
+        }
+      });
+      const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
+      const disclosureFinishers = new Set();
       document.querySelectorAll('[data-disclosure]').forEach(function (details) {
         const summary = details.querySelector('summary');
         if (!summary) return;
+        let animation = null;
+        let desired = details.open;
         function sync() {
-          summary.setAttribute('aria-expanded', String(details.open));
-          details.dataset.expanded = String(details.open);
+          summary.setAttribute('aria-expanded', String(animation ? desired : details.open));
+          details.dataset.expanded = summary.getAttribute('aria-expanded');
+        }
+        function finish() {
+          const old = animation;
+          animation = null;
+          old?.cancel();
+          details.open = desired;
+          details.style.height = '';
+          details.style.overflow = '';
+          sync();
+          disclosureFinishers.delete(finish);
+          document.dispatchEvent(new CustomEvent('chishui:layout'));
         }
         sync();
         details.addEventListener('toggle', sync);
-        summary.addEventListener('click', function () {
-          summary.setAttribute('aria-expanded', String(!details.open));
-          details.dataset.expanded = String(!details.open);
+        summary.addEventListener('click', function (event) {
+          event.preventDefault();
+          desired = !(animation ? desired : details.open);
+          const start = details.getBoundingClientRect().height;
+          animation?.cancel();
+          animation = null;
+          if (motionQuery.matches || body.dataset.motion === 'off' || typeof details.animate !== 'function') {
+            finish();
+            return;
+          }
+          details.style.height = '';
+          details.open = true;
+          const computed = getComputedStyle(details);
+          const end = desired ? details.getBoundingClientRect().height : summary.getBoundingClientRect().height
+            + parseFloat(computed.paddingTop) + parseFloat(computed.paddingBottom)
+            + parseFloat(computed.borderTopWidth) + parseFloat(computed.borderBottomWidth);
+          details.style.overflow = 'hidden';
+          animation = details.animate({ height: [start + 'px', end + 'px'] }, {
+            duration: 340, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both'
+          });
+          const current = animation;
+          animation.onfinish = function () { if (animation === current) finish(); };
+          disclosureFinishers.add(finish);
+          sync();
         });
       });
+      function settleDisclosures() { disclosureFinishers.forEach(function (finish) { finish(); }); }
+      motionQuery.addEventListener('change', settleDisclosures);
+      new MutationObserver(function () { if (body.dataset.motion === 'off') settleDisclosures(); })
+        .observe(body, { attributes: true, attributeFilter: ['data-motion'] });
 
-      import('./src/image-viewer.js?v=096bdd34').then(function (mod) { mod.initImageViewer(); }).catch(function () {
+      import('./src/image-viewer.js?v=40fe9681').then(function (mod) { mod.initImageViewer(); }).catch(function () {
         /* 原图链接在增强不可用时仍可直接打开。 */
       });
 
       const audioBox = document.querySelector('[data-audio-controls]');
       if (audioBox) {
-        import('./src/audio.js?v=808b90ea').then(function (mod) {
+        import('./src/audio.js?v=8ddfbe0e').then(function (mod) {
           const create = mod && mod.createAudioController;
           const tracks = mod && mod.audioTracks;
           if (typeof create !== 'function' || !Array.isArray(tracks) || !tracks.length) throw new Error('audio contract unavailable');
@@ -968,7 +1019,7 @@
             const labels = {
               off: '配乐：The Great Sea（已关闭）',
               loading: '配乐：The Great Sea（载入中…）',
-              playing: '正在播放：The Great Sea — Scott Buckley',
+              playing: '配乐：The Great Sea（播放中）',
               paused: '配乐：The Great Sea（已暂停）',
               error: '配乐暂不可用。'
             };
@@ -1157,7 +1208,7 @@
       });
     })();
   </script>
-  <script type="module" src="./src/editorial-motion.js?v=da08760c"></script>
-  <script type="module" src="./src/mao-exhibition.js?v=84140cd7"></script>
+  <script type="module" src="./src/editorial-motion.js?v=5bdb58a3"></script>
+  <script type="module" src="./src/mao-exhibition.js?v=850cfd58"></script>
 </body>
 </html>

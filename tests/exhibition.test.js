@@ -53,8 +53,9 @@ test('exhibition images are labelled as artwork and its local accessibility refe
   const pictures = [...combined.matchAll(/<picture>.*?<\/picture>/g)].map(([picture]) => picture);
   assert.equal(pictures.length, 6);
   assert.ok(pictures.every(picture => /loading="lazy"/.test(picture) && /width="\d+" height="\d+"/.test(picture)));
-  assert.equal((combined.match(/人物、陈设与山河为艺术构图，不是历史照片或现场复原/g) || []).length, 5);
-  assert.match(combined, /<details id="exhibition-sources" class="exhibition-sources">/);
+  assert.doesNotMatch(combined, /不是历史照片|现场复原|人物、陈设与山河为艺术构图/);
+  assert.match(combined, /借助 AI 图像工具创作/);
+  assert.match(combined, /<details id="exhibition-sources" class="exhibition-sources" data-disclosure>/);
 });
 
 test('strategy follows the article at the reading line and preserves manual choice in tablet columns', () => {
@@ -113,6 +114,8 @@ function motionFixture({ compact = false, reduced = false, mode, forcedColors = 
   const observers = [];
   const covers = [];
   const media = {};
+  const frames = new Map();
+  let frameId = 0;
   function eventNode(properties = {}) {
     const listeners = {};
     return Object.assign({
@@ -128,14 +131,16 @@ function motionFixture({ compact = false, reduced = false, mode, forcedColors = 
     }, properties);
   }
   function node(selector = '', selectors = {}) {
-    return eventNode({
+    const target = eventNode({
       dataset: {},
-      style: { removeProperty(name) { delete this[name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())]; } },
+      style: { opacity: '', transform: '', removeProperty(name) { delete this[name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())]; } },
+      box: { top: 0, bottom: 600 },
+      contains(child) { return child.parent === this || !!child.parent && this.contains(child.parent); },
       matches: value => value === selector,
       querySelector: value => selectors[value]?.[0],
       querySelectorAll: value => selectors[value] || [],
       setAttribute() {}, removeAttribute() {},
-      getBoundingClientRect: () => ({ top: 0, bottom: 600 }),
+      getBoundingClientRect() { return this.box; },
       append(child) { child.parent = this; covers.push(child); },
       remove() { this.removed = true; },
       animate(frames, options) {
@@ -151,6 +156,8 @@ function motionFixture({ compact = false, reduced = false, mode, forcedColors = 
         return animation;
       },
     });
+    for (const children of Object.values(selectors)) children.forEach(child => { child.parent = target; });
+    return target;
   }
   const heading = node();
   const lines = Array.from({ length: 4 }, () => node());
@@ -186,6 +193,8 @@ function motionFixture({ compact = false, reduced = false, mode, forcedColors = 
   const scenes = ['judge', 'divert', 'initiative'].map(key => Object.assign(node(), { dataset: { strategyScene: key } }));
   const win = eventNode({
     innerHeight: 900, AbortController,
+    requestAnimationFrame(callback) { frames.set(++frameId, callback); return frameId; },
+    cancelAnimationFrame(id) { frames.delete(id); },
     matchMedia(query) {
       const matches = query.includes('reduced-motion') ? reduced : query.includes('forced-colors') ? forcedColors : compact;
       return media[query] = eventNode({ matches });
@@ -211,13 +220,118 @@ function motionFixture({ compact = false, reduced = false, mode, forcedColors = 
   };
   const controller = initMaoExhibition({ root });
   return {
-    calls, covers, media, doc, controller, targets, heading, lines, verse, img, woodcut, incision,
+    calls, covers, media, doc, win, frames, controller, targets, heading, lines, verse, img, woodcut, incision,
     sequences, theme, themeLines, art, thread, routes, links, scenes, observers,
     enter: (...nodes) => observers[1].callback(nodes.map(target => ({ target, isIntersecting: true }))),
+    leave: (...nodes) => observers[1].callback(nodes.map(target => ({ target, isIntersecting: false }))),
+    scroll() { win.dispatch('scroll'); },
+    flushFrame() {
+      const pending = [...frames.values()];
+      frames.clear();
+      pending.forEach(callback => callback());
+    },
     select: key => links.find(link => link.dataset.strategyChoice === key).dispatch('click', { button: 0 }),
     forTarget: target => calls.filter(call => call.target === target),
   };
 }
+
+test('leaving cancels only that entrance, removes covers and permits another entrance', () => {
+  const f = motionFixture();
+  f.enter(f.woodcut, f.verse, f.theme);
+  const original = [...f.calls];
+  f.enter(f.verse);
+  assert.equal(f.calls.length, original.length, 'duplicate observer notifications do not restart entrances');
+  f.leave(f.woodcut, f.verse);
+  assert.ok(f.covers[0].removed);
+  assert.ok(original.filter(call => call.target === f.covers[0] || f.verse.contains(call.target))
+    .every(call => call.animation.cancelled));
+  assert.ok(original.filter(call => f.theme.contains(call.target)).every(call => !call.animation.cancelled));
+  assert.ok(f.observers[1].targets.includes(f.verse), 'entrances remain observed');
+  f.enter(f.woodcut, f.verse);
+  assert.equal(f.covers.length, 2);
+  assert.equal(f.forTarget(f.heading).length, 2);
+  f.controller.destroy();
+});
+
+test('a deferred image load from a previous visit cannot add a cover on the next visit', () => {
+  const f = motionFixture();
+  f.img.complete = false;
+  f.enter(f.woodcut);
+  f.leave(f.woodcut);
+  f.enter(f.woodcut);
+  f.img.complete = true;
+  f.img.dispatch('load');
+  assert.equal(f.covers.length, 1);
+  f.controller.destroy();
+});
+
+test('scroll motion follows both viewport edges in both directions and restores offscreen styles', () => {
+  const f = motionFixture();
+  const text = f.sequences[0].target;
+  for (const target of [f.woodcut, f.verse, text]) {
+    target.box = { top: 880, bottom: 1480 };
+  }
+  f.scroll(); f.scroll();
+  assert.equal(f.frames.size, 1, 'scroll work is coalesced into one frame');
+  f.flushFrame();
+  for (const target of [f.woodcut, f.verse, text]) {
+    assert.ok(Number(target.style.opacity) >= .65 && Number(target.style.opacity) < 1);
+    assert.ok(parseFloat(target.style.transform.slice(11)) > 0);
+    assert.ok(parseFloat(target.style.transform.slice(11)) <= 16);
+    target.box = { top: 150, bottom: 750 };
+  }
+  f.scroll(); f.flushFrame();
+  assert.equal(f.verse.style.opacity, '1');
+  assert.equal(f.verse.style.transform, 'translateY(0px)');
+  f.verse.box = { top: -580, bottom: 20 };
+  f.scroll(); f.flushFrame();
+  const upper = { ...f.verse.style };
+  assert.ok(Number(upper.opacity) >= .65 && Number(upper.opacity) < 1);
+  assert.ok(parseFloat(upper.transform.slice(11)) >= -16 && parseFloat(upper.transform.slice(11)) < 0);
+  f.verse.box = { top: 150, bottom: 750 };
+  f.scroll(); f.flushFrame();
+  assert.equal(f.verse.style.opacity, '1', 'scrolling back restores the reading state');
+  f.verse.box = { top: -580, bottom: 20 };
+  f.scroll(); f.flushFrame();
+  assert.equal(f.verse.style.opacity, upper.opacity);
+  f.verse.box = { top: -700, bottom: -100 };
+  f.scroll(); f.flushFrame();
+  assert.equal(f.verse.style.opacity, '');
+  assert.equal(f.verse.style.transform, '');
+  f.verse.box = { top: 910, bottom: 1510 };
+  f.scroll(); f.flushFrame();
+  assert.equal(f.verse.style.opacity, '');
+  f.controller.destroy();
+});
+
+test('settle cancels pending scroll work and restores styles for reduced/off/hidden/destroy', () => {
+  for (const state of ['reduced', 'off', 'hidden', 'destroy']) {
+    const f = motionFixture();
+    f.verse.style.opacity = '.9';
+    f.verse.style.transform = 'translateX(2px)';
+    f.verse.box = { top: 880, bottom: 1480 };
+    f.scroll(); f.flushFrame();
+    assert.notEqual(f.verse.style.opacity, '.9');
+    f.scroll();
+    if (state === 'reduced') {
+      const reduced = f.media['(prefers-reduced-motion: reduce)'];
+      reduced.matches = true;
+      reduced.dispatch('change');
+    } else if (state === 'off') {
+      f.doc.body.dataset.motion = 'off';
+      f.doc.dispatch('chishui:motion');
+    } else if (state === 'hidden') {
+      f.doc.hidden = true;
+      f.doc.dispatch('visibilitychange');
+    } else f.controller.destroy();
+    assert.equal(f.frames.size, 0, state);
+    assert.equal(f.verse.style.opacity, '.9', state);
+    assert.equal(f.verse.style.transform, 'translateX(2px)', state);
+    f.scroll(); f.flushFrame();
+    assert.equal(f.verse.style.opacity, '.9', state);
+    f.controller.destroy();
+  }
+});
 
 test('compact full motion reveals woodcuts in 700ms and choreographs each verse without a parent animation', () => {
   const f = motionFixture({ compact: true });

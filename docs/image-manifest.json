@@ -214,8 +214,8 @@
       "role": "generated-woodcut-artwork",
       "source": {
         "path": "design-study/mao-mountain-poem.png",
-        "bytes": 3745082,
-        "sha256": "73fbe6152f5ee6918c7eee5a2d10308e1a95a15c10464a0d6ed4623a1c011c11",
+        "bytes": 4037782,
+        "sha256": "074bff523df56b0f8539c97cab9cf4339e8432f5a4d0eb2224deffb34b1e199a",
         "format": "PNG",
         "width": 1024,
         "height": 1536
@@ -227,8 +227,8 @@
           "width": 480,
           "height": 720,
           "quality": 84,
-          "bytes": 160408,
-          "sha256": "c2dee512d19c725f8cb475e1b986434b05a30f19c8567918178d81ee85875de5"
+          "bytes": 147338,
+          "sha256": "8940bcff48e998feb9cfca0cb163de3dc20864da3de55aec75133192ed40c53a"
         },
         {
           "path": "public/images/mao-mountain-poem-768.webp",
@@ -236,8 +236,8 @@
           "width": 768,
           "height": 1152,
           "quality": 84,
-          "bytes": 362986,
-          "sha256": "2d3e81f18f7b8bcfac93a6bdd569155271e9ff7e0770914e77be6187bf98a792"
+          "bytes": 335400,
+          "sha256": "b937b1892e17e757f060cbe7e71945bde484c10cdea3295815fdd862cba4e3e7"
         },
         {
           "path": "public/images/mao-mountain-poem-1024.webp",
@@ -245,8 +245,8 @@
           "width": 1024,
           "height": 1536,
           "quality": 84,
-          "bytes": 669580,
-          "sha256": "16c806dd19195da166e546460d4fa6420048fdb71ce3820f2c54b73ae7ca536d"
+          "bytes": 599586,
+          "sha256": "26f72639be6fc474e642f264041606f31c1b6b70477fa48ac6c448a3110c2e92"
         }
       ]
     },
@@ -334,12 +334,12 @@
     }
   ],
   "totals": {
-    "sourceBytes": 23203854,
-    "variantBytes": 5918762,
-    "largestVariantBytes": 3585504,
-    "allVariantsSavedBytes": 17285092,
-    "allVariantsSavingPercent": 74.49,
-    "largestVariantsSavedBytes": 19618350,
-    "largestVariantsSavingPercent": 84.55
+    "sourceBytes": 23496554,
+    "variantBytes": 5808112,
+    "largestVariantBytes": 3515510,
+    "allVariantsSavedBytes": 17688442,
+    "allVariantsSavingPercent": 75.28,
+    "largestVariantsSavedBytes": 19981044,
+    "largestVariantsSavingPercent": 85.04
   }
 }

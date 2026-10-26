@@ -44,13 +44,14 @@ function setup() {
     captures.delete(id);
     fire(viewport, 'lostpointercapture', { pointerId: id });
   };
-  const controls = ['in', 'out', 'reset'].map((dialogZoom) => new Element({ dialogZoom }));
   const dialog = new Element();
   dialog.open = false;
   dialog.showModal = () => { dialog.open = true; };
   dialog.close = () => { dialog.open = false; fire(dialog, 'close'); };
   dialog.querySelector = () => viewport;
-  dialog.querySelectorAll = (selector) => selector === '[data-dialog-zoom]' ? controls : [];
+  dialog.querySelectorAll = () => [];
+  dialog.getBoundingClientRect = () => ({left:100, top:100, right:600, bottom:500});
+  viewport.getBoundingClientRect = () => ({left:0,top:0,right:500,bottom:400});
   const image = new Element();
   image.naturalWidth = 2000;
   image.naturalHeight = 1000;
@@ -72,7 +73,9 @@ function setup() {
     pointerType: 'mouse', isPrimary: true, button: 0, pointerId: 7, clientX: 250, clientY: 150, ...fields
   });
   const move = (fields = {}) => fire(viewport, 'pointermove', { pointerId: 7, clientX: 200, clientY: 110, ...fields });
-  return { api, viewport, controls, dialog, image, link, caption, captures, click, open, down, move,
+  return { api, viewport, dialog, image, link, caption, captures, click, open, down, move,
+    wheel: (deltaY) => fire(viewport, 'wheel', {deltaY, deltaMode:0, clientX:0, clientY:0}),
+    key: (key) => fire(dialog, 'keydown', {key}),
     disconnected: () => disconnected };
 }
 
@@ -81,7 +84,7 @@ test('viewer pans only a zoomed mouse pointer and releases capture after pointer
   env.open();
   assert.equal(env.image.dataset.zoom, '1');
   assert.equal(env.down().defaultPrevented, false);
-  env.click(env.controls[0]);
+  env.wheel(-Math.log(1.5) / .002);
   assert.equal(env.image.dataset.zoom, '1.5');
   assert.equal(env.viewport.dataset.pannable, 'true');
   assert.equal(env.down({ pointerType: 'touch' }).defaultPrevented, false);
@@ -116,9 +119,9 @@ test('double click toggles fit and 2x; fit reset releases an active drag', () =>
   assert.equal(env.viewport.scrollLeft, 0);
   assert.equal(env.captures.size, 0);
   assert.equal(env.viewport.dataset.pannable, 'false');
-  env.click(env.controls[0]);
+  env.wheel(-Math.log(1.5) / .002);
   env.down();
-  env.click(env.controls[2]);
+  env.key('0');
   assert.equal(env.captures.size, 0);
   assert.equal(env.image.dataset.zoom, '1');
   env.api.destroy();
@@ -128,7 +131,7 @@ for (const finish of ['pointercancel', 'lostpointercapture', 'close', 'error', '
   test(`viewer clears drag state on ${finish} and ignores later movement`, () => {
     const env = setup();
     env.open();
-    env.click(env.controls[0]);
+    env.wheel(-Math.log(1.5) / .002);
     env.down();
     if (finish === 'close') env.dialog.close();
     else if (finish === 'error') fire(env.image, 'error');
@@ -157,4 +160,33 @@ test('modified clicks remain native and destroy restores ordinary image links', 
   assert.equal(env.click(env.link).defaultPrevented, false);
   assert.equal(env.dialog.open, false);
   assert.equal(env.click(env.link, { ctrlKey: true }).defaultPrevented, false);
+});
+
+test('wheel zoom preserves the cursor point, clamps scale, and dialog follows image ratio', () => {
+  const env = setup(); env.open();
+  assert.equal(parseFloat(env.dialog.style.width) / parseFloat(env.dialog.style.height), 2);
+  const event = fire(env.viewport, 'wheel', {deltaY:-Math.log(2)/.002, deltaMode:0, clientX:120, clientY:90});
+  assert.equal(event.defaultPrevented, true);
+  assert.equal(env.image.dataset.zoom, '2');
+  assert.equal(env.viewport.scrollLeft, 120);
+  assert.equal(env.viewport.scrollTop, 90);
+  env.wheel(-10000); assert.equal(env.image.dataset.zoom, '4');
+  env.wheel(10000); assert.equal(env.image.dataset.zoom, '1');
+  assert.equal(env.viewport.scrollLeft, 0);
+  env.image.naturalWidth = 1000; env.image.naturalHeight = 2000;
+  fire(env.image, 'load');
+  assert.equal(parseFloat(env.dialog.style.width) / parseFloat(env.dialog.style.height), .5);
+  env.api.destroy();
+});
+
+test('only a complete outside click closes the dialog and restores focus', () => {
+  const env=setup();env.open();
+  fire(env.dialog,'pointerdown',{clientX:200,clientY:200});
+  env.click(env.dialog,{clientX:20,clientY:20});
+  assert.equal(env.dialog.open,true,'dragging out never closes');
+  fire(env.dialog,'pointerdown',{clientX:20,clientY:20});
+  env.click(env.dialog,{clientX:20,clientY:20});
+  assert.equal(env.dialog.open,false);
+  assert.equal(env.link.focuses,1);
+  env.api.destroy();
 });

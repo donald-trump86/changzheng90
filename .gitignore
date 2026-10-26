@@ -4,3 +4,4 @@ exports/
 local-exports/
 artifacts/
 .DS_Store
+.taste-skill/
