@@ -19,6 +19,10 @@ export function initMaoExhibition({ root = document } = {}) {
   const emphasis = new Set();
   const covers = new Set();
   const observers = [];
+  const entrances = new Map();
+  const scrollStyles = new Map();
+  let scrollTargets = [];
+  let scrollFrame = 0;
   const map = root.querySelector('[data-command-map]');
   const caption = root.querySelector('[data-strategy-caption]');
   const links = [...root.querySelectorAll('[data-strategy-choice]')];
@@ -27,11 +31,11 @@ export function initMaoExhibition({ root = document } = {}) {
   const canAnimate = () => !destroyed && !doc.hidden && !reduced.matches && !forcedColors.matches
     && !['off', 'reduced'].includes(doc.body?.dataset.motion);
   function cancel(animation) {
-    const cleanup = animations.get(animation);
+    const record = animations.get(animation);
     animations.delete(animation);
     emphasis.delete(animation);
     animation.cancel();
-    cleanup?.();
+    record?.cleanup?.();
   }
   function animate(target, frames, options = {}, cleanup) {
     if (!canAnimate() || typeof target.animate !== 'function') { cleanup?.(); return; }
@@ -47,7 +51,7 @@ export function initMaoExhibition({ root = document } = {}) {
       cleanup?.();
       return;
     }
-    animations.set(animation, cleanup);
+    animations.set(animation, { target, cleanup });
     const complete = () => {
       if (!animations.has(animation)) return;
       animations.delete(animation);
@@ -57,8 +61,47 @@ export function initMaoExhibition({ root = document } = {}) {
     animation.finished.then(complete, complete);
     return animation;
   }
+  function resetScroll(target) {
+    const style = scrollStyles.get(target);
+    if (!style) return;
+    target.style.opacity = style.opacity;
+    target.style.transform = style.transform;
+    scrollStyles.delete(target);
+  }
+  function updateScroll() {
+    scrollFrame = 0;
+    if (!canAnimate()) return;
+    const height = win.innerHeight;
+    const band = Math.min(160, height * .2);
+    if (band <= 0) return;
+    for (const target of scrollTargets) {
+      const box = target.getBoundingClientRect();
+      if (box.bottom <= 0 || box.top >= height) { resetScroll(target); continue; }
+      const edge = box.top > height - band ? 1 - (height - box.top) / band
+        : box.bottom < band ? -(1 - box.bottom / band) : 0;
+      if (!scrollStyles.has(target)) scrollStyles.set(target, {
+        opacity: target.style.opacity, transform: target.style.transform,
+      });
+      target.style.opacity = String(1 - Math.abs(edge) * .35);
+      target.style.transform = `translateY(${edge * 16}px)`;
+    }
+  }
+  function onScroll() {
+    if (!scrollFrame && scrollTargets.length && canAnimate()) scrollFrame = win.requestAnimationFrame(updateScroll);
+  }
+  function leave(target) {
+    entrances.delete(target);
+    for (const [animation, record] of animations) {
+      if (record.target === target || target.contains(record.target)) cancel(animation);
+    }
+    resetScroll(target);
+  }
   function settle() {
     revealGeneration++;
+    entrances.clear();
+    if (scrollFrame) win.cancelAnimationFrame(scrollFrame);
+    scrollFrame = 0;
+    for (const target of scrollStyles.keys()) resetScroll(target);
     for (const animation of animations.keys()) cancel(animation);
     for (const cover of covers) cover.remove();
     covers.clear();
@@ -68,8 +111,9 @@ export function initMaoExhibition({ root = document } = {}) {
     if (!img || !canAnimate()) return;
     if (!img.complete) {
       const generation = revealGeneration;
+      const entrance = entrances.get(target);
       img.addEventListener('load', () => {
-        if (generation !== revealGeneration || !canAnimate()) return;
+        if (generation !== revealGeneration || entrances.get(target) !== entrance || !canAnimate()) return;
         const box = target.getBoundingClientRect();
         if (box.bottom > 0 && box.top < win.innerHeight) revealWoodcut(target);
       }, { once: true, signal });
@@ -140,7 +184,7 @@ export function initMaoExhibition({ root = document } = {}) {
       scenes.forEach(node => strategyObserver.observe(node));
     };
     observeStrategy();
-    win.addEventListener('resize', observeStrategy, { signal });
+    win.addEventListener('resize', () => { observeStrategy(); onScroll(); }, { signal });
     observers.push({ disconnect: () => strategyObserver?.disconnect() });
 
     const sequences = {
@@ -152,10 +196,10 @@ export function initMaoExhibition({ root = document } = {}) {
     };
     const entranceObserver = new win.IntersectionObserver(entries => {
       for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
         const target = entry.target;
-        entranceObserver.unobserve(target);
-        if (!canAnimate()) continue;
+        if (!entry.isIntersecting) { leave(target); continue; }
+        if (!canAnimate() || entrances.has(target)) continue;
+        entrances.set(target, {});
         if (target.matches('[data-woodcut-reveal]')) {
           revealWoodcut(target);
         } else if (target.matches('.woodcut-incision')) {
@@ -182,7 +226,10 @@ export function initMaoExhibition({ root = document } = {}) {
     }, { threshold: .12 });
     const targets = ['[data-woodcut-reveal]', '.woodcut-incision', '.mountain-verse', '.command-theme', ...Object.keys(sequences)];
     root.querySelectorAll(targets.join(', ')).forEach(node => entranceObserver.observe(node));
+    scrollTargets = [...root.querySelectorAll(targets.filter(selector => selector !== '.woodcut-incision').join(', '))];
     observers.push(entranceObserver);
+    win.addEventListener('scroll', onScroll, { passive: true, signal });
+    onScroll();
   }
   doc.addEventListener('chishui:motion', settle, { signal });
   doc.addEventListener('visibilitychange', () => { if (doc.hidden) settle(); }, { signal });

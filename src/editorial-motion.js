@@ -129,7 +129,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   /* ── 状态 ─────────────────────────────────────── */
   const actors = new Map();          // 每个动画一个属主，可整体取消
   const touched = new Set();         // 写过内联样式的节点，恢复时清空
-  const scenes = new Map();          // 区块 → 待入场元素（一次触发）
+  const scenes = new Map();          // 区块 → 可重复入场元素
   const seen = new Set();
   const cleanups = [];
   const handledEvents = new WeakSet();
@@ -535,13 +535,36 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     meter.setAttribute('aria-valuenow', String(Math.round(value * 100)));
   }
 
+  function scrollScenes() {
+    const targets = [...scenes.keys()];
+    const band = Math.min(160, win.innerHeight * .2);
+    if (band <= 0) return;
+    for (const target of targets) {
+      // Nested scene children keep their entrance transform; scroll owns only the outer container.
+      if (targets.some(other => other !== target && other.contains(target))) continue;
+      const box = target.getBoundingClientRect();
+      if (box.bottom <= 0 || box.top >= win.innerHeight) {
+        clearNode(target);
+        touched.delete(target);
+        continue;
+      }
+      const edge = box.top > win.innerHeight - band ? 1 - (win.innerHeight - box.top) / band
+        : box.bottom < band ? -(1 - box.bottom / band) : 0;
+      touched.add(target);
+      target.style.opacity = String(1 - Math.abs(edge) * .35);
+      target.style.transform = `translateY(${edge * 16}px)`;
+    }
+  }
+
   function onScroll() {
+    if (blocked()) { renderProgress(readingPosition()); return; }
     if (scrollFrame) return;
     scrollFrame = win.requestAnimationFrame(() => {
       scrollFrame = 0;
       const next = readingPosition();
       renderProgress(next);
       if (!blocked()) {
+        scrollScenes();
         if (fine.matches && art && visible(art)) {
           const rect = art.getBoundingClientRect();
           parallax = Math.min(6, Math.max(-6, (win.innerHeight / 2 - rect.top - rect.height / 2) * 0.018));
@@ -564,7 +587,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     });
   }
 
-  /* ── 区块入场（一次触发，逐区不同形） ───────────── */
+  /* ── 区块入场（离屏回收，逐区不同形） ───────────── */
 
   function addScene(rootSelector, childrenSelector, kind, options) {
     all(rootSelector).forEach((element) => {
@@ -572,9 +595,19 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     });
   }
 
+  function leaveScene(target) {
+    if (!scenes.has(target)) return;
+    seen.delete(target);
+    cancel(`scene-${[...scenes.keys()].indexOf(target)}`);
+    const focus = $('.context .timeline-focus');
+    if (focus && target.contains(focus)) cancel('timeline-focus');
+    clearNode(target);
+    touched.delete(target);
+  }
+
   function playScene(target) {
     const scene = scenes.get(target);
-    if (!scene || seen.has(target)) return;
+    if (!scene || seen.has(target) || blocked()) return;
     seen.add(target);
     const index = [...scenes.keys()].indexOf(target);
     if (scene.kind === 'plate') {
@@ -793,6 +826,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   }
 
   function settle() {
+    seen.clear();
     cancelAll();
     all('.plate-sheet').forEach((sheet) => {
       const parent = sheet.parentElement;
@@ -871,6 +905,8 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
             else cancel(item.key);
           } else if (isIntersecting) {
             playScene(target);
+          } else {
+            leaveScene(target);
           }
         });
       }), { threshold: [0, 0.12, 0.36] });

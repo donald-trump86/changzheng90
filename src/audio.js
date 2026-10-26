@@ -4,7 +4,7 @@
  * Silent by default: elements are created with preload="none", volume 0, and
  * never play before an explicit enable(). Every state-changing action advances
  * a generation token, so a play() promise that settles after pause(), destroy()
- * or a hidden tab can never restart sound (the continuation re-pauses instead).
+ * or page departure can never restart sound (the continuation re-pauses instead).
  *
  * Only locally hosted, licence-verified recordings belong in `audioTracks`.
  * Attribution and licence evidence: audio-credits.html and docs/audio-rights.md.
@@ -119,7 +119,7 @@ export function createAudioController({ tracks, createAudio, onState, volume = 0
 
   /**
    * Play `node` and settle the state only if this attempt is still current.
-   * Any token change (pause/destroy/hidden/new attempt) means silence wins:
+   * Any token change (pause/destroy/pagehide/new attempt) means silence wins:
    * the continuation pauses the element instead of resuming sound — except
    * when a newer live attempt owns this same element (node === active &&
    * enabled): pausing then would abort the attempt that is actually current.
@@ -320,10 +320,6 @@ export function createAudioController({ tracks, createAudio, onState, volume = 0
     }
   }
 
-  const hide = () => {
-    if (globalThis.document && globalThis.document.hidden) stop();
-  };
-  on(globalThis.document, 'visibilitychange', hide);
   on(globalThis.window, 'pagehide', () => stop());
 
   emit();
