@@ -2,6 +2,10 @@
 
 公开入口为 [https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)，源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。源码维护于 `main`，GitHub Pages 使用 `gh-pages` 分支根目录，自定义域名由 Cloudflare 代理至 GitHub Pages。
 
+2026-10-26，阅读交互与山中木刻修订已发布。产品源码提交 `46e469b`，`gh-pages` 发布提交 `5a071fca7220f17f3996baf3e8c0214a528604e4`。GitHub Pages 状态 `built`、无错误，耗时26.567秒，完成于20:12:27（Asia/Shanghai）。最终140项测试通过；55个发布文件的相对路径与SHA-256均与最终构建一致。本轮改动包括侧边目录、固定尺寸动画/配乐控制、滚轮拖动看图、资料展开收起、双向滚动、整块页尾返回及重新生成的山中行军图；详见[本轮验收](reading-refinements-2026-10-26.md)。
+
+2026-10-26 20:12发布后，公开根首页自动请求返回403、标题「Just a moment...」，已停止后续资源请求，未绕过Cloudflare验证。本次确认的是Pages部署成功、发布文件一致及相同构建的本地Brave实测；公开域名下的新版交互与资源字节尚未复验。
+
 2026-10-26，全站动效与交互升级已发布。产品源码提交为 `c0c3ea8426cb6b0a1895cfcf9c308056a93cd1fe`，`gh-pages` 发布提交为 `ba48d9dbf330392f5452085f921fcfbabd03ec6f`。Pages状态 `built`、无错误、耗时55.806秒，完成于2026-10-26 17:16:49（Asia/Shanghai）。最终129项测试通过，55个发布文件按路径与SHA-256和最终构建逐一一致，独立交付门禁Spec PASS、Quality APPROVED。详见[本轮验收](motion-upgrade-2026-10-26.md)。
 
 公开根首页返回200、标题正确，已显示「从长征读起」，全部22个版本化资源引用与本地构建一致。随后对首个脚本资源做独立字节请求，Cloudflare返回403／`error code: 1010`；确认响应不是产品脚本后停止资源请求，未绕过边缘限制。因此本轮没有声称已完成公开域名下八个改动资源的远程字节核验。发布分支55个文件的本地构建一致性与Pages提交成功可确认；动效交互实测来自相同最终构建的专用Brave，本轮没有重试公开域名浏览器挑战。
