@@ -2,6 +2,10 @@
 
 公开入口为 [https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)，源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。源码维护于 `main`，GitHub Pages 使用 `gh-pages` 分支根目录，自定义域名由 Cloudflare 代理至 GitHub Pages。
 
+2026-10-26，全站动效与交互升级已发布。产品源码提交为 `c0c3ea8426cb6b0a1895cfcf9c308056a93cd1fe`，`gh-pages` 发布提交为 `ba48d9dbf330392f5452085f921fcfbabd03ec6f`。Pages状态 `built`、无错误、耗时55.806秒，完成于2026-10-26 17:16:49（Asia/Shanghai）。最终129项测试通过，55个发布文件按路径与SHA-256和最终构建逐一一致，独立交付门禁Spec PASS、Quality APPROVED。详见[本轮验收](motion-upgrade-2026-10-26.md)。
+
+公开根首页返回200、标题正确，已显示「从长征读起」，全部22个版本化资源引用与本地构建一致。随后对首个脚本资源做独立字节请求，Cloudflare返回403／`error code: 1010`；确认响应不是产品脚本后停止资源请求，未绕过边缘限制。因此本轮没有声称已完成公开域名下八个改动资源的远程字节核验。发布分支55个文件的本地构建一致性与Pages提交成功可确认；动效交互实测来自相同最终构建的专用Brave，本轮没有重试公开域名浏览器挑战。
+
 2026-10-26，手机四渡路线演示与滚动阅读优化已发布。产品源码提交为 `c8a8bd0`，`gh-pages` 提交为 `7539c00ab9361f1ffc91f55161f447fd227f4b70`。GitHub Pages 对应构建状态为 `built`，耗时34.175秒、无错误，完成于2026-10-26 11:47:24（Asia/Shanghai）。发布前106项Node测试全部通过；55个部署文件的相对路径与SHA-256和最终 `dist/` 完全一致，本次实际更新首页及4个动效／样式模块。
 
 原域名首页经HTTP核对返回200、标题为「长征路上，四渡赤水」，全部版本化资源引用与本地构建一致。4个更新资源均返回200且SHA-256一致：`editorial-motion.js?v=c61ee1a2`、`historical-map.css?v=18a44351`、`mao-exhibition.css?v=53572efe`、`mao-exhibition.js?v=b05967dd`。线上HTML比本地多1305字节，逐行差异仅在 `</body>` 前插入Cloudflare分析脚本；因此未将整页哈希不同误判为旧版首页。线上检查是HTTP及资源字节核对，交互实测仍以本地相同构建在专用Brave中的结果为准，详见[验证记录](verification.md)。

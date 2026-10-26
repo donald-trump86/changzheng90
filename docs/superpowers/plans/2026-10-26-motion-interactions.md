@@ -32,4 +32,4 @@
 - [x] 展区：compact 揭幕、刀痕、逐句诗词、五组错峰、朱红线、策略脉冲；清理与异常回退。测试 tests/exhibition.test.js。
 - [x] 交互：地图地点考据和键盘语义、原图鼠标拖拽和双击；index 的键盘切章、窄屏展开、OG 与阅读入口；CSS focus / reduce / forced-colors。
 - [x] 全量 npm test / npm run build；Brave 在 1440、768、390 验证动效和静态、无脚本与动画库失败降级；截图对比并记录结果。
-- [ ] 根据既有长征 H5 授权提交、推送并验证根首页部署。
+- [x] 根据既有长征 H5 授权提交、推送并验证根首页部署。发布提交 ba48d9d，Pages built；公开根页200且22资源引用一致，独立资源字节请求受Cloudflare1010限制。

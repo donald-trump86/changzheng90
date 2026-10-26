@@ -31,6 +31,10 @@
 
 独立 `inspect.mjs`／`scenes.mjs` 会额外启动浏览器，本轮按专用Brave约束使用同一任务的MCP测量与截图替代，未宣称自动检查器通过。没有真机、Safari、微信或运营商网络验证。没有重测配乐主观听感。
 
+## 独立交付门禁
+
+新审阅者单遍分8段读取 `bbf4ee9` → `c0c3ea8` 的2399行差异：Spec PASS；Quality APPROVED，ready for delivery；Critical / Important / Minor 均无。交叉核对双引擎与WAAPI清理、路线线型与徽标、静态回退、地图事件／注释、导航排除条件及查看器捕获释放。没有修改文件或重跑测试／浏览器。运行验证采用上表证据；两条超长的生成SVG差异行受到工具截断，未独立读取完整序列化结果，已检查生成器与现有测试证据。
+
 ## 画面复核
 
 ROUND 1 (final)
