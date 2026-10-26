@@ -12,6 +12,7 @@ export function initMaoExhibition({ root = document } = {}) {
   const abort = new win.AbortController();
   const { signal } = abort;
   const reduced = win.matchMedia('(prefers-reduced-motion: reduce)');
+  const compact = win.matchMedia('(max-width: 900px), (pointer: coarse)');
   const animations = new Set();
   const covers = new Set();
   const observers = [];
@@ -48,8 +49,8 @@ export function initMaoExhibition({ root = document } = {}) {
       return;
     }
     if (!img.naturalWidth) return;
-    if (motion() === 'reduced') {
-      animate(img, [{ opacity: .7 }, { opacity: 1 }]);
+    if (motion() === 'reduced' || compact.matches) {
+      animate(img, [{ opacity: .85 }, { opacity: 1 }], { duration: motion() === 'reduced' ? 150 : 240 });
       return;
     }
     const cover = doc.createElement('span');
@@ -86,7 +87,7 @@ export function initMaoExhibition({ root = document } = {}) {
           const box = node.getBoundingClientRect();
           return box.top <= readingLine && box.bottom > readingLine;
         });
-        // Tablet columns share a reading row; retain the reader's manual choice there.
+        // Retain the reader's manual choice when articles share a reading row.
         if (current.length === 1) select(current[0].dataset.strategyScene);
       }, { rootMargin: `-${readingLine}px 0px -${Math.max(0, win.innerHeight - readingLine - 1)}px 0px`, threshold: 0 });
       scenes.forEach(node => strategyObserver.observe(node));
@@ -103,6 +104,9 @@ export function initMaoExhibition({ root = document } = {}) {
         if (motion() === 'off') continue;
         if (target.matches('[data-woodcut-reveal]')) {
           revealWoodcut(target);
+        } else if (compact.matches) {
+          // Touch scrolling keeps the reading surface still and immediately legible.
+          continue;
         } else if (target.matches('.command-theme')) {
           target.querySelectorAll('[data-theme-line]').forEach((line, index) => animate(line,
             motion() === 'reduced' ? [{ opacity: .7 }, { opacity: 1 }] : [{ opacity: .25, transform: 'translateY(10px)' }, { opacity: 1, transform: 'translateY(0)' }],
@@ -120,6 +124,7 @@ export function initMaoExhibition({ root = document } = {}) {
   doc.addEventListener('chishui:motion', settle, { signal });
   doc.addEventListener('visibilitychange', () => { if (doc.hidden) settle(); }, { signal });
   reduced.addEventListener('change', settle, { signal });
+  compact.addEventListener('change', settle, { signal });
   const watch = new win.MutationObserver(settle);
   watch.observe(doc.body, { attributes: true, attributeFilter: ['data-motion'] });
   return {
