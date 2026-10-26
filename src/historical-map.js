@@ -1,22 +1,16 @@
 /* Stable SVG renderer; Anime actors belong exclusively to editorial-motion.js.
-   The camera glide below is a plain rAF tween: eased, cancellable, and never
-   an Anime actor. */
+   Camera geometry settles instantly: only transform/opacity may animate. */
 (() => {
   'use strict';
   const LABEL_PX = 16;
-  const TWEEN_MS = 520;
   const SVG_NS = 'http://www.w3.org/2000/svg';
-  const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
-  const raf = (fn) => requestAnimationFrame(fn);
-  const caf = (id) => cancelAnimationFrame(id);
   const defer = (fn) => (typeof queueMicrotask === 'function' ? queueMicrotask(fn) : setTimeout(fn, 0));
-  const motionOff = () => Boolean(document.body?.dataset?.motion === 'off'
-    || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches));
+  const instances = new WeakMap();
   function create() {
     const data = globalThis.ChishuiMapData;
     const svg = document.getElementById('route-map');
     if (!data || !svg) throw new Error('Historical map data or static SVG unavailable');
+    instances.get(svg)?.destroy();
     const $ = (id) => document.getElementById(id);
     const route = $('current-route');
     const head = $('march-head');
@@ -46,20 +40,58 @@
     let allView = null; // View to restore when the all-routes reading mode ends.
     let fitting = false;
     let geometry = data.geometry(chapter, view);
-    let camera = null;
-    let cameraToken = 0;
+    let destroyed = false;
+    let pointed = null;
+    let focused = null;
+    const listeners = [];
+    const note = $('map-view-note');
+    const places = new Map([...marks, ...areas].map((node) => [node,
+      data.places[node.dataset.mapPoint || data.fords[node.dataset.ford]?.reference]]));
+    const originalAttributes = [...places.keys()].map((node) => [node,
+      ['tabindex', 'role', 'aria-label', 'aria-describedby'].map((name) => [name, node.getAttribute(name)])]);
+    function listen(node, name, handler) {
+      node.addEventListener(name, handler);
+      listeners.push(() => node.removeEventListener(name, handler));
+    }
+    function showPlace(node) {
+      const place = places.get(node);
+      note.textContent = place ? `${place.name}：${place.note}` : geometry.notice;
+    }
+    function syncPlaces() {
+      for (const [node, place] of places) {
+        const visible = node.style.display !== 'none';
+        node.setAttribute('tabindex', visible && place ? '0' : '-1');
+        if (!visible) {
+          if (pointed === node) pointed = null;
+          if (focused === node) focused = null;
+          if (document.activeElement === node) node.blur();
+        }
+      }
+      showPlace(pointed || focused);
+    }
+    for (const [node, place] of places) {
+      if (!place) continue;
+      node.setAttribute('role', 'button');
+      node.setAttribute('aria-label', node.dataset.ford ? data.fords[node.dataset.ford].name : place.name);
+      const describedBy = (node.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+      node.setAttribute('aria-describedby', [...new Set([...describedBy, 'map-view-note'])].join(' '));
+      listen(node, 'pointerenter', () => { pointed = node; showPlace(node); });
+      listen(node, 'pointerleave', () => { if (pointed === node) pointed = null; showPlace(pointed || focused); });
+      listen(node, 'focusin', () => { focused = node; showPlace(node); });
+      listen(node, 'focusout', () => { if (focused === node) focused = null; showPlace(pointed || focused); });
+      listen(node, 'click', () => { pointed = node; showPlace(node); });
+      listen(node, 'keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        showPlace(node);
+      });
+    }
     const dispatch = (name, reason) => document.dispatchEvent(new CustomEvent(name, { detail: { reason, chapter, view, allRoutes } }));
     const pointFor = (id) => id === 'river' ? [490, 310] : id.startsWith('ford:') ? data.fords[id.slice(5)].xy : data.node(id);
     const overlaps = (a, b, gap = 0) => a.x < b.x + b.width + gap && a.x + a.width + gap > b.x && a.y < b.y + b.height + gap && a.y + a.height + gap > b.y;
-    const readViewBox = () => (svg.getAttribute('viewBox') || '').trim().split(/\s+/).map(Number);
-    const sameBox = (a, b) => a.length === 4 && b.length === 4 && a.every((value, i) => Math.abs(value - b[i]) < 0.01);
-    const scaleFor = (box) => {
-      const rect = svg.getBoundingClientRect();
-      return Math.min(rect.width / box[2], rect.height / box[3]);
-    };
 
     function fit(overrideScale) {
-      if (fitting) return;
+      if (destroyed || fitting) return;
       fitting = true;
       try {
         const available = Math.max(1, innerHeight - 32);
@@ -92,6 +124,7 @@
           // Broad ford area symbols remain geographic, their size is not a GPS error radius.
           area.style.display = view === 'detail' && !stage.fords.includes(area.dataset.ford) ? 'none' : '';
         });
+        syncPlaces();
         const routeSegments = geometry.points.slice(1).map((to, i) => [geometry.points[i], to]);
         function hitsRoute(box) {
           return routeSegments.some(([a, b]) => {
@@ -148,22 +181,6 @@
         svg.dataset.visibleLabels = String(labels.filter((label) => label.style.display !== 'none').length);
       } finally { fitting = false; }
     }
-    // Hold every fitted element at its settled screen size while the camera glides,
-    // so labels stay readable for the whole transition.
-    function pinScale(scale) {
-      if (!scale) return;
-      const font = LABEL_PX / scale;
-      labels.forEach((label) => {
-        if (label.style.display !== 'none') label.style.fontSize = `${font}px`;
-      });
-      marks.forEach((mark) => mark.setAttribute('r', String(2.7 / scale)));
-      start.setAttribute('r', String(4 / scale));
-      head.setAttribute('r', String(4 / scale));
-      crossingDots.forEach((dot) => dot.setAttribute('r', String(3.4 / scale)));
-      const arrowSize = 11 / scale;
-      $('route-arrow').setAttribute('markerWidth', String(arrowSize));
-      $('route-arrow').setAttribute('markerHeight', String(arrowSize));
-    }
     function commit() {
       const stage = data.stages[chapter - 1];
       geometry = data.geometry(chapter, view);
@@ -214,59 +231,13 @@
       allButtons.forEach((button) => button.setAttribute('aria-pressed', String(allRoutes)));
       fit();
     }
-    /* ---- camera: eased viewBox glide, instantly cancellable ---- */
-    function cancelCamera() {
-      const interrupted = Boolean(camera);
-      cameraToken++; // The old actor/token dies before any new geometry commits.
-      if (camera) {
-        caf(camera.raf);
-        camera = null;
-      }
-      return interrupted;
-    }
-    function settleCamera(from, interrupted, after) {
-      const to = geometry.viewBox;
-      // An interruption settles straight to the latest state; so do motion-off,
-      // unmapped canvases, and no-op transitions.
-      const glide = !interrupted && !motionOff() && !sameBox(from, to) && scaleFor(to) > 0;
-      if (!glide) {
-        svg.setAttribute('viewBox', to.join(' '));
-        fit();
-        if (after) after();
-        return;
-      }
-      const toScale = scaleFor(to);
-      fit(toScale); // Target labels settle at their final screen size first.
-      svg.setAttribute('viewBox', from.join(' ')); // commit() wrote the target; the camera departs from where we were.
-      const token = cameraToken;
-      const started = now();
-      camera = { from, started, after, raf: 0 };
-      const step = () => {
-        if (token !== cameraToken || !camera) return;
-        const t = Math.min(1, (now() - camera.started) / TWEEN_MS);
-        const e = easeInOutCubic(t);
-        const box = from.map((value, i) => value + (to[i] - value) * e);
-        svg.setAttribute('viewBox', box.join(' '));
-        pinScale(scaleFor(box));
-        if (t >= 1) {
-          const done = camera.after;
-          camera = null;
-          svg.setAttribute('viewBox', to.join(' '));
-          fit();
-          if (done) done();
-          return;
-        }
-        camera.raf = raf(step);
-      };
-      camera.raf = raf(step);
-    }
     function apply(reason, mutate, withAfter) {
-      const from = camera ? camera.from : readViewBox();
-      dispatch('chishui:map-before', reason); // Before any mutation, as always.
-      const interrupted = cancelCamera();
+      if (destroyed) return;
+      dispatch('chishui:map-before', reason);
+      pointed = focused = null;
       mutate();
       commit();
-      settleCamera(from, interrupted, withAfter ? () => dispatch('chishui:map-after', reason) : null);
+      if (withAfter) dispatch('chishui:map-after', reason);
     }
     function setChapter(number) {
       const nextView = allRoutes && allView ? allView : view;
@@ -324,19 +295,34 @@
       const existing = document.querySelector('.map-all-routes');
       if (existing) existing.remove(); // Re-entrant: a second create() replaces, never stacks.
       host.appendChild(block);
+      return block;
     }
     // Fallback toggle for [data-map-all]: if the page wires its own handler that
     // runs first and flips the state, this deferred one stands down.
     allButtons.forEach((button) => {
-      button.addEventListener('click', () => {
+      listen(button, 'click', () => {
         const before = allRoutes;
-        defer(() => { if (allRoutes === before) setAllRoutes(!before); });
+        defer(() => { if (!destroyed && allRoutes === before) setAllRoutes(!before); });
       });
     });
-    mountOverviewDescription();
+    const overviewDescription = mountOverviewDescription();
     commit();
     document.querySelector('.map-view-controls').hidden = false;
-    return { setChapter, setView, setAllRoutes, fit };
+    const api = { setChapter, setView, setAllRoutes, fit, destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      listeners.forEach((remove) => remove());
+      originalAttributes.forEach(([node, attributes]) => attributes.forEach(([name, value]) => {
+        if (value === null) node.removeAttribute(name);
+        else node.setAttribute(name, value);
+      }));
+      pointed = focused = null;
+      showPlace(null);
+      overviewDescription.remove();
+      instances.delete(svg);
+    } };
+    instances.set(svg, api);
+    return api;
   }
   globalThis.ChishuiHistoricalMap = { create };
 })();

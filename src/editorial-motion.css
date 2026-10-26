@@ -127,6 +127,29 @@
   }
 }
 
+/* 配乐与披露控件沿用纸墨风格，只改变合成属性。 */
+.audio-wave { display: inline-flex; align-items: center; gap: 3px; width: 22px; height: 20px; flex: none; }
+.audio-wave i { display: block; width: 3px; height: 16px; background: currentColor; transform-origin: center; }
+body[data-audio-playing="true"]:not([data-motion="off"]) .audio-wave i {
+  animation: chishui-wave 0.65s ease-in-out infinite alternate;
+}
+body[data-audio-playing="true"]:not([data-motion="off"]) .audio-wave i:nth-child(2) { animation-delay: 0.22s; }
+body[data-audio-playing="true"]:not([data-motion="off"]) .audio-wave i:nth-child(3) { animation-delay: 0.45s; }
+@keyframes chishui-wave { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+.disclosure-icon .icon-vertical {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+.disclosure[open]:not([data-expanded="false"]) .disclosure-icon .icon-vertical { transform: rotate(90deg) scaleY(0); opacity: 0; }
+.dialog-viewport[data-pannable="true"] { cursor: grab; }
+.dialog-viewport[data-dragging="true"] { cursor: grabbing; user-select: none; }
+.dialog-viewport img { -webkit-user-drag: none; }
+
+@media (max-width: 650px) {
+  #continuation .after-route li { display: block; white-space: nowrap; }
+}
+
 /* ── 减弱动态 / 关闭动态 / 强制颜色 ─────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -150,6 +173,7 @@ body[data-motion="off"] .river-flow {
 }
 
 @media (forced-colors: active) {
+  .audio-wave i { animation: none !important; transform: none !important; }
   .motion-control {
     outline: 1px solid ButtonText;
   }

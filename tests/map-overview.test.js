@@ -246,8 +246,8 @@ function buildEnv({ reduce = false, motionOff = false, previousRoutes = 3 } = {}
       }
     },
     flush: async () => { await Promise.resolve(); await Promise.resolve(); },
-    fire: (el, type) => (el.listeners.get(type) || []).slice()
-      .forEach((fn) => fn({ type, target: el })),
+    fire: (el, type, extra = {}) => (el.listeners.get(type) || []).slice()
+      .forEach((fn) => fn({ type, target: el, ...extra })),
     create: () => context.ChishuiHistoricalMap.create()
   });
   return env;
@@ -313,77 +313,20 @@ test('setChapter exits all-routes mode and restores previous-leg rendering', () 
     'the post-exit view is validated and committed');
 });
 
-test('camera glides between detail windows and settles exactly', () => {
+test('camera commits the sourced window instantly without animating layout properties', () => {
   const env = buildEnv();
   const map = env.create();
   map.setView('detail');
-  assert.equal(env.frames.size, 1, 'a camera tween is in flight');
-  assert.equal(env.viewBox(), '0 220 1000 600', 'viewBox is not committed until the tween settles');
-  assert.ok(!env.events.some((event) => event.type === 'chishui:map-after'),
-    'map-after waits for settle');
-  env.pump(100, 1);
-  assert.notEqual(env.viewBox(), '0 220 1000 600');
-  assert.notEqual(env.viewBox(), data.geometry(1, 'detail').viewBox.join(' '));
-  const [midX] = env.viewBox().split(' ').map(Number);
-  const [fromX, , fromW] = data.geometry(1, 'overview').viewBox;
-  const [toX, , toW] = data.geometry(1, 'detail').viewBox;
-  assert.ok(midX > Math.min(fromX, toX) && midX < Math.max(fromX, toX), 'eased interpolation between windows');
-  assert.ok(fromW !== toW && midX !== fromX);
-  const label = env.visibleLabels()[0];
-  const midFont = label && label.style.fontSize;
-  env.pump(100, 8);
-  assert.equal(env.viewBox(), data.geometry(1, 'detail').viewBox.join(' '), 'settles exactly on the sourced window');
   assert.equal(env.frames.size, 0);
-  assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, 1,
-    'map-after fires once, after settle');
-  const settled = env.svg.getScreenCTM();
-  const settledFont = `${16 / Math.hypot(settled.a, settled.b)}px`;
-  for (const item of env.visibleLabels()) assert.equal(item.style.fontSize, settledFont);
-  if (midFont) assert.notEqual(midFont, settledFont, 'label size tracks the camera to stay readable mid-flight');
-  map.setChapter(2);
-  assert.equal(env.frames.size, 1, 'detail-to-detail chapter change animates the camera');
-  env.pump(100, 8);
-  assert.equal(env.viewBox(), data.geometry(2, 'detail').viewBox.join(' '));
-});
-
-test('rapid setChapter calls cancel the in-flight tween and settle on the latest state', () => {
-  const env = buildEnv();
-  const map = env.create();
-  map.setView('detail');
-  env.pump(100, 8);
-  map.setChapter(2);
-  const stale = env.frames.values().next().value;
-  assert.equal(env.frames.size, 1);
-  map.setChapter(3);
-  assert.equal(env.frames.size, 0, 'the in-flight tween is cancelled');
-  assert.equal(env.viewBox(), data.geometry(3, 'detail').viewBox.join(' '), 'settles immediately on the latest state');
+  assert.equal(env.viewBox(), data.geometry(1, 'detail').viewBox.join(' '));
+  const matrix = env.svg.getScreenCTM();
+  for (const label of env.visibleLabels()) assert.equal(label.style.fontSize, `${16 / Math.hypot(matrix.a, matrix.b)}px`);
+  for (const chapter of [2, 4, 3]) map.setChapter(chapter);
+  assert.equal(env.frames.size, 0);
+  assert.equal(env.viewBox(), data.geometry(3, 'detail').viewBox.join(' '));
   assert.equal(env.route.getAttribute('d'), data.geometry(3, 'detail').path);
-  assert.equal(env.svg.dataset.chapter, '3');
-  const frozen = env.viewBox();
-  env.pump(100, 6);
-  assert.equal(env.viewBox(), frozen, 'no leftover frames may move the camera');
-  const afterCount = env.events.filter((event) => event.type === 'chishui:map-after').length;
-  if (stale) stale(env.clock + 5000);
-  assert.equal(env.viewBox(), frozen, 'the old tween token is dead and cannot commit');
-  assert.equal(env.route.getAttribute('d'), data.geometry(3, 'detail').path);
-  assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, afterCount,
-    'the dead tween commits nothing, not even a map-after');
-  assert.ok(env.events.filter((event) => event.type === 'chishui:map-after')
-    .every((event) => event.detail.reason === 'view'),
-    'chapter operations keep the existing before-only event semantics');
-});
-
-test('cancelling a transition drops its pending map-after', () => {
-  const env = buildEnv();
-  const map = env.create();
-  map.setView('detail'); // Glide in flight with a map-after waiting for settle.
-  assert.equal(env.frames.size, 1);
-  map.setChapter(2); // Cancellation kills the old actor before the new geometry commits.
-  env.pump(100, 8);
-  assert.equal(env.viewBox(), data.geometry(2, 'detail').viewBox.join(' '));
-  assert.equal(env.route.getAttribute('d'), data.geometry(2, 'detail').path);
-  assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, 0,
-    'the voided view transition never settles its map-after');
+  assert.equal(env.events.filter(event => event.type === 'chishui:map-after').length, 1,
+    'chapter changes retain their existing before-only event contract');
 });
 
 test('reduced motion and motion-off jump instantly without animation frames', () => {
@@ -405,15 +348,15 @@ test('map-before precedes every mutation and view mode settles with map-after', 
   const before = env.events.filter((event) => event.type === 'chishui:map-before');
   assert.equal(before.length, 1);
   assert.equal(before[0].detail.reason, 'view');
-  assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, 0);
+  assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, 1);
   env.pump(100, 8);
   const after = env.events.filter((event) => event.type === 'chishui:map-after');
   assert.equal(after.length, 1);
   assert.equal(after[0].detail.reason, 'view');
   map.setAllRoutes(true);
   assert.equal(env.events.filter((event) => event.type === 'chishui:map-before').length, 2);
-  assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, 1,
-    'map-after waits for the all-routes camera change to settle');
+  assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, 2,
+    'all-routes geometry settles synchronously');
   env.pump(100, 8);
   assert.equal(env.events.filter((event) => event.type === 'chishui:map-after').length, 2,
     'all-routes mode change settles like a view change');
@@ -455,4 +398,39 @@ test('an accessible four-leg west/east description is mounted near the map from 
   env.create();
   assert.equal(env.document.querySelectorAll('.map-all-routes').length, 1,
     'a second create() replaces the description instead of stacking it');
+});
+
+test('map places and ford references expose sourced notes through pointer, touch and keyboard', () => {
+  const env = buildEnv();
+  const map = env.create();
+  const note = env.document.getElementById('map-view-note');
+  const point = env.svg.querySelector('[data-map-point="zunyi"]');
+  const ford = env.svg.querySelector('[data-ford="tucheng"]');
+  assert.equal(point.getAttribute('role'), 'button');
+  assert.equal(point.getAttribute('tabindex'), '0');
+  assert.equal(point.getAttribute('aria-label'), data.places.zunyi.name);
+  assert.equal(point.getAttribute('aria-describedby'), 'map-view-note');
+  const sourced = id => `${data.places[id].name}：${data.places[id].note}`;
+  env.fire(point, 'pointerenter'); assert.equal(note.textContent, sourced('zunyi'));
+  env.fire(point, 'pointerleave'); assert.equal(note.textContent, data.geometry(1, 'overview').notice);
+  env.fire(ford, 'click'); assert.equal(note.textContent, sourced(data.fords.tucheng.reference));
+  env.fire(ford, 'pointerleave');
+  env.fire(point, 'focusin'); assert.equal(note.textContent, sourced('zunyi'));
+  env.fire(point, 'pointerleave'); assert.equal(note.textContent, sourced('zunyi'), 'focus remains selected when pointer leaves');
+  env.fire(point, 'focusout'); assert.equal(note.textContent, data.geometry(1, 'overview').notice);
+  for (const key of ['Enter', ' ']) {
+    let prevented = false;
+    env.fire(point, 'keydown', { key, preventDefault() { prevented = true; } });
+    assert.ok(prevented); assert.equal(note.textContent, sourced('zunyi'));
+  }
+  map.setChapter(2); assert.equal(note.textContent, data.geometry(2, 'overview').notice);
+  env.fire(point, 'click'); map.setView('detail');
+  assert.equal(note.textContent, data.geometry(2, 'detail').notice);
+  for (const node of env.svg.querySelectorAll('[data-map-point]')) {
+    if (node.style.display === 'none') assert.equal(node.getAttribute('tabindex'), '-1');
+  }
+  map.destroy();
+  assert.equal(point.getAttribute('role'), null); assert.equal(point.getAttribute('tabindex'), null);
+  const text = note.textContent; env.fire(point, 'click'); assert.equal(note.textContent, text);
+  assert.ok([...point.listeners.values()].every(list => list.length === 0));
 });

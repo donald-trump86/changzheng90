@@ -39,11 +39,10 @@ test('each crossing reveals through its own mask without overwriting line style 
     assert.equal(mask.getAttribute('x'), '325');
     reveal.update(0);
     assert.equal(mask.children[0].getAttribute('stroke-dashoffset'), '100');
-    assert.equal(head.getAttribute('cx'), '10');
+    assert.equal(head.getAttribute('transform'), 'translate(10 20)');
     reveal.update(.5);
     assert.equal(mask.children[0].getAttribute('stroke-dashoffset'), '50');
-    assert.equal(head.getAttribute('cx'), '60');
-    assert.equal(head.getAttribute('cy'), '45');
+    assert.equal(head.getAttribute('transform'), 'translate(60 45)');
     assert.equal(path.getAttribute('stroke-dasharray'), pattern);
     assert.equal(path.getAttribute('marker-end'), `url(#arrow-${stage})`);
     reveal.update(1);
@@ -71,9 +70,9 @@ test('overshooting progress cannot move the march head beyond either endpoint', 
   const { path, svg } = fixture(4);
   const reveal = createChapterRouteReveal(path);
   reveal.update(-.5);
-  assert.equal(svg.children[1].getAttribute('cx'), '10');
+  assert.equal(svg.children[1].getAttribute('transform'), 'translate(10 20)');
   reveal.update(1.5);
-  assert.equal(svg.children[1].getAttribute('cx'), '110');
+  assert.equal(svg.children[1].getAttribute('transform'), 'translate(110 70)');
   reveal.finish();
 });
 
@@ -97,7 +96,7 @@ test('chapter playback waits for the SVG and cancels cleanly across its lifecycl
   const reduced = Object.assign(new EventTarget(), { matches: false });
   const observers = [];
   const win = Object.assign(new EventTarget(), {
-    innerHeight: 800, scrollY: 0, location: { hash: '' }, matchMedia: () => fine,
+    innerHeight: 800, scrollY: 0, location: { hash: '' }, matchMedia: query => query.includes('forced-colors') ? reduced : fine,
     requestAnimationFrame, cancelAnimationFrame,
     IntersectionObserver: class {
       constructor(callback, options) { Object.assign(this, { callback, options, targets: [] }); observers.push(this); }

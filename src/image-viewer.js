@@ -12,11 +12,21 @@ export function initImageViewer(root = document, win = window) {
   let ready = false;
   let destroyed = false;
   let generation = 0;
+  let drag = null;
+  const originalPanAttributes = ['data-pannable', 'data-dragging'].map((name) => [name, viewport.getAttribute(name)]);
+  function endDrag() {
+    const pointerId = drag?.id;
+    drag = null;
+    viewport.dataset.dragging = 'false';
+    if (pointerId !== undefined && viewport.hasPointerCapture(pointerId)) viewport.releasePointerCapture(pointerId);
+  }
   function listen(node, type, fn) {
     node.addEventListener(type, fn);
     listeners.push(() => node.removeEventListener(type, fn));
   }
   function fit(reset = false) {
+    if (reset || level === 0) endDrag();
+    viewport.dataset.pannable = String(dialog.open && ready && level > 0);
     if (!dialog.open || !ready || !image.naturalWidth || !image.naturalHeight) return;
     const aspect = image.naturalWidth / image.naturalHeight;
     const width = Math.min(viewport.clientWidth, viewport.clientHeight * aspect);
@@ -36,8 +46,37 @@ export function initImageViewer(root = document, win = window) {
     image.hidden = !ready;
     fit(true);
   }
+  viewport.dataset.pannable = 'false';
+  viewport.dataset.dragging = 'false';
+  listen(viewport, 'pointerdown', (event) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0 || event.isPrimary === false
+      || !dialog.open || !ready || level === 0 || drag) return;
+    viewport.setPointerCapture(event.pointerId);
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY,
+      left: viewport.scrollLeft, top: viewport.scrollTop };
+    viewport.dataset.dragging = 'true';
+    event.preventDefault();
+  });
+  listen(viewport, 'pointermove', (event) => {
+    if (!drag || drag.id !== event.pointerId) return;
+    viewport.scrollLeft = drag.left + drag.x - event.clientX;
+    viewport.scrollTop = drag.top + drag.y - event.clientY;
+    event.preventDefault();
+  });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    listen(viewport, type, (event) => { if (drag?.id === event.pointerId) endDrag(); });
+  }
+  listen(viewport, 'dblclick', (event) => {
+    if (event.button !== 0 || !dialog.open || !ready) return;
+    event.preventDefault();
+    level = level === 0 ? 2 : 0;
+    fit(true);
+  });
+  listen(image, 'dragstart', (event) => { if (level > 0) event.preventDefault(); });
   listen(image, 'load', loaded);
   listen(image, 'error', () => {
+    endDrag();
+    viewport.dataset.pannable = 'false';
     ready = false;
     image.hidden = true;
     root.getElementById('dialog-caption').textContent = '原图暂时无法载入，请关闭后使用原图链接重试。';
@@ -47,6 +86,8 @@ export function initImageViewer(root = document, win = window) {
       // Preserve native open-in-new-tab and modified-click behavior.
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
+      endDrag();
+      viewport.dataset.pannable = 'false';
       trigger = link;
       level = 0;
       ready = false;
@@ -86,6 +127,8 @@ export function initImageViewer(root = document, win = window) {
     }
   });
   listen(dialog, 'close', () => {
+    endDrag();
+    viewport.dataset.pannable = 'false';
     generation++;
     ready = false;
     if (trigger?.isConnected) trigger.focus({ preventScroll: true });
@@ -98,8 +141,13 @@ export function initImageViewer(root = document, win = window) {
     if (destroyed) return;
     destroyed = true;
     generation++;
+    endDrag();
     observer?.disconnect();
     listeners.forEach((remove) => remove());
+    originalPanAttributes.forEach(([name, value]) => {
+      if (value === null) viewport.removeAttribute(name);
+      else viewport.setAttribute(name, value);
+    });
     if (dialog.open) dialog.close();
   } };
 }

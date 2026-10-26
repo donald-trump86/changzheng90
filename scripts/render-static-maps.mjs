@@ -43,7 +43,7 @@ export function renderStaticMap({ id, chapter = null, mapData, chapters }) {
     const points = mapData.geometry(n, mode).points;
     const a = points[segment], b = points[segment + 1];
     const [x, y] = a.map((value, i) => value + (b[i] - value) * t);
-    return `<g class="static-stage-badge static-stage-${n}" data-static-stage="${n}" transform="translate(${x} ${y})"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">${n}</text></g>`;
+    return `<g transform="translate(${x} ${y})"><g class="static-stage-badge static-stage-${n}" data-static-stage="${n}" role="img" aria-label="${names[n - 1]}路线编号"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">${n}</text></g></g>`;
   }).join('') : '';
   const orientation = overview ? '<text class="static-river-name" x="420" y="170">赤水河</text><g class="static-north" transform="translate(70 180)"><text text-anchor="middle">北</text><path d="M0 30v68m-14-48 14-20 14 20"/></g>' : '';
   const legend = overview ? `<ol class="static-route-key" aria-label="四渡路线与日期">${numbers.map(n => {
@@ -53,10 +53,10 @@ export function renderStaticMap({ id, chapter = null, mapData, chapters }) {
   }).join('')}</ol>` : '';
   return `<figure class="static-map ${overview ? 'context-overview' : 'chapter-map'}" data-static-map="${overview ? 'overview' : chapter}" aria-labelledby="${id}-caption">
               <figcaption id="${id}-caption"><strong>${e(title)}</strong><p>${e(notice)}</p></figcaption>
-              <svg class="static-map-drawing" viewBox="${viewBox.join(' ')}" role="img" aria-labelledby="${id}-title ${id}-desc" xmlns="http://www.w3.org/2000/svg">
+              <svg class="static-map-drawing" viewBox="${viewBox.join(' ')}" role="${overview ? 'group' : 'img'}" aria-labelledby="${id}-title ${id}-desc" xmlns="http://www.w3.org/2000/svg">
                 <title id="${id}-title">${e(title)}</title><desc id="${id}-desc">${e(notice)}</desc>
                 <defs>${markers}</defs>
-                <g aria-hidden="true"><path class="static-river" d="${e(mapData.path(mapData.river.points))}"/>${areas}${labels}${paths}${places}${badges}${orientation}</g>
+                <g${overview ? '' : ' aria-hidden="true"'}><path class="static-river" d="${e(mapData.path(mapData.river.points))}"/>${areas}${labels}${paths}${places}${badges}${orientation}</g>
               </svg>${legend}
             </figure>`;
 }

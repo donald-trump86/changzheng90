@@ -127,6 +127,35 @@
 .static-map figcaption p { margin-top: 8px; }
 .static-map svg { width: 100%; height: auto; aspect-ratio: 5 / 3; overflow: hidden; background: var(--map-paper); margin-top: 16px; }
 .context-overview { container: chishui-overview / inline-size; }
+body[data-map-layout="pinned"] .chapter-map { display: none; }
+.context-overview .static-route, .context-overview .static-stage-badge {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.context-overview[data-focus-stage] .static-route,
+.context-overview[data-focus-stage] .static-stage-badge { opacity: 0.22; }
+.context-overview[data-focus-stage="1"] .static-stage-1 .static-route,
+.context-overview[data-focus-stage="2"] .static-stage-2 .static-route,
+.context-overview[data-focus-stage="3"] .static-stage-3 .static-route,
+.context-overview[data-focus-stage="4"] .static-stage-4 .static-route,
+.context-overview[data-focus-stage="1"] [data-static-route="1"],
+.context-overview[data-focus-stage="2"] [data-static-route="2"],
+.context-overview[data-focus-stage="3"] [data-static-route="3"],
+.context-overview[data-focus-stage="4"] [data-static-route="4"] { opacity: 1; }
+.context-overview[data-focus-stage="1"] [data-static-stage="1"],
+.context-overview[data-focus-stage="2"] [data-static-stage="2"],
+.context-overview[data-focus-stage="3"] [data-static-stage="3"],
+.context-overview[data-focus-stage="4"] [data-static-stage="4"] { opacity: 1; transform: scale(1.08); }
+.context-overview [tabindex]:focus-visible, #route-map [role="button"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+#route-map [role="button"] { cursor: pointer; }
+@media (prefers-reduced-motion: reduce) {
+  .context-overview .static-route, .context-overview .static-stage-badge { transition: none; }
+  .context-overview [data-static-stage] { transform: none !important; }
+}
+body[data-motion="off"] .context-overview .static-route,
+body[data-motion="off"] .context-overview .static-stage-badge { transition: none; }
+body[data-motion="off"] .context-overview [data-static-stage] { transform: none !important; }
 .context-overview .static-map-drawing { aspect-ratio: 5 / 4; }
 .chapter-map { margin-block: 20px 28px; }
 .chapter-map svg { aspect-ratio: 5 / 4; }
@@ -182,4 +211,10 @@
   .map-ford { stroke: CanvasText; fill: none; }
   #route-map .march-line, #route-map .march-start, .map-previous-route, #route-map .map-crossing-dot { stroke: CanvasText; }
   #route-map .march-start, #route-map .map-crossing-dot { fill: Canvas; }
+}
+
+@media (forced-colors: active) {
+  .context-overview .static-route, .context-overview .static-stage-badge { transition: none; opacity: 1 !important; }
+  .context-overview [data-static-stage] { transform: none !important; }
+  .context-overview [tabindex]:focus-visible, #route-map [role="button"]:focus-visible { outline-color: Highlight; }
 }

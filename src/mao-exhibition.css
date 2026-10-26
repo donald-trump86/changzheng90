@@ -19,7 +19,7 @@
 .mao-exhibition .woodcut-subtitle { font-family: var(--display, var(--serif)); font-size: clamp(1.25rem, 2vw, 1.7rem); line-height: 1.6; margin-top: 1rem; }
 .mao-exhibition .woodcut-small { font-size: .9375rem; line-height: 1.8; }
 .woodcut-text-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 1.3rem; font-size: 1rem; font-weight: 600; }
-.woodcut-incision { display: block; height: 20px; width: 100%; fill: var(--accent); margin-block: 0 3.5rem; }
+.woodcut-incision { display: block; height: 20px; width: 100%; fill: var(--accent); margin-block: 0 3.5rem; transform-origin: left center; }
 .woodcut-plate { min-width: 0; }
 .woodcut-window { position: relative; overflow: hidden; }
 .woodcut-reveal-cover { position: absolute; inset: 0; background: var(--paper); transform-origin: center bottom; pointer-events: none; }
@@ -92,7 +92,7 @@
 .command-map { background: var(--map-paper); padding: clamp(.8rem, 2vw, 1.6rem); }
 .command-map svg { display: block; width: 100%; height: auto; overflow: visible; }
 .command-river { fill: none; stroke: var(--river-bank); stroke-width: 24; stroke-linejoin: round; }
-.command-route { fill: none; stroke: var(--muted); stroke-width: 8; stroke-linejoin: round; opacity: .23; }
+.command-route { fill: none; stroke: var(--muted); stroke-width: 8; stroke-linejoin: round; opacity: .23; transition: opacity 240ms ease; }
 .command-route[data-command-route="2"] { stroke-dasharray: 22 9; }
 .command-route[data-command-route="3"] { stroke-dasharray: 5 11; stroke-linecap: round; }
 .command-route[data-command-route="4"] { stroke-dasharray: 26 9 6 9; }
@@ -265,8 +265,21 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .mao-exhibition *, .mao-exhibition *::before, .mao-exhibition *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+  .mao-exhibition .woodcut-reveal-cover { display: none; }
 }
-body[data-motion="off"] .mao-exhibition * { animation: none !important; transition: none !important; }
+body:is([data-motion="off"], [data-motion="reduced"]) .mao-exhibition *,
+body:is([data-motion="off"], [data-motion="reduced"]) .mao-exhibition *::before,
+body:is([data-motion="off"], [data-motion="reduced"]) .mao-exhibition *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+body:is([data-motion="off"], [data-motion="reduced"]) .woodcut-reveal-cover { display: none; }
+@media (forced-colors: active) {
+  .mao-exhibition *, .mao-exhibition *::before, .mao-exhibition *::after { animation: none !important; transition: none !important; }
+  .mao-exhibition .woodcut-reveal-cover { display: none; }
+  .command-route { stroke: CanvasText; }
+  .command-map[data-strategy="judge"] :is([data-command-route="1"], [data-command-route="2"]),
+  .command-map[data-strategy="divert"] :is([data-command-route="3"], [data-command-route="4"]),
+  .command-map[data-strategy="initiative"] [data-command-route="4"] { stroke: Highlight; }
+  .command-red-thread path { stroke: CanvasText; }
+}
 @media print {
   .mao-exhibition { break-inside: auto; padding-block: 1.5rem; }
   .poems-plate, .command-map-sticky { position: static; }
