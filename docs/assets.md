@@ -18,6 +18,22 @@
 
 两张照片保持原始字节、完整画面与比例，未裁切或加滤镜。PD-China 和 PD-US1996 分别说明相关法域的公有领域依据，不应表述为全球任意使用授权。作者、上传来源及许可姓名属于素材归属，不是作品署名。
 
+## 毛泽东与四渡赤水专题木刻
+
+五幅均于2026年10月26日经 Magpie 的 `gpt-image-2` 生成；以首幅肖像作为配套画面参考，保持黑白刀刻、克制朱红与纸张色统一。构图为本项目生成的艺术表达，未取用或复刻其他艺术家的版画。生成画面不能作为真实照片、历史现场复原或服装、座次、地形的史料证据；不据此承诺排他版权或模型输出的独占性。五幅图的正式文字均由 HTML 排版。
+
+| 原始文件 | 尺寸 | 字节 | SHA-256 | 页面用途 |
+| --- | --- | ---: | --- | --- |
+| [遵义会议](../design-study/zunyi-meeting.png) | 1536×1024 | 3703384 | `addbee8e673f027fc4ac4ca691ad05249eecbbd6dbd0eb66cb1f5d751241a736` | 集体讨论的序章主视觉 |
+| [毛泽东与山河](../design-study/mao-command-portrait.png) | 1536×1024 | 3900706 | `8dba70ca88b5b6f6367c12673fcb8b0c6e9b06b3fa785142f4b6d5339384f8f8` | 人物登场与深色主题高潮 |
+| [诗词与群山](../design-study/mao-mountain-poem.png) | 1024×1536 | 3745082 | `73fbe6152f5ee6918c7eee5a2d10308e1a95a15c10464a0d6ed4623a1c011c11` | 《十六字令三首》竖幅 |
+| [群山行军横卷](../design-study/march-mountains-banner.png) | 2172×724 | 3893430 | `028ffc621b82687ebce8762a51ef12c75f2fc6eadc160094a490dd8ee5f4c11b` | 领导调整与指挥判断之间的长卷 |
+| [赤水河山](../design-study/chishui-river-landscape.png) | 1536×1024 | 3993878 | `14aead7b3e2df6e63f1076ec6351dfd5f8fee473339a67dcec9a0dabf3e5dfef` | 回到行军历史的山河尾声 |
+
+原图保留在源码中；公开站点只发布每幅三档 WebP，由[处理脚本](../scripts/prepare-images.mjs)校验原图再生成，尺寸、字节和散列详见[图像清单](image-manifest.json)。全部使用 `picture`、明确宽高、延迟加载和异步解码；两处肖像复用同一资源，不重复生成。图下和可展开的“专题史料、诗词与艺术创作说明”均标注 AI 木刻艺术插画。
+
+新增字体子集的原始包核验、字符覆盖、内部改名与完整 OFL 保留记录见[字体说明](exhibition-font-subset.md)。
+
 ## 地图数据与粗采样地形
 
 [地图数据文件](../src/historical-map-data.js)保存十个现代代表点、完整来源、概略关系、阶段节点与90点高程。现代参照点不等于1935年浮桥、渡口或城心测点。
@@ -39,7 +55,7 @@
 
 | 文件 | 字节 | SHA-256 |
 | --- | ---: | --- |
-| [显示字体](../public/fonts/chishui-atlas-display.woff2) | 283900 | `206886367c10bc65959cc19133cb83b5cfa620a9caff670e35eba8abbf4021ad` |
+| [显示字体](../public/fonts/chishui-atlas-display.woff2) | 264788 | `f5f7e23bedd3e63f3b3e35f4ddf63a154a92000d6d3ccb69a33d35a88d2e4384` |
 | [完整 OFL](../public/fonts/ZHUQUE-OFL.txt) | 4389 | `66cc01ad4df62fca6936431a426104cb32a52ce8da49de9a7d643e02d7659043` |
 | [原创纸纹](../public/atlas-paper.png) | 81926 | `f51ce5bb33e2a9f43a9920b66e019b30ede6dbc63790df073ed0ae2108174422` |
 

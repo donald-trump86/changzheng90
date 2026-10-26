@@ -126,15 +126,220 @@
           "sha256": "cc5405fc29989c283a36de881b5c982bb6b768c3b355814afeea7f6f42481fd8"
         }
       ]
+    },
+    {
+      "id": "mao-command-portrait",
+      "role": "generated-woodcut-artwork",
+      "source": {
+        "path": "design-study/mao-command-portrait.png",
+        "bytes": 3900706,
+        "sha256": "8dba70ca88b5b6f6367c12673fcb8b0c6e9b06b3fa785142f4b6d5339384f8f8",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024
+      },
+      "variants": [
+        {
+          "path": "public/images/mao-command-portrait-480.webp",
+          "format": "WEBP",
+          "width": 480,
+          "height": 320,
+          "quality": 84,
+          "bytes": 58888,
+          "sha256": "0a80e898e09765c62bee99a2bd209f3daab38a629964306d607672793a62b795"
+        },
+        {
+          "path": "public/images/mao-command-portrait-960.webp",
+          "format": "WEBP",
+          "width": 960,
+          "height": 640,
+          "quality": 84,
+          "bytes": 209092,
+          "sha256": "bcf507aee0412b7ada6764a8432d3b13120228057b309d34c64b22dbf3c8ee35"
+        },
+        {
+          "path": "public/images/mao-command-portrait-1536.webp",
+          "format": "WEBP",
+          "width": 1536,
+          "height": 1024,
+          "quality": 84,
+          "bytes": 554268,
+          "sha256": "a8dde40fffe34f558eadb058f36f6ee4729e452b2b57c33cab799f74d1b1c2b9"
+        }
+      ]
+    },
+    {
+      "id": "zunyi-meeting",
+      "role": "generated-woodcut-artwork",
+      "source": {
+        "path": "design-study/zunyi-meeting.png",
+        "bytes": 3703384,
+        "sha256": "addbee8e673f027fc4ac4ca691ad05249eecbbd6dbd0eb66cb1f5d751241a736",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024
+      },
+      "variants": [
+        {
+          "path": "public/images/zunyi-meeting-480.webp",
+          "format": "WEBP",
+          "width": 480,
+          "height": 320,
+          "quality": 84,
+          "bytes": 65004,
+          "sha256": "77556205ddab93e5134a11042b85406dcdab153ec3fe6aea56fe3e8b6e32a571"
+        },
+        {
+          "path": "public/images/zunyi-meeting-960.webp",
+          "format": "WEBP",
+          "width": 960,
+          "height": 640,
+          "quality": 84,
+          "bytes": 218342,
+          "sha256": "959c85ea244aef4fdcddcfc78b3531b1ad83863f9014d9641da29ca40f31c9dc"
+        },
+        {
+          "path": "public/images/zunyi-meeting-1536.webp",
+          "format": "WEBP",
+          "width": 1536,
+          "height": 1024,
+          "quality": 84,
+          "bytes": 537254,
+          "sha256": "5c30c8bce11cd423508540867fd507856e16b662849134bd430e68ff77d6b973"
+        }
+      ]
+    },
+    {
+      "id": "mao-mountain-poem",
+      "role": "generated-woodcut-artwork",
+      "source": {
+        "path": "design-study/mao-mountain-poem.png",
+        "bytes": 3745082,
+        "sha256": "73fbe6152f5ee6918c7eee5a2d10308e1a95a15c10464a0d6ed4623a1c011c11",
+        "format": "PNG",
+        "width": 1024,
+        "height": 1536
+      },
+      "variants": [
+        {
+          "path": "public/images/mao-mountain-poem-480.webp",
+          "format": "WEBP",
+          "width": 480,
+          "height": 720,
+          "quality": 84,
+          "bytes": 160408,
+          "sha256": "c2dee512d19c725f8cb475e1b986434b05a30f19c8567918178d81ee85875de5"
+        },
+        {
+          "path": "public/images/mao-mountain-poem-768.webp",
+          "format": "WEBP",
+          "width": 768,
+          "height": 1152,
+          "quality": 84,
+          "bytes": 362986,
+          "sha256": "2d3e81f18f7b8bcfac93a6bdd569155271e9ff7e0770914e77be6187bf98a792"
+        },
+        {
+          "path": "public/images/mao-mountain-poem-1024.webp",
+          "format": "WEBP",
+          "width": 1024,
+          "height": 1536,
+          "quality": 84,
+          "bytes": 669580,
+          "sha256": "16c806dd19195da166e546460d4fa6420048fdb71ce3820f2c54b73ae7ca536d"
+        }
+      ]
+    },
+    {
+      "id": "march-mountains-banner",
+      "role": "generated-woodcut-artwork",
+      "source": {
+        "path": "design-study/march-mountains-banner.png",
+        "bytes": 3893430,
+        "sha256": "028ffc621b82687ebce8762a51ef12c75f2fc6eadc160094a490dd8ee5f4c11b",
+        "format": "PNG",
+        "width": 2172,
+        "height": 724
+      },
+      "variants": [
+        {
+          "path": "public/images/march-mountains-banner-720.webp",
+          "format": "WEBP",
+          "width": 720,
+          "height": 240,
+          "quality": 84,
+          "bytes": 79472,
+          "sha256": "02cd31001beeb166ae3748ba19cc07d70f87bba03731498d94042bce7aeb9214"
+        },
+        {
+          "path": "public/images/march-mountains-banner-1440.webp",
+          "format": "WEBP",
+          "width": 1440,
+          "height": 480,
+          "quality": 84,
+          "bytes": 267790,
+          "sha256": "6308c2fc87d5119689f9671944df089711d73a8bfde059238caa9556e63a815b"
+        },
+        {
+          "path": "public/images/march-mountains-banner-2172.webp",
+          "format": "WEBP",
+          "width": 2172,
+          "height": 724,
+          "quality": 84,
+          "bytes": 569680,
+          "sha256": "8c9458eb5a8f032110acda684111b5159d932d06396d1dfbdaa4acf177ca00c5"
+        }
+      ]
+    },
+    {
+      "id": "chishui-river-landscape",
+      "role": "generated-woodcut-artwork",
+      "source": {
+        "path": "design-study/chishui-river-landscape.png",
+        "bytes": 3993878,
+        "sha256": "14aead7b3e2df6e63f1076ec6351dfd5f8fee473339a67dcec9a0dabf3e5dfef",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024
+      },
+      "variants": [
+        {
+          "path": "public/images/chishui-river-landscape-480.webp",
+          "format": "WEBP",
+          "width": 480,
+          "height": 320,
+          "quality": 84,
+          "bytes": 70610,
+          "sha256": "051c0f8ce79050cd9ce41e10f21e31e3bd02b59430ba06d7f5adbd87ec45e3bd"
+        },
+        {
+          "path": "public/images/chishui-river-landscape-960.webp",
+          "format": "WEBP",
+          "width": 960,
+          "height": 640,
+          "quality": 84,
+          "bytes": 249570,
+          "sha256": "d8c9807d3a668c3e6be41a48aa31114fe234b49286a6f9eb9e19822d7bf4ba87"
+        },
+        {
+          "path": "public/images/chishui-river-landscape-1536.webp",
+          "format": "WEBP",
+          "width": 1536,
+          "height": 1024,
+          "quality": 84,
+          "bytes": 588854,
+          "sha256": "d2d03aef00667ca32a4bec08eef2bcf31ae21866ce1ba73d82eb234a892a074c"
+        }
+      ]
     }
   ],
   "totals": {
-    "sourceBytes": 3967374,
-    "variantBytes": 1256964,
-    "largestVariantBytes": 665868,
-    "allVariantsSavedBytes": 2710410,
-    "allVariantsSavingPercent": 68.32,
-    "largestVariantsSavedBytes": 3301506,
-    "largestVariantsSavingPercent": 83.22
+    "sourceBytes": 23203854,
+    "variantBytes": 5918762,
+    "largestVariantBytes": 3585504,
+    "allVariantsSavedBytes": 17285092,
+    "allVariantsSavingPercent": 74.49,
+    "largestVariantsSavedBytes": 19618350,
+    "largestVariantsSavingPercent": 84.55
   }
 }

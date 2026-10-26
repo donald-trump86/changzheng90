@@ -1,6 +1,7 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { renderStaticMap } from './render-static-maps.mjs';
+import { renderMaoExhibition } from './render-mao-exhibition.mjs';
 
 const anchors = ['one', 'two', 'three', 'four'];
 const names = ['一渡', '二渡', '三渡', '四渡'];
@@ -30,6 +31,7 @@ export function renderHistory(html, history, mapData) {
   const first = chapters[0];
   const e = escapeHTML;
   const regions = {
+    ...renderMaoExhibition(mapData),
     'context-overview': renderStaticMap({ id: 'context-map', mapData, chapters }),
     timeline: `<ol class="timeline" aria-label="长征进程中的五个节点">\n${eras.map((era) => `        <li${era.id === 'sidu' ? ' class="timeline-focus"' : ''}><time datetime="${e(isoDate(era.start_date))}">${e(era.display_date)}</time><p>${e(era.description)}</p></li>`).join('\n')}\n      </ol>`,
     'chapter-nav': `<nav class="chapter-nav" aria-label="选择四渡赤水章节">\n${chapters.map((chapter, index) => `        <a class="chapter-link" href="#crossing-${anchors[index]}" data-chapter-choice="${e(chapter.id)}"${index === 0 ? ' aria-current="true"' : ''}><strong>${names[index]}</strong><time datetime="${e(chapter.dateISO[0])}">${e(shortDate(chapter.dateISO))}</time></a>`).join('\n')}\n      </nav>`,
@@ -54,7 +56,10 @@ export function renderHistory(html, history, mapData) {
     'epilogue-copy': `<h2 id="continuation-title">${e(epilogue.sectionTitle)}</h2>\n        <h3>${e(epilogue.title)}</h3>\n${epilogue.paragraphs.map((paragraph) => `        <p>${e(paragraph)}</p>`).join('\n')}`,
     'epilogue-after': `<h3>${e(epilogue.afterTitle)}</h3>\n        <ol aria-label="四渡后的部分行动">${epilogue.actions.map((action) => `<li>${e(action)}</li>`).join('')}</ol>\n        <p>${e(epilogue.body)}</p>`,
   };
-  return Object.entries(regions).reduce((rendered, [name, content]) => replaceRegion(rendered, name, content), html);
+  // Builds stamp asset hashes separately; retain those queries when re-rendering copy.
+  const assetVersions = new Map([...html.matchAll(/(\.\/public\/images\/[a-z0-9-]+\.webp)\?v=([a-f0-9]{8})/g)].map(([, path, hash]) => [path, hash]));
+  return Object.entries(regions).reduce((rendered, [name, content]) => replaceRegion(rendered, name,
+    content.replace(/\.\/public\/images\/[a-z0-9-]+\.webp/g, path => assetVersions.has(path) ? `${path}?v=${assetVersions.get(path)}` : path)), html);
 }
 
 async function main() {

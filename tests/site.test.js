@@ -78,9 +78,13 @@ test('deployment contains only the public site, no source tooling or private art
   const entries = (await readdir(dist, { recursive: true, withFileTypes: true }))
     .filter((entry) => entry.isFile()).map((entry) => join(entry.parentPath, entry.name).slice(dist.length + 1)).sort();
   const studyFiles = ['design-study/chishui-valley-study.png', 'design-study/long-march-gathering.jpg', 'design-study/sixth-army-1935.jpg'];
-  const previews = ['valley-480', 'valley-960', 'valley-1440', 'valley-1774', 'gathering-320', 'gathering-585', 'sixth-army-320', 'sixth-army-698'].map(name => `public/images/${name}.webp`);
-  assert.equal(entries.length, 38);
-  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/party-emblem.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/vendor/lenis-1.3.27.esm.js', 'public/vendor/lenis-1.3.27-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/image-viewer.js', 'src/audio.js', 'src/history-scroll.js', 'src/page-scroll.js', ...studyFiles, ...previews].sort());
+   const previews = ['valley-480', 'valley-960', 'valley-1440', 'valley-1774', 'gathering-320', 'gathering-585', 'sixth-army-320', 'sixth-army-698',
+     ...['mao-command-portrait', 'zunyi-meeting', 'chishui-river-landscape'].flatMap(id => [480, 960, 1536].map(width => `${id}-${width}`)),
+     ...[480, 768, 1024].map(width => `mao-mountain-poem-${width}`),
+     ...[720, 1440, 2172].map(width => `march-mountains-banner-${width}`),
+   ].map(name => `public/images/${name}.webp`);
+  assert.equal(entries.length, 55);
+  assert.deepEqual(entries, ['.nojekyll', 'CNAME', 'audio-credits.html', 'index.html', 'public/favicon.svg', 'public/party-emblem.svg', 'public/audio/undertow.mp3', 'public/audio/the-great-sea.mp3', 'public/vendor/anime-4.5.0.esm.min.js', 'public/vendor/ANIME-LICENSE.txt', 'public/vendor/lenis-1.3.27.esm.js', 'public/vendor/lenis-1.3.27-LICENSE.txt', 'public/atlas-paper.png', 'public/fonts/chishui-atlas-display.woff2', 'public/fonts/ZHUQUE-OFL.txt', 'src/print-atlas.css', 'src/history-data.js', 'src/historical-map-data.js', 'src/historical-map.js', 'src/historical-map.css', 'public/map/region-relief.png', 'src/editorial-motion.js', 'src/editorial-motion.css', 'src/image-viewer.js', 'src/audio.js', 'src/history-scroll.js', 'src/page-scroll.js', 'src/mao-exhibition.css', 'src/mao-exhibition.js', ...studyFiles, ...previews].sort());
 });
 
 test('vendored Lenis matches the verified release bytes and ships its original license', async () => {
@@ -123,7 +127,7 @@ test('responsive previews match encoded assets and preserved originals', async (
       count++;
     }
   }
-  assert.equal(count, 8);
+  assert.equal(count, 23);
   const valley = manifest.images.find((item) => item.id === 'valley');
   assert.equal(valley.source.width, 1774);
   assert.equal(valley.source.height, 887);
@@ -164,8 +168,8 @@ test('new homepage is served at root with working images under a repository pref
       };
       const modules = [...html.body.matchAll(/<script\b[^>]*\btype="module"[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]);
       const styles = [...html.body.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"/g)].map((match) => match[1]);
-      assert.deepEqual(modules.map(stripVersion), ['./src/editorial-motion.js']);
-      assert.deepEqual(styles.map(stripVersion), ['./src/editorial-motion.css', './src/print-atlas.css', './src/historical-map.css']);
+      assert.deepEqual(modules.map(stripVersion), ['./src/editorial-motion.js', './src/mao-exhibition.js']);
+      assert.deepEqual(styles.map(stripVersion), ['./src/editorial-motion.css', './src/print-atlas.css', './src/historical-map.css', './src/mao-exhibition.css']);
       const classics = [...html.body.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1]);
       assert.deepEqual(classics.map(stripVersion), ['./src/history-data.js', './src/historical-map-data.js', './src/historical-map.js']);
       const visited = new Set();
@@ -232,7 +236,7 @@ test('new homepage is served at root with working images under a repository pref
       assert.match(license.body, /MIT License[\s\S]*Copyright[\s\S]*Permission is hereby granted[\s\S]*THE SOFTWARE IS PROVIDED "AS IS"/);
       assert.equal((await get(port, '/repository/public/vendor/anime-4.5.0.esm.min.js')).bytes.length, 118678);
       const previews = new Set([...html.body.matchAll(/<source\b[^>]*\bsrcset="([^"]+)"/g)].flatMap(match => match[1].split(',').map(item => item.trim().split(/\s+/)[0])));
-      assert.equal(previews.size, 8, 'all responsive variants are wired');
+      assert.equal(previews.size, 23, 'all responsive variants are wired');
       for (const ref of previews) {
         stripVersion(ref);
         const preview = await resource(ref, base, /^image\/webp(?:;|$)/);
@@ -254,7 +258,7 @@ test('new homepage is served at root with working images under a repository pref
         assert.equal(url.searchParams.get('v'), sha256(original).slice(0, 8), url.pathname);
       }
       const imgRefs = [...new Set([...html.body.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1]))];
-      assert.deepEqual(imgRefs.map(stripVersion).sort(), ['./public/images/gathering-585.webp', './public/images/sixth-army-698.webp', './public/images/valley-960.webp', './public/party-emblem.svg']);
+      assert.deepEqual(imgRefs.map(stripVersion).sort(), ['./public/images/chishui-river-landscape-960.webp', './public/images/gathering-585.webp', './public/images/mao-command-portrait-960.webp', './public/images/mao-mountain-poem-768.webp', './public/images/march-mountains-banner-1440.webp', './public/images/sixth-army-698.webp', './public/images/valley-960.webp', './public/images/zunyi-meeting-960.webp', './public/party-emblem.svg']);
       for (const ref of imgRefs) {
         stripVersion(ref);
         const url = new URL(ref, base);

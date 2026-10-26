@@ -39,6 +39,41 @@ const sources = [
     sha256: 'ee2238bfcdf45a50af86302091cb9799de73b40e647b0cc99b51a9dc781e049f',
     widths: [320, 698],
   },
+  {
+    id: 'mao-command-portrait', role: 'generated-woodcut-artwork',
+    path: 'design-study/mao-command-portrait.png',
+    format: 'PNG', width: 1536, height: 1024, bytes: 3900706,
+    sha256: '8dba70ca88b5b6f6367c12673fcb8b0c6e9b06b3fa785142f4b6d5339384f8f8',
+    widths: [480, 960, 1536],
+  },
+  {
+    id: 'zunyi-meeting', role: 'generated-woodcut-artwork',
+    path: 'design-study/zunyi-meeting.png',
+    format: 'PNG', width: 1536, height: 1024, bytes: 3703384,
+    sha256: 'addbee8e673f027fc4ac4ca691ad05249eecbbd6dbd0eb66cb1f5d751241a736',
+    widths: [480, 960, 1536],
+  },
+  {
+    id: 'mao-mountain-poem', role: 'generated-woodcut-artwork',
+    path: 'design-study/mao-mountain-poem.png',
+    format: 'PNG', width: 1024, height: 1536, bytes: 3745082,
+    sha256: '73fbe6152f5ee6918c7eee5a2d10308e1a95a15c10464a0d6ed4623a1c011c11',
+    widths: [480, 768, 1024],
+  },
+  {
+    id: 'march-mountains-banner', role: 'generated-woodcut-artwork',
+    path: 'design-study/march-mountains-banner.png',
+    format: 'PNG', width: 2172, height: 724, bytes: 3893430,
+    sha256: '028ffc621b82687ebce8762a51ef12c75f2fc6eadc160094a490dd8ee5f4c11b',
+    widths: [720, 1440, 2172],
+  },
+  {
+    id: 'chishui-river-landscape', role: 'generated-woodcut-artwork',
+    path: 'design-study/chishui-river-landscape.png',
+    format: 'PNG', width: 1536, height: 1024, bytes: 3993878,
+    sha256: '14aead7b3e2df6e63f1076ec6351dfd5f8fee473339a67dcec9a0dabf3e5dfef',
+    widths: [480, 960, 1536],
+  },
 ];
 
 function assert(condition, message) {
@@ -171,7 +206,7 @@ async function main() {
     images, totals,
   };
   await writeFile(absolute(manifestPath), `${JSON.stringify(manifest, null, 2)}\n`);
-  console.log(`Verified ${images.length} unchanged sources and 8 WebP variants.`);
+  console.log(`Verified ${images.length} unchanged sources and ${images.reduce((sum, image) => sum + image.variants.length, 0)} WebP variants.`);
   console.log(JSON.stringify(totals));
 }
 
