@@ -20,7 +20,7 @@
 
 最终截图：[桌面会议](../artifacts/mao-exhibition/desktop-zunyi.png)、[桌面诗词](../artifacts/mao-exhibition/desktop-poems.png)、[桌面人物](../artifacts/mao-exhibition/desktop-command.png)、[桌面主题](../artifacts/mao-exhibition/desktop-theme.png)、[手机会议](../artifacts/mao-exhibition/mobile-zunyi.png)、[手机诗词](../artifacts/mao-exhibition/mobile-poems.png)、[手机主题](../artifacts/mao-exhibition/mobile-theme.png)、[手机地图](../artifacts/mao-exhibition/mobile-map.png)。截图是本地验收产物，不在站点发布白名单。
 
-本轮不调用会额外启动浏览器客户端的独立 `inspect.mjs`／`scenes.mjs`，遵守专用Brave仅一个任务的规则；没有自动设计评分。未使用真机、微信内核或运营商网络，没有重测配乐主观听感；默认无自动音频播放。改动保留在本地工作区，未提交、推送或更新线上站点；一次性额度轮询提醒已不存在。
+本轮不调用会额外启动浏览器客户端的独立 `inspect.mjs`／`scenes.mjs`，遵守专用Brave仅一个任务的规则；没有自动设计评分。未使用真机、微信内核或运营商网络，没有重测配乐主观听感；默认无自动音频播放。实现验收时改动尚未提交或发布；经用户确认后，2026-10-26已推送产品源码 `8671fbc` 与站点提交 `7762604`，GitHub Pages构建成功，55个发布文件与本地构建逐文件核对一致。公开入口仍按用户此前选择由本人查看，未重复发起Cloudflare验证；详见[部署记录](deployment.md)。一次性额度轮询提醒已不存在。
 
 ## 2026-10-25：总览路线、地名与图标校正
 

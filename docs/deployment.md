@@ -2,7 +2,7 @@
 
 公开入口为 [https://changzheng90.luvch1nabest.me/](https://changzheng90.luvch1nabest.me/)，源码仓库为 [donald-trump86/changzheng90](https://github.com/donald-trump86/changzheng90)。源码维护于 `main`，GitHub Pages 使用 `gh-pages` 分支根目录，自定义域名由 Cloudflare 代理至 GitHub Pages。
 
-本轮总览路线、地名与图标校正已推送至 `gh-pages`，部署提交为 `3091106beee0bc8101ecc6886a433b76478ba314`，对应产品源码为 `4ea09ae`。GitHub Pages 构建状态为 `built`（22.290秒，无错误，完成于2026-10-25 15:46:42，Asia/Shanghai）；38个部署文件与最终构建逐个字节一致。本地构建通过97项Node测试、八尺寸地图检查及桌面／手机截图核对，详见[验证记录](verification.md)。
+2026-10-26，遵义会议、《十六字令三首》与毛泽东指挥艺术木刻专题已推送至 `main`，产品源码提交为 `8671fbc58f4a288f9286cefa22a24beb376beeb9`。对应 `gh-pages` 部署提交为 `7762604dfaae6879fb12e7d0298fd37a2c5279e2`；GitHub Pages 构建状态为 `built`（44.375秒，无错误，完成于2026-10-26 09:17:14，Asia/Shanghai）。55个部署文件的相对路径与SHA-256均和最终 `dist/` 一致，保留 `CNAME` 与 `.nojekyll`；五幅新木刻的原始PNG只在源码分支，站点使用15个响应式WebP变体。本地已通过102项Node测试、七种视口及桌面／手机截图核对，详见[验证记录](verification.md)。
 
 此前2026-10-25 14:26通过专用Brave打开原域名根首页时，Cloudflare返回403，页面标题为「Just a moment...」。用户随后选择自行查看公开页面；本轮沿用该选择，未重复发起自动访问或可见验证，公开入口未作本轮自动浏览器验收。
 
@@ -16,7 +16,7 @@ PORT=4174 npm run dev -- --root dist
 
 [构建脚本](../scripts/build.mjs)只复制显式允许的站点文件，输出到 `dist/`。[域名文件](../public/CNAME)在构建根目录映射为 `CNAME`，并生成空的 `.nojekyll`。根首页、音频版权页和运行资源使用相对路径。文档、研究材料、测试与临时产物不应进入部署包。
 
-修改构建白名单时同步检查实际 HTML、CSS 和模块依赖，确认部署资源可通过仓库子路径读取、MIME 正确、字节一致。当前构建输出38个文件，检查结果见[验证记录](verification.md)。
+修改构建白名单时同步检查实际 HTML、CSS 和模块依赖，确认部署资源可通过仓库子路径读取、MIME 正确、字节一致。当前构建输出55个文件，检查结果见[验证记录](verification.md)。
 
 ## 更新现有站点
 
