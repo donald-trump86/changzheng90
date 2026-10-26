@@ -76,6 +76,43 @@ function defaultReduced() {
   return { matches: false, addEventListener() {}, removeEventListener() {} };
 }
 
+// Reveal through a separate stroke so each crossing keeps its original dash pattern.
+export function createChapterRouteReveal(path) {
+  const svg = path.ownerSVGElement;
+  const doc = path.ownerDocument;
+  const length = path.getTotalLength();
+  const originalMask = path.getAttribute('mask');
+  const make = (name, attributes) => {
+    const node = doc.createElementNS('http://www.w3.org/2000/svg', name);
+    Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, String(value)));
+    return node;
+  };
+  const mask = make('mask', { id: `${svg.getAttribute('aria-labelledby').split(' ')[0]}-reveal`, maskUnits: 'userSpaceOnUse' });
+  const box = svg.viewBox.baseVal;
+  for (const [key, value] of Object.entries({ x: box.x - 40, y: box.y - 40, width: box.width + 80, height: box.height + 80 })) mask.setAttribute(key, String(value));
+  const ink = make('path', { d: path.getAttribute('d'), fill: 'none', stroke: 'white', 'stroke-width': 28, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-dasharray': `${length} ${length}`, 'stroke-dashoffset': length });
+  const head = make('circle', { r: 3.5, fill: `var(--stage-${path.getAttribute('data-static-route')})`, stroke: 'var(--paper)', 'stroke-width': 1.5, 'vector-effect': 'non-scaling-stroke', 'aria-hidden': 'true', 'pointer-events': 'none' });
+  mask.appendChild(ink);
+  svg.appendChild(mask);
+  svg.appendChild(head);
+  path.setAttribute('mask', `url(#${mask.id})`);
+  return {
+    update(value) {
+      const progress = Math.min(1, Math.max(0, value));
+      ink.setAttribute('stroke-dashoffset', String(length * (1 - progress)));
+      const point = path.getPointAtLength(length * progress);
+      head.setAttribute('cx', String(point.x));
+      head.setAttribute('cy', String(point.y));
+    },
+    finish() {
+      if (originalMask === null) path.removeAttribute('mask');
+      else path.setAttribute('mask', originalMask);
+      mask.remove();
+      head.remove();
+    },
+  };
+}
+
 export function initEditorialMotion({ root = document, reduced = defaultReduced() } = {}) {
   const doc = root.ownerDocument || document;
   const win = doc.defaultView || window;
@@ -96,7 +133,6 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   let pendingPlay = true;            // 有新路线待画，进入视口即画
   let routeFrame = 0;
   let scrollFrame = 0;
-  let progressValue = 0;
   let drift = 0;
   let parallax = 0;
   let writingMotion = false;
@@ -110,6 +146,10 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   const meter = $('#reading-progress');
   const river = $('.river-flow');
   const art = $('.hero-art img');
+  const fine = win.matchMedia('(hover: hover) and (pointer: fine)');
+  const chapterMaps = all('.chapter-map').map((figure, index) => ({
+    figure, svg: $('svg', figure), path: $('[data-static-route]', figure), key: `chapter-map-${index}`, played: false, button: null,
+  }));
 
   const mode = () => {
     if (destroyed || userOff || paused) return 'off';
@@ -224,7 +264,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     const current = mode();
     if (current === 'off') return; // 完全静态：不写样式
     const cross = current === 'reduced';
-    const distance = cross ? 0 : (options.distance ?? 16);
+    const distance = cross || !fine.matches ? 0 : (options.distance ?? 16);
     const duration = cross ? 180 : (options.duration ?? 440);
     const gap = cross ? 0 : (options.gap ?? 65);
     const values = list.map((node) => ({ node, value: 0 }));
@@ -435,8 +475,9 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   }
 
   function syncAmbient() {
-    if (blocked() || mode() !== 'full') {
+    if (blocked() || mode() !== 'full' || !fine.matches) {
       cancel('ambient');
+      if (art) art.style.removeProperty('transform');
       return;
     }
     if (!river && !art) return;
@@ -467,7 +508,6 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   }
 
   function renderProgress(value) {
-    progressValue = value;
     if (!meter || !meter.firstElementChild) return;
     meter.firstElementChild.style.transform = `scaleX(${value})`;
     meter.setAttribute('aria-valuenow', String(Math.round(value * 100)));
@@ -478,12 +518,8 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     scrollFrame = win.requestAnimationFrame(() => {
       scrollFrame = 0;
       const next = readingPosition();
-      if (blocked() || mode() === 'reduced') {
-        renderProgress(next);
-      } else {
-        const from = { value: progressValue };
-        run('progress', [from], { value: next }, { duration: 160, gap: 0, ease: 'outQuad' },
-          () => renderProgress(from.value), () => renderProgress(readingPosition()));
+      renderProgress(next);
+      if (!blocked() && mode() === 'full' && fine.matches) {
         if (art && visible(art)) {
           const rect = art.getBoundingClientRect();
           parallax = Math.min(6, Math.max(-6, (win.innerHeight / 2 - rect.top - rect.height / 2) * 0.018));
@@ -518,6 +554,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     const scene = scenes.get(target);
     if (!scene || seen.has(target)) return;
     seen.add(target);
+    if (!fine.matches && scene.kind !== 'plate') return;
     const index = [...scenes.keys()].indexOf(target);
     if (scene.kind === 'plate') {
       revealPlates(`scene-${index}`, all('figure', target).length ? all('figure', target) : [target]);
@@ -528,8 +565,23 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     }
   }
 
+  function playChapterMap(item, replay = false) {
+    if (!item.path || blocked() || mode() !== 'full' || !visible(item.svg) || (item.played && !replay)) return;
+    const box = item.svg.getBoundingClientRect();
+    const shown = Math.min(win.innerHeight, box.bottom) - Math.max(0, box.top);
+    if (!replay && shown < box.height * .35) return;
+    cancel(item.key);
+    item.played = true;
+    const reveal = createChapterRouteReveal(item.path);
+    const position = { value: 0 };
+    reveal.update(0);
+    run(item.key, [position], { value: 1 }, { duration: 1800, gap: 0, ease: 'inOutSine' },
+      () => reveal.update(position.value), () => reveal.finish());
+  }
+
   function observeScenes() {
     if (!observer) return;
+    chapterMaps.forEach(item => observer.observe(item.svg));
     if (mapCanvas) observer.observe(mapCanvas);
     scenes.forEach((scene, element) => observer.observe(element));
     if (art) observer.observe(art);
@@ -555,7 +607,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   }
 
   function pulseChapterFocus(key, panel) {
-    if (!panel || blocked() || mode() !== 'full') return;
+    if (!panel || blocked() || mode() !== 'full' || !fine.matches) return;
     const targets = [$('.chapter-date', panel), $('h3', panel), $('#route-direction'), $('#route-date')].filter(Boolean);
     if (!targets.length) return;
     targets.forEach((node) => touched.add(node));
@@ -611,11 +663,13 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       toggle.setAttribute('aria-disabled', String(fixed));
       toggle.textContent = fixed ? '系统已减少动态' : (paused || userOff) ? '恢复动画' : '暂停动画';
     }
+    chapterMaps.forEach(item => { if (item.button) item.button.hidden = blocked() || mode() !== 'full'; });
     doc.dispatchEvent(new CustomEvent('chishui:motion'));
     if (blocked() || mode() === 'reduced') settle();
     else {
       renderProgress(readingPosition());
       syncAmbient();
+      chapterMaps.forEach(item => playChapterMap(item));
     }
   }
 
@@ -685,12 +739,29 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
             if (isIntersecting && pendingPlay && mapInViewport()) playRoute();
           } else if (target === art) {
             syncAmbient();
+          } else if (target.matches('.chapter-map > svg')) {
+            const item = chapterMaps.find(item => item.svg === target);
+            if (isIntersecting) playChapterMap(item);
+            else cancel(item.key);
           } else if (isIntersecting) {
             playScene(target);
           }
         });
-      }), { threshold: [0, 0.12] });
+      }), { threshold: [0, 0.12, 0.36] });
     }
+
+    chapterMaps.forEach(item => {
+      if (!item.path || !observer) return;
+      const button = doc.createElement('button');
+      button.type = 'button';
+      button.className = 'motion-control chapter-map-replay';
+      button.textContent = '重播路线';
+      button.setAttribute('aria-label', `重播第${item.figure.getAttribute('data-static-map')}渡路线`);
+      item.figure.appendChild(button);
+      item.button = button;
+      cleanups.push(() => button.remove());
+      listen(button, 'click', safe(() => playChapterMap(item, true)));
+    });
 
     all('details[data-disclosure]').forEach((details, idx) => {
       listen(details, 'toggle', safe(() => {
@@ -750,6 +821,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       onScroll();
     }));
     listen(doc, 'visibilitychange', safe(syncState));
+    listen(fine, 'change', safe(() => { settle(); syncState(); }));
     listen(win, 'pagehide', safe(() => {
       departed = true;
       if (observer) observer.disconnect();
@@ -802,9 +874,11 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
         applyEmblem();
         run('hero-emblem', [eVal], { value: 1 }, { duration: 520, gap: 0, ease: 'outBack' }, applyEmblem, () => clearNode(emblem));
       }
-      enter('hero-line', all('.opening h1 > span'), { duration: 560, gap: 95, distance: 26, ease: 'outExpo' });
-      enter('hero-meta', all('.opening-meta'), { duration: 480, gap: 0, distance: 14 });
-      enter('hero-lead', all('.opening-lead, .opening-actions, .opening-audio'), { duration: 500, gap: 80, distance: 14 });
+      if (fine.matches) {
+        enter('hero-line', all('.opening h1 > span'), { duration: 560, gap: 95, distance: 26, ease: 'outExpo' });
+        enter('hero-meta', all('.opening-meta'), { duration: 480, gap: 0, distance: 14 });
+        enter('hero-lead', all('.opening-lead, .opening-actions, .opening-audio'), { duration: 500, gap: 80, distance: 14 });
+      }
       revealPlates('hero-art', all('.hero-art, .hero-archive'));
       pendingPlay = true;
     }

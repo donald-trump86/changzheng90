@@ -172,7 +172,7 @@
   .command-strategy-layout { grid-template-columns: 1fr; }
   .command-map-sticky { position: static; }
   .command-map { max-width: 42rem; margin-inline: auto !important; }
-  .command-decisions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+  .command-decisions { display: grid; gap: 2rem; max-width: 42rem; margin-inline: auto; }
   .command-decisions article, .command-decisions article + article { padding: 0; }
   .command-decisions p { font-size: 1rem; }
   .command-decisions .decision-lead { font-size: 1.2rem; }
@@ -203,10 +203,10 @@
   .poems-heading h2 { font-size: clamp(1.9rem, 7.8vw, 2.65rem); }
   .poems-layout { grid-template-columns: 1fr; gap: 1.5rem; }
   .poems-plate { position: static; }
-  .poems-plate img { max-height: none; width: 100%; }
-  .poems-text { padding-inline: .5rem; }
-  .mountain-verse { padding-block: 1rem 1.5rem; }
-  .mountain-verse + .mountain-verse { padding-top: 1.75rem; }
+  .poems-plate img { max-height: min(62svh, 30rem); width: 100%; object-position: center; }
+  .poems-text { padding: .25rem clamp(.5rem, 4vw, 1.25rem) 0; }
+  .mountain-verse { padding-block: .5rem 1.5rem; }
+  .mountain-verse + .mountain-verse { padding-top: 2rem; }
   .mountain-verse h3 { font-size: .9375rem; margin-bottom: .7rem; }
   .mountain-verse blockquote p { font-size: clamp(1.35rem, 6.1vw, 1.5rem); line-height: 1.95; }
   .mao-exhibition .poems-attribution { font-size: .875rem; }
@@ -258,8 +258,10 @@
 }
 @media (max-height: 649px) {
   .poems-plate, .command-map-sticky { position: static; }
-  .poems-plate img { max-height: none; }
   .mountain-verse, .command-decisions article { min-height: 0; }
+}
+@media (min-width: 600px) and (max-height: 649px) {
+  .poems-plate img { max-height: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mao-exhibition *, .mao-exhibition *::before, .mao-exhibition *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }

@@ -130,6 +130,8 @@
 .context-overview .static-map-drawing { aspect-ratio: 5 / 4; }
 .chapter-map { margin-block: 20px 28px; }
 .chapter-map svg { aspect-ratio: 5 / 4; }
+.chapter-map-replay { display: inline-flex; align-items: center; margin-top: 12px; min-height: 44px; }
+.chapter-map-replay:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 .static-river { fill: none; stroke: var(--river); stroke-width: 8; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: .6; }
 .static-route { fill: none; stroke: var(--stage-color); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .static-route-1, .static-stage-1 { --stage-color: var(--stage-1); }
