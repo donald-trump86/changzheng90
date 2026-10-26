@@ -1888,9 +1888,7 @@ details[open] > summary .disclosure-icon,
   *::before,
   *::after {
     animation: none !important;
-    transition-property: opacity !important;
-    transition-duration: 180ms !important;
-    transition-timing-function: linear !important;
+    transition: none !important;
   }
 
   .primary-action:active,

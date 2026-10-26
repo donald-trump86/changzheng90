@@ -5,7 +5,7 @@
      载入失败时由内置 rAF 引擎接管，任何行为都不缺位；本模块在没有 anime 时也可安全 import。
    - 只动画 transform / opacity；唯一例外是路线的 stroke-dashoffset 与河面虚线相位
      （纯绘制，不影响布局）。
-   - prefers-reduced-motion: reduce → 只做 180ms 淡入；body[data-motion="off"] → 完全静态。
+   - prefers-reduced-motion: reduce → 立即静态归位；body[data-motion="off"] → 完全静态。
    - 无脚本或出错时：所有内容静态可读（failStatic 清除全部内联样式并撤下控件）。
    动效清单（触发 → 效果 → 时长/缓动）见 .superpowers/sdd/2026-10-23-museum-redesign/task-2-report.md。 */
 
@@ -59,6 +59,7 @@ function rafTween(targets, to, options, update, finish) {
       });
     }
     if (update) update();
+    if (stopped) return;
     if (loop || elapsed < span) frame = requestAnimationFrame(step);
     else if (finish) finish();
   };
@@ -76,6 +77,8 @@ function defaultReduced() {
   return { matches: false, addEventListener() {}, removeEventListener() {} };
 }
 
+let revealId = 0;
+
 // Reveal through a separate stroke so each crossing keeps its original dash pattern.
 export function createChapterRouteReveal(path) {
   const svg = path.ownerSVGElement;
@@ -87,7 +90,7 @@ export function createChapterRouteReveal(path) {
     Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, String(value)));
     return node;
   };
-  const mask = make('mask', { id: `${svg.getAttribute('aria-labelledby').split(' ')[0]}-reveal`, maskUnits: 'userSpaceOnUse' });
+  const mask = make('mask', { id: `chishui-route-reveal-${++revealId}`, 'data-motion-mask': '', maskUnits: 'userSpaceOnUse' });
   const box = svg.viewBox.baseVal;
   for (const [key, value] of Object.entries({ x: box.x - 40, y: box.y - 40, width: box.width + 80, height: box.height + 80 })) mask.setAttribute(key, String(value));
   const ink = make('path', { d: path.getAttribute('d'), fill: 'none', stroke: 'white', 'stroke-width': 28, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-dasharray': `${length} ${length}`, 'stroke-dashoffset': length });
@@ -100,9 +103,13 @@ export function createChapterRouteReveal(path) {
     update(value) {
       const progress = Math.min(1, Math.max(0, value));
       ink.setAttribute('stroke-dashoffset', String(length * (1 - progress)));
-      const point = path.getPointAtLength(length * progress);
-      head.setAttribute('cx', String(point.x));
-      head.setAttribute('cy', String(point.y));
+      try {
+        const point = path.getPointAtLength(length * progress);
+        head.setAttribute('transform', `translate(${point.x} ${point.y})`);
+      } catch (error) {
+        this.finish();
+        throw error;
+      }
     },
     finish() {
       if (originalMask === null) path.removeAttribute('mask');
@@ -147,16 +154,20 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   const river = $('.river-flow');
   const art = $('.hero-art img');
   const fine = win.matchMedia('(hover: hover) and (pointer: fine)');
+  const forced = win.matchMedia('(forced-colors: active)');
+  const overview = $('.context-overview');
+  const overviewSVG = overview && $('svg.static-map-drawing', overview);
+  let overviewPlayed = false;
   const chapterMaps = all('.chapter-map').map((figure, index) => ({
     figure, svg: $('svg', figure), path: $('[data-static-route]', figure), key: `chapter-map-${index}`, played: false, button: null,
   }));
 
   const mode = () => {
     if (destroyed || userOff || paused) return 'off';
-    if (reduced && reduced.matches) return 'reduced';
+    if ((reduced && reduced.matches) || forced.matches) return 'reduced';
     return 'full';
   };
-  const blocked = () => mode() === 'off' || departed || (doc.hidden ?? false);
+  const blocked = () => mode() !== 'full' || departed || (doc.hidden ?? false);
   const visible = (node) => {
     if (node.checkVisibility && !node.checkVisibility()) return false;
     const closed = node.closest('details:not([open])');
@@ -189,7 +200,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     const entry = actors.get(key);
     if (!entry) return;
     actors.delete(key); // 先失效回调，再取消；收尾必须仍执行（恢复静态样式）
-    entry.actor.cancel();
+    entry.actor?.cancel();
     if (entry.finish) entry.finish();
   }
 
@@ -221,7 +232,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       if (!fn) return undefined;
       return () => {
         if (actors.get(key) !== entry || blocked()) return;
-        fn();
+        try { fn(); } catch (error) { failStatic(error); }
       };
     };
     const module = animeModule;
@@ -263,31 +274,35 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     list.forEach((node) => touched.add(node));
     const current = mode();
     if (current === 'off') return; // 完全静态：不写样式
-    const cross = current === 'reduced';
-    const distance = cross || !fine.matches ? 0 : (options.distance ?? 16);
-    const duration = cross ? 180 : (options.duration ?? 440);
-    const gap = cross ? 0 : (options.gap ?? 65);
+    if (current !== 'full' || blocked()) return;
+    const requested = options.distance ?? 12;
+    const distance = fine.matches ? (options.distance ?? 16) : Math.sign(requested) * Math.min(10, Math.abs(requested));
+    const duration = options.duration ?? 440;
+    const gap = options.gap ?? 65;
     const values = list.map((node) => ({ node, value: 0 }));
     const apply = () => values.forEach(({ node, value }) => {
       node.style.opacity = String(value);
-      if (distance) node.style.transform = `translateY(${(1 - value) * distance}px)`;
+      if (distance) node.style.transform = `${options.axis === 'x' ? 'translateX' : 'translateY'}(${(1 - value) * distance}px)`;
     });
-    const done = () => list.forEach(clearNode);
+    let completed = false;
+    const done = () => {
+      list.forEach(clearNode);
+      if (completed && !blocked()) options.onComplete?.();
+    };
     apply();
-    run(key, values, { value: 1 }, { duration, gap, ease: options.ease || 'outCubic' }, apply, done);
+    run(key, values, { value: 1 }, { duration, gap, ease: options.ease || 'outCubic' }, () => {
+      apply();
+      completed = values.every(({ value }) => value >= 1);
+    }, done);
   }
 
   /* 图版揭示：一张衬纸自下而上揭开（transform），原图轻微落定（transform + opacity）。
-     不裁切、不滤镜；减弱动态时只做 180ms 淡入；JS 注入的衬纸用完即删。 */
+     不裁切、不滤镜；减弱动态时完全静态；JS 注入的衬纸用完即删。 */
   function revealPlates(key, figures) {
     const current = mode();
-    if (current === 'off') return;
+    if (current !== 'full' || blocked()) return;
     const plates = figures.filter(Boolean).filter((figure) => figure.getBoundingClientRect().width > 0);
     if (!plates.length) return;
-    if (current === 'reduced') {
-      enter(key, plates.map((figure) => figure.querySelector('img') || figure), { distance: 0, duration: 180, gap: 0 });
-      return;
-    }
     const sheets = [];
     plates.forEach((figure) => {
       const img = figure.querySelector('img');
@@ -335,16 +350,12 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
 
   function finishRoute() {
     if (!route) return;
-    route.style.strokeDasharray = '';
-    route.style.strokeDashoffset = '0';
+    route.style.removeProperty('stroke-dasharray');
+    route.style.removeProperty('stroke-dashoffset');
     route.setAttribute('marker-end', 'url(#route-arrow)');
     if (head) {
       clearNode(head);
-      try {
-        const point = route.getPointAtLength(route.getTotalLength());
-        head.setAttribute('cx', String(point.x));
-        head.setAttribute('cy', String(point.y));
-      } catch (error) { /* 路径几何不可用时保持原位 */ }
+      head.removeAttribute('transform');
       head.setAttribute('visibility', 'hidden');
     }
     clearMapAccentTransforms();
@@ -445,6 +456,8 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       return;
     }
     const length = route.getTotalLength();
+    head.setAttribute('cx', '0');
+    head.setAttribute('cy', '0');
     const position = { value: 0 };
     const apply = () => {
       const v = position.value;
@@ -452,10 +465,8 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       route.style.strokeDashoffset = String(length * (1 - v));
       try {
         const point = route.getPointAtLength(length * v);
-        head.setAttribute('cx', String(point.x));
-        head.setAttribute('cy', String(point.y));
         const pulse = 1 + 0.18 * Math.sin(v * Math.PI * 3);
-        head.style.transform = `scale(${pulse})`;
+        head.style.transform = `translate(${point.x}px, ${point.y}px) scale(${pulse})`;
       } catch (error) { /* 同上 */ }
     };
     route.removeAttribute('marker-end');
@@ -475,27 +486,37 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   }
 
   function syncAmbient() {
-    if (blocked() || mode() !== 'full' || !fine.matches) {
+    if (blocked()) {
       cancel('ambient');
       if (art) art.style.removeProperty('transform');
       return;
     }
-    if (!river && !art) return;
     const riverVisible = river && visible(river.closest('svg') || river);
-    const artworkVisible = art && visible(art);
-    if (!riverVisible && !artworkVisible) {
+    const artworkVisible = fine.matches && art && visible(art);
+    const fords = all('.map-ford.is-current-ford');
+    const mapVisible = riverVisible || (mapCanvas && visible(mapCanvas));
+    if (!riverVisible && !artworkVisible && !mapVisible) {
       cancel('ambient');
       return;
     }
     if (actors.has('ambient')) return;
     const phase = { value: 0 };
     run('ambient', [phase], { value: 1 }, { duration: 8000, gap: 0, ease: 'linear', loop: true }, () => {
-      if (river) river.style.strokeDashoffset = String(-160 * phase.value);
+      if (river && visible(river.closest('svg') || river)) river.style.strokeDashoffset = String(-160 * phase.value);
       drift = Math.sin(phase.value * Math.PI * 2);
-      if (art && visible(art)) artworkPosition();
+      if (fine.matches && art && visible(art)) artworkPosition();
+      // The entrance owns the same transform until its one-shot pulse completes.
+      if (!actors.has('map-fords') && mapCanvas && visible(mapCanvas)) {
+        all('.map-ford.is-current-ford').forEach(ford => {
+          touched.add(ford);
+          ford.style.transform = `scale(${1 + 0.05 * drift})`;
+        });
+      }
     }, () => {
       if (river) river.style.removeProperty('stroke-dashoffset');
       if (art) art.style.removeProperty('transform');
+      fords.forEach(clearNode);
+      all('.map-ford').forEach(clearNode);
       drift = 0;
     });
   }
@@ -509,7 +530,8 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
 
   function renderProgress(value) {
     if (!meter || !meter.firstElementChild) return;
-    meter.firstElementChild.style.transform = `scaleX(${value})`;
+    if (blocked()) meter.firstElementChild.style.removeProperty('transform');
+    else meter.firstElementChild.style.transform = `scaleX(${value})`;
     meter.setAttribute('aria-valuenow', String(Math.round(value * 100)));
   }
 
@@ -519,8 +541,8 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       scrollFrame = 0;
       const next = readingPosition();
       renderProgress(next);
-      if (!blocked() && mode() === 'full' && fine.matches) {
-        if (art && visible(art)) {
+      if (!blocked()) {
+        if (fine.matches && art && visible(art)) {
           const rect = art.getBoundingClientRect();
           parallax = Math.min(6, Math.max(-6, (win.innerHeight / 2 - rect.top - rect.height / 2) * 0.018));
           artworkPosition();
@@ -554,15 +576,111 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     const scene = scenes.get(target);
     if (!scene || seen.has(target)) return;
     seen.add(target);
-    if (!fine.matches && scene.kind !== 'plate') return;
     const index = [...scenes.keys()].indexOf(target);
     if (scene.kind === 'plate') {
       revealPlates(`scene-${index}`, all('figure', target).length ? all('figure', target) : [target]);
     } else if (scene.kind === 'fade') {
       enter(`scene-${index}`, scene.nodes, { distance: 0, duration: 320, gap: 40 });
     } else {
-      enter(`scene-${index}`, scene.nodes, { duration: 440, gap: 55, distance: scene.options.distance ?? 14 });
+      enter(`scene-${index}`, scene.nodes, { duration: 440, gap: 55, distance: 14, ...scene.options });
     }
+  }
+
+  function emphasizeTimeline() {
+    const focus = $('.context .timeline-focus');
+    if (!focus || blocked()) return;
+    touched.add(focus);
+    const state = { value: 0 };
+    const apply = () => { focus.style.transform = `translateX(${6 * (1 - state.value)}px)`; };
+    apply();
+    run('timeline-focus', [state], { value: 1 }, { duration: 480, ease: 'outCubic' }, apply, () => clearNode(focus));
+  }
+
+  function cancelOverview() {
+    cancel('overview-routes');
+    for (const stage of [1, 2, 3, 4]) cancel(`overview-badge-${stage}`);
+  }
+
+  function playOverview() {
+    if (!overviewSVG || overviewPlayed || blocked() || !visible(overviewSVG)) return;
+    const box = overviewSVG.getBoundingClientRect();
+    if (Math.min(win.innerHeight, box.bottom) - Math.max(0, box.top) < box.height * .35) return;
+    const paths = all('[data-static-route]', overviewSVG).sort((a, b) => Number(a.getAttribute('data-static-route')) - Number(b.getAttribute('data-static-route')));
+    if (!paths.length) return;
+    overviewPlayed = true;
+    const reveals = [];
+    const badges = [];
+    const started = new Set();
+    const cleanup = () => {
+      reveals.forEach(reveal => reveal.finish());
+      badges.forEach(badge => { if (badge) clearNode(badge); });
+    };
+    try {
+      paths.forEach(path => {
+        const reveal = createChapterRouteReveal(path);
+        reveals.push(reveal);
+        reveal.update(0);
+        const badge = $(`[data-static-stage="${path.getAttribute('data-static-route')}"]`, overviewSVG);
+        badges.push(badge);
+        if (badge) { touched.add(badge); badge.style.opacity = '0'; }
+      });
+      const clock = { value: 0 };
+      const duration = 620 + (paths.length - 1) * 460;
+      const apply = () => {
+        reveals.forEach((reveal, index) => {
+          const progress = Math.min(1, Math.max(0, (clock.value * duration - index * 460) / 620));
+          reveal.update(EASE.outCubic(progress));
+          const badge = badges[index];
+          if (progress < 1 || started.has(index) || !badge) return;
+          started.add(index);
+          const pop = { value: 0 };
+          const draw = () => {
+            badge.style.opacity = String(Math.min(1, pop.value));
+            badge.style.transform = `scale(${0.45 + 0.55 * pop.value})`;
+          };
+          draw();
+          run(`overview-badge-${index + 1}`, [pop], { value: 1 }, { duration: 420, ease: 'outBack' }, draw, () => clearNode(badge));
+        });
+      };
+      run('overview-routes', [clock], { value: 1 }, { duration, ease: 'linear' }, apply, () => {
+        reveals.forEach(reveal => reveal.finish());
+        // Do not erase the final badge's still-running pop on normal completion.
+        badges.forEach((badge, index) => { if (badge && !actors.has(`overview-badge-${index + 1}`)) clearNode(badge); });
+      });
+    } catch (error) {
+      cleanup();
+      throw error;
+    }
+  }
+
+  function bindOverviewFocus() {
+    if (!overview) return;
+    const items = all('.static-route-key li', overview);
+    const badges = all('[data-static-stage]', overview);
+    let pointer = null;
+    let focus = null;
+    const stageFor = node => node?.getAttribute('data-static-stage') || String(items.indexOf(node) + 1);
+    const sync = () => {
+      const active = focus || pointer;
+      if (active) overview.setAttribute('data-focus-stage', stageFor(active));
+      else overview.removeAttribute('data-focus-stage');
+    };
+    [...items, ...badges].forEach(node => {
+      const original = node.getAttribute('tabindex');
+      node.setAttribute('tabindex', '0');
+      cleanups.push(() => {
+        if (original === null) node.removeAttribute('tabindex');
+        else node.setAttribute('tabindex', original);
+      });
+      listen(node, 'pointerenter', () => { pointer = node; sync(); });
+      listen(node, 'pointerleave', () => { if (pointer === node) pointer = null; sync(); });
+      listen(node, 'focusin', () => { focus = node; sync(); });
+      listen(node, 'focusout', event => {
+        if (node.contains(event.relatedTarget)) return;
+        if (focus === node) focus = null;
+        sync();
+      });
+    });
   }
 
   function playChapterMap(item, replay = false) {
@@ -582,6 +700,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   function observeScenes() {
     if (!observer) return;
     chapterMaps.forEach(item => observer.observe(item.svg));
+    if (overviewSVG) observer.observe(overviewSVG);
     if (mapCanvas) observer.observe(mapCanvas);
     scenes.forEach((scene, element) => observer.observe(element));
     if (art) observer.observe(art);
@@ -686,7 +805,9 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
     if (art) art.style.removeProperty('transform');
     if (river) river.style.removeProperty('stroke-dashoffset');
     finishRoute(); // 恢复完整路线（含箭头与行军点状态）
-    renderProgress(readingPosition());
+    overview?.removeAttribute('data-focus-stage');
+    // Keep the progress value for AT without retaining an inline animated state.
+    meter?.firstElementChild?.style.removeProperty('transform');
   }
 
   function failStatic(error) {
@@ -719,14 +840,16 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
   try {
     loadAnime().then((module) => { animeModule = module; });
 
-    addScene('.context', '.context-intro h2 > span, .context-intro h2, .context-lead, .context-note, .timeline li', 'rise');
+    addScene('.context-intro', 'h2 > span, h2, .context-lead, .context-note', 'rise');
+    addScene('.context .timeline', 'li', 'rise', { onComplete: emphasizeTimeline });
     addScene('.crossings > .section-heading, .crossings .section-heading', 'h2 > span, h2, p', 'rise', { distance: 12 });
     addScene('.crossings .chapter-nav', '[data-chapter-choice], .chapter-link', 'rise', { distance: 10 });
     addScene('.chapter-panel', '.chapter-date, h3, .situation > p', 'rise', { distance: 12 });
     addScene('.archives-grid', 'figure', 'plate');
     addScene('.continuation-plate', 'img', 'plate');
     addScene('.continuation-copy', 'h2 > span, h2, .statement, p, .quiet-link', 'rise', { distance: 18 });
-    addScene('.after-route', 'h3, li, p', 'rise', { distance: 12 });
+    addScene('#continuation .after-route', 'h3, p', 'rise', { distance: 12 });
+    addScene('#continuation .after-route ol', 'li', 'rise', { axis: 'x', distance: -16, gap: 140 });
     addScene('.era-strip', 'li', 'rise', { distance: 12 });
     addScene('.sources', '.disclosure > summary, .licence', 'fade');
 
@@ -739,6 +862,9 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
             if (isIntersecting && pendingPlay && mapInViewport()) playRoute();
           } else if (target === art) {
             syncAmbient();
+          } else if (target === overviewSVG) {
+            if (isIntersecting) playOverview();
+            else cancelOverview();
           } else if (target.matches('.chapter-map > svg')) {
             const item = chapterMaps.find(item => item.svg === target);
             if (isIntersecting) playChapterMap(item);
@@ -749,6 +875,8 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
         });
       }), { threshold: [0, 0.12, 0.36] });
     }
+
+    bindOverviewFocus();
 
     chapterMaps.forEach(item => {
       if (!item.path || !observer) return;
@@ -833,6 +961,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
       syncState();
     }));
     if (reduced && reduced.addEventListener) listen(reduced, 'change', safe(syncState));
+    listen(forced, 'change', safe(syncState));
 
     /* 页面上的 body[data-motion] 开关（内联脚本或按钮直接改属性）同样生效 */
     if (win.MutationObserver && doc.body) {
@@ -874,7 +1003,7 @@ export function initEditorialMotion({ root = document, reduced = defaultReduced(
         applyEmblem();
         run('hero-emblem', [eVal], { value: 1 }, { duration: 520, gap: 0, ease: 'outBack' }, applyEmblem, () => clearNode(emblem));
       }
-      if (fine.matches) {
+      {
         enter('hero-line', all('.opening h1 > span'), { duration: 560, gap: 95, distance: 26, ease: 'outExpo' });
         enter('hero-meta', all('.opening-meta'), { duration: 480, gap: 0, distance: 14 });
         enter('hero-lead', all('.opening-lead, .opening-actions, .opening-audio'), { duration: 500, gap: 80, distance: 14 });

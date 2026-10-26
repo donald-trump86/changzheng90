@@ -6,6 +6,10 @@
   <meta name="color-scheme" content="light">
   <meta name="description" content="纪念长征胜利90周年：沿四渡赤水的日期、渡河方向与历史情势，阅读长征中的这一段。">
   <title>长征路上，四渡赤水</title>
+  <meta property="og:title" content="长征路上，四渡赤水">
+  <meta property="og:description" content="纪念长征胜利90周年：从遵义会议、长征诗词到四渡赤水，沿史料、地图与木刻读懂这段历程。">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./design-study/chishui-valley-study.png?v=3c3772ce">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23e9e4d8'/%3E%3Cpath d='M20-2C30 8 9 9 16 18S23 26 17 34' fill='none' stroke='%23526b73' stroke-width='5'/%3E%3C/svg%3E">
   <style>
     * { box-sizing: border-box; }
@@ -94,7 +98,6 @@
     .disclosure > summary:hover { color: var(--accent); }
     .disclosure-icon { width: 22px; height: 22px; flex: none; }
     .disclosure-icon path { stroke: currentColor; stroke-width: 1.8; fill: none; }
-    .disclosure[open]:not([data-expanded="false"]) .disclosure-icon .icon-vertical { display: none; }
     .disclosure-body { overflow: hidden; }
     .disclosure-inner { padding-block: 4px 12px; }
     .disclosure-inner h4 { margin: 12px 0 6px; }
@@ -269,10 +272,10 @@
     :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
   </style>
-  <link rel="stylesheet" href="./src/editorial-motion.css?v=f444638c">
-  <link rel="stylesheet" href="./src/print-atlas.css?v=57532c27">
-  <link rel="stylesheet" href="./src/historical-map.css?v=18a44351">
-  <link rel="stylesheet" href="./src/mao-exhibition.css?v=53572efe">
+  <link rel="stylesheet" href="./src/editorial-motion.css?v=5f7d7c7a">
+  <link rel="stylesheet" href="./src/print-atlas.css?v=e9923eb2">
+  <link rel="stylesheet" href="./src/historical-map.css?v=0c175f6e">
+  <link rel="stylesheet" href="./src/mao-exhibition.css?v=d743aa07">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到正文</a>
@@ -303,7 +306,7 @@
         <div class="opening-description">
           <p class="opening-lead">1935年1—3月，中央红军在川黔滇边多次调整行动，四次渡过赤水河。从每一次转向的来由，读长征中的这一段。</p>
           <div class="opening-actions">
-            <a href="#crossings" class="primary-action" data-start-reading>阅读四渡赤水<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h17m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></a>
+            <a href="#context-title" class="primary-action" data-start-reading>从长征读起<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h17m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></a>
             <span class="read-time">约3分钟</span>
           </div>
           <div class="audio-controls opening-audio" data-audio-controls hidden role="region" aria-label="背景配乐控制">
@@ -336,10 +339,10 @@
       </div>
       <!-- history:context-overview:start --><figure class="static-map context-overview" data-static-map="overview" aria-labelledby="context-map-caption">
               <figcaption id="context-map-caption"><strong>四渡赤水总览</strong><p>按编号、颜色和线型辨认四渡。阶段行军概括连线、渡河区域与河道均经概化；黑点是现代地点方位参照，不表示逐点到访。</p></figcaption>
-              <svg class="static-map-drawing" viewBox="0 100 1000 800" role="img" aria-labelledby="context-map-title context-map-desc" xmlns="http://www.w3.org/2000/svg">
+              <svg class="static-map-drawing" viewBox="0 100 1000 800" role="group" aria-labelledby="context-map-title context-map-desc" xmlns="http://www.w3.org/2000/svg">
                 <title id="context-map-title">四渡赤水总览</title><desc id="context-map-desc">按编号、颜色和线型辨认四渡。阶段行军概括连线、渡河区域与河道均经概化；黑点是现代地点方位参照，不表示逐点到访。</desc>
                 <defs><marker id="context-map-arrow-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="40" markerHeight="40" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--stage-1)"/></marker><marker id="context-map-arrow-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="40" markerHeight="40" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--stage-2)"/></marker><marker id="context-map-arrow-3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="40" markerHeight="40" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--stage-3)"/></marker><marker id="context-map-arrow-4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="40" markerHeight="40" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--stage-4)"/></marker></defs>
-                <g aria-hidden="true"><path class="static-river" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/><ellipse class="static-ford" cx="470" cy="345" rx="25" ry="15"><title>元厚渡河区（概化区域）</title></ellipse><ellipse class="static-ford" cx="497" cy="390" rx="27" ry="16.2"><title>土城渡河区（概化区域）</title></ellipse><ellipse class="static-ford" cx="520" cy="458" rx="26" ry="15.6"><title>太平渡一带（概化区域）</title></ellipse><ellipse class="static-ford" cx="575" cy="455" rx="25" ry="15"><title>二郎滩一带（概化区域）</title></ellipse><ellipse class="static-ford" cx="650" cy="600" rx="28" ry="16.8"><title>茅台渡河区（概化区域）</title></ellipse><path class="static-label-leader" d="M470 345L380 275L359 270"/><text class="static-place-name" data-static-label="ford:yuanhou" x="345" y="290" text-anchor="end">元厚</text><path class="static-label-leader" d="M497 390L375 385L349 385"/><text class="static-place-name" data-static-label="ford:tucheng" x="335" y="405" text-anchor="end">土城</text><path class="static-label-leader" d="M520 458L300 490L234 490"/><text class="static-place-name" data-static-label="ford:taiping" x="220" y="510" text-anchor="end">太平渡</text><path class="static-label-leader" d="M575 455L660 350L706 345"/><text class="static-place-name" data-static-label="ford:erlang" x="720" y="365" text-anchor="start">二郎滩</text><path class="static-label-leader" d="M650 600L590 725L579 760"/><text class="static-place-name" data-static-label="ford:maotai" x="565" y="780" text-anchor="end">茅台</text><path class="static-label-leader" d="M84.822 599.36L50 720L36 765"/><text class="static-place-name" data-static-label="zaxi" x="50" y="785" text-anchor="start">扎西地区</text><path class="static-label-leader" d="M416.739 499.922L385 645L364 670"/><text class="static-place-name" data-static-label="gulin" x="350" y="690" text-anchor="end">古蔺</text><path class="static-label-leader" d="M590.809 362.828L640 245L661 240"/><text class="static-place-name" data-static-label="xishui" x="675" y="260" text-anchor="start">习水</text><path class="static-label-leader" d="M858.152 453.614L970 450L970 285L989 240"/><text class="static-place-name" data-static-label="tongzi" x="975" y="260" text-anchor="end">桐梓</text><path class="static-label-leader" d="M903.217 658.236L945 620L999 580"/><text class="static-place-name" data-static-label="zunyi" x="985" y="600" text-anchor="end">遵义</text><path class="static-route static-route-1" data-static-route="1" d="M550 381L497 390L250 480L84.822 599.36" marker-end="url(#context-map-arrow-1)"/><path class="static-route static-route-2" data-static-route="2" d="M84.822 599.36L300 540L520 458L660 430L858.152 453.614L875 535L903.217 658.236" marker-end="url(#context-map-arrow-2)"/><path class="static-route static-route-3" data-static-route="3" d="M903.217 658.236L770 610L650 600L540 550L390 430" marker-end="url(#context-map-arrow-3)"/><path class="static-route static-route-4" data-static-route="4" d="M390 430L450 470L520 458L640 430L850 770" marker-end="url(#context-map-arrow-4)"/><circle class="static-place" data-static-place="yuanhou" cx="471.722" cy="338.968" r="12"><title>元厚：今元厚镇，1935年猿猴场；镇点不等于渡河点</title></circle><circle class="static-place" data-static-place="tucheng" cx="496.983" cy="380.793" r="12"><title>土城：一渡包括土城南北地区</title></circle><circle class="static-place" data-static-place="taiping" cx="516.465" cy="452.496" r="12"><title>太平：地方志称渡口距镇政府1.8千米</title></circle><circle class="static-place" data-static-place="erlang" cx="573.97" cy="447.73" r="12"><title>二郎：地方志称二郎滩渡口距镇政府550米</title></circle><circle class="static-place" data-static-place="maotai" cx="659.796" cy="594.112" r="12"><title>茅台：三渡在茅台及附近</title></circle><circle class="static-place" data-static-place="zaxi" cx="84.822" cy="599.36" r="12"><title>扎西：今威信；代表集中地区的现代参照</title></circle><circle class="static-place" data-static-place="gulin" cx="416.739" cy="499.922" r="12"><title>古蔺：Q1342169县实体点，不表示红军进入县城</title></circle><circle class="static-place" data-static-place="xishui" cx="590.809" cy="362.828" r="12"><title>习水：Q531259县实体点</title></circle><circle class="static-place" data-static-place="tongzi" cx="858.152" cy="453.614" r="12"><title>桐梓：Q1200607县实体点</title></circle><circle class="static-place" data-static-place="zunyi" cx="903.217" cy="658.236" r="12"><title>遵义：现代城市点，不是1935年城心测点</title></circle><g class="static-stage-badge static-stage-1" data-static-stage="1" transform="translate(299.4 462)"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">1</text></g><g class="static-stage-badge static-stage-2" data-static-stage="2" transform="translate(181.65210000000002 572.648)"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">2</text></g><g class="static-stage-badge static-stage-3" data-static-stage="3" transform="translate(578.5 567.5)"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">3</text></g><g class="static-stage-badge static-stage-4" data-static-stage="4" transform="translate(797.5 685)"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">4</text></g><text class="static-river-name" x="420" y="170">赤水河</text><g class="static-north" transform="translate(70 180)"><text text-anchor="middle">北</text><path d="M0 30v68m-14-48 14-20 14 20"/></g></g>
+                <g><path class="static-river" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/><ellipse class="static-ford" cx="470" cy="345" rx="25" ry="15"><title>元厚渡河区（概化区域）</title></ellipse><ellipse class="static-ford" cx="497" cy="390" rx="27" ry="16.2"><title>土城渡河区（概化区域）</title></ellipse><ellipse class="static-ford" cx="520" cy="458" rx="26" ry="15.6"><title>太平渡一带（概化区域）</title></ellipse><ellipse class="static-ford" cx="575" cy="455" rx="25" ry="15"><title>二郎滩一带（概化区域）</title></ellipse><ellipse class="static-ford" cx="650" cy="600" rx="28" ry="16.8"><title>茅台渡河区（概化区域）</title></ellipse><path class="static-label-leader" d="M470 345L380 275L359 270"/><text class="static-place-name" data-static-label="ford:yuanhou" x="345" y="290" text-anchor="end">元厚</text><path class="static-label-leader" d="M497 390L375 385L349 385"/><text class="static-place-name" data-static-label="ford:tucheng" x="335" y="405" text-anchor="end">土城</text><path class="static-label-leader" d="M520 458L300 490L234 490"/><text class="static-place-name" data-static-label="ford:taiping" x="220" y="510" text-anchor="end">太平渡</text><path class="static-label-leader" d="M575 455L660 350L706 345"/><text class="static-place-name" data-static-label="ford:erlang" x="720" y="365" text-anchor="start">二郎滩</text><path class="static-label-leader" d="M650 600L590 725L579 760"/><text class="static-place-name" data-static-label="ford:maotai" x="565" y="780" text-anchor="end">茅台</text><path class="static-label-leader" d="M84.822 599.36L50 720L36 765"/><text class="static-place-name" data-static-label="zaxi" x="50" y="785" text-anchor="start">扎西地区</text><path class="static-label-leader" d="M416.739 499.922L385 645L364 670"/><text class="static-place-name" data-static-label="gulin" x="350" y="690" text-anchor="end">古蔺</text><path class="static-label-leader" d="M590.809 362.828L640 245L661 240"/><text class="static-place-name" data-static-label="xishui" x="675" y="260" text-anchor="start">习水</text><path class="static-label-leader" d="M858.152 453.614L970 450L970 285L989 240"/><text class="static-place-name" data-static-label="tongzi" x="975" y="260" text-anchor="end">桐梓</text><path class="static-label-leader" d="M903.217 658.236L945 620L999 580"/><text class="static-place-name" data-static-label="zunyi" x="985" y="600" text-anchor="end">遵义</text><path class="static-route static-route-1" data-static-route="1" d="M550 381L497 390L250 480L84.822 599.36" marker-end="url(#context-map-arrow-1)"/><path class="static-route static-route-2" data-static-route="2" d="M84.822 599.36L300 540L520 458L660 430L858.152 453.614L875 535L903.217 658.236" marker-end="url(#context-map-arrow-2)"/><path class="static-route static-route-3" data-static-route="3" d="M903.217 658.236L770 610L650 600L540 550L390 430" marker-end="url(#context-map-arrow-3)"/><path class="static-route static-route-4" data-static-route="4" d="M390 430L450 470L520 458L640 430L850 770" marker-end="url(#context-map-arrow-4)"/><circle class="static-place" data-static-place="yuanhou" cx="471.722" cy="338.968" r="12"><title>元厚：今元厚镇，1935年猿猴场；镇点不等于渡河点</title></circle><circle class="static-place" data-static-place="tucheng" cx="496.983" cy="380.793" r="12"><title>土城：一渡包括土城南北地区</title></circle><circle class="static-place" data-static-place="taiping" cx="516.465" cy="452.496" r="12"><title>太平：地方志称渡口距镇政府1.8千米</title></circle><circle class="static-place" data-static-place="erlang" cx="573.97" cy="447.73" r="12"><title>二郎：地方志称二郎滩渡口距镇政府550米</title></circle><circle class="static-place" data-static-place="maotai" cx="659.796" cy="594.112" r="12"><title>茅台：三渡在茅台及附近</title></circle><circle class="static-place" data-static-place="zaxi" cx="84.822" cy="599.36" r="12"><title>扎西：今威信；代表集中地区的现代参照</title></circle><circle class="static-place" data-static-place="gulin" cx="416.739" cy="499.922" r="12"><title>古蔺：Q1342169县实体点，不表示红军进入县城</title></circle><circle class="static-place" data-static-place="xishui" cx="590.809" cy="362.828" r="12"><title>习水：Q531259县实体点</title></circle><circle class="static-place" data-static-place="tongzi" cx="858.152" cy="453.614" r="12"><title>桐梓：Q1200607县实体点</title></circle><circle class="static-place" data-static-place="zunyi" cx="903.217" cy="658.236" r="12"><title>遵义：现代城市点，不是1935年城心测点</title></circle><g transform="translate(299.4 462)"><g class="static-stage-badge static-stage-1" data-static-stage="1" role="img" aria-label="一渡路线编号"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">1</text></g></g><g transform="translate(181.65210000000002 572.648)"><g class="static-stage-badge static-stage-2" data-static-stage="2" role="img" aria-label="二渡路线编号"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">2</text></g></g><g transform="translate(578.5 567.5)"><g class="static-stage-badge static-stage-3" data-static-stage="3" role="img" aria-label="三渡路线编号"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">3</text></g></g><g transform="translate(797.5 685)"><g class="static-stage-badge static-stage-4" data-static-stage="4" role="img" aria-label="四渡路线编号"><circle r="36"/><text text-anchor="middle" dominant-baseline="central">4</text></g></g><text class="static-river-name" x="420" y="170">赤水河</text><g class="static-north" transform="translate(70 180)"><text text-anchor="middle">北</text><path d="M0 30v68m-14-48 14-20 14 20"/></g></g>
               </svg><ol class="static-route-key" aria-label="四渡路线与日期"><li class="static-stage-1"><svg class="static-line-key" viewBox="0 0 44 12" aria-hidden="true"><path class="static-route static-route-1" d="M1 6H43"/></svg><div><strong>1 · 一渡 · 西渡</strong><span>1935年1月29日拂晓</span><span>元厚渡河区、土城渡河区</span><span>去向：扎西地区</span></div></li><li class="static-stage-2"><svg class="static-line-key" viewBox="0 0 44 12" aria-hidden="true"><path class="static-route static-route-2" d="M1 6H43"/></svg><div><strong>2 · 二渡 · 东渡</strong><span>1935年2月18—21日</span><span>太平渡一带、二郎滩一带</span><span>去向：遵义地区</span></div></li><li class="static-stage-3"><svg class="static-line-key" viewBox="0 0 44 12" aria-hidden="true"><path class="static-route static-route-3" d="M1 6H43"/></svg><div><strong>3 · 三渡 · 西渡</strong><span>1935年3月16—17日</span><span>茅台渡河区</span><span>去向：川南机动区（概略）</span></div></li><li class="static-stage-4"><svg class="static-line-key" viewBox="0 0 44 12" aria-hidden="true"><path class="static-route static-route-4" d="M1 6H43"/></svg><div><strong>4 · 四渡 · 东渡</strong><span>1935年3月21—22日</span><span>太平渡一带、二郎滩一带</span><span>去向：向南机动</span></div></li></ol>
             </figure><!-- history:context-overview:end -->
     </section>
@@ -393,15 +396,15 @@
               <button type="button" data-map-all aria-pressed="false">全部路线</button>
               <button type="button" id="replay-route" class="motion-control" hidden>重播路线</button>
             </div>
-            <p class="map-view-note" id="map-view-note">阶段行军概括连线</p>
+            <p class="map-view-note" id="map-view-note" role="status" aria-live="polite" aria-atomic="true">阶段行军概括连线</p>
           </div>
           <div class="map-canvas">
-            <svg id="route-map" viewBox="0 220 1000 600" role="img" aria-labelledby="map-title map-description" xmlns="http://www.w3.org/2000/svg">
+            <svg id="route-map" viewBox="0 220 1000 600" role="group" aria-labelledby="map-title map-description" xmlns="http://www.w3.org/2000/svg">
               <title id="map-title">一渡赤水 · 区域总览</title>
               <!-- history:map-description:start --><desc id="map-description">土城、猿猴场（今元厚）地区分路西渡，向川南机动，随后在扎西地区集中。连线概括阶段顺序，不是1月29日当天全程。现代地点只作方位参照，渡口区域、河道和阶段连线经原创概化，不代表1935年精确测绘。</desc><!-- history:map-description:end -->
               <defs><marker id="route-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="42" markerHeight="42" orient="auto"><path d="M0 0 10 5 0 10Z" fill="var(--accent)"/></marker></defs>
               <image class="map-relief" data-map-src="./public/map/region-relief.png?v=03101e4a" x="0" y="0" width="1000" height="820" preserveAspectRatio="none" aria-hidden="true"/>
-              <g aria-hidden="true">
+              <g>
                 <path class="river-bank" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/>
                 <path class="river" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/>
                 <path class="river-flow" d="M445 220L455 290L470 345L497 390L490 425L520 458L575 455L610 510L650 600L720 720L760 820"/>
@@ -641,7 +644,7 @@
   </dialog>
   <script src="./src/history-data.js?v=f8fc0980"></script>
   <script src="./src/historical-map-data.js?v=2f35fe94"></script>
-  <script src="./src/historical-map.js?v=60fd0f9e"></script>
+  <script src="./src/historical-map.js?v=e7d29a5b"></script>
   <script>
     (() => {
       'use strict';
@@ -801,6 +804,14 @@
         if (location.hash !== hash) history.pushState(null, '', hash);
         lastHandledHash = hash;
       }
+      function revealExplorer() {
+        const explorer = document.getElementById('map-explorer');
+        if (!explorer || explorer.open || wideQuery.matches) return;
+        explorer.open = true;
+        announce('交互地图已展开，可比较路线、查看渡口。');
+        scheduleMapLayout();
+      }
+
       function navigateToChapter(number, options) {
         const panel = panels[number - 1];
         if (!panel) return;
@@ -850,6 +861,18 @@
         navigateToChapter(Math.min(count, currentChapter + 1));
       });
 
+      // Keep arrow navigation local to the chapter reader and leave form/dialog keys native.
+      document.getElementById('crossings')?.addEventListener('keydown', function (event) {
+        if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        if (document.querySelector('dialog[open], [aria-modal="true"]')) return;
+        if (event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="slider"]')) return;
+        const number = Math.max(1, Math.min(count, currentChapter + (event.key === 'ArrowRight' ? 1 : -1)));
+        if (number === currentChapter) return;
+        event.preventDefault();
+        navigateToChapter(number);
+      });
+
       function chapterFromHash() {
         const index = panels.findIndex(function (panel) { return '#' + panel.id === location.hash; });
         return index >= 0 ? index + 1 : 0;
@@ -873,7 +896,10 @@
         if (!target) return;
         event.preventDefault();
         const number = panels.indexOf(target) + 1;
-        if (number) navigateToChapter(number);
+        if (number) {
+          if (link.closest('.chapter-nav')) revealExplorer();
+          navigateToChapter(number);
+        }
         else {
           intentVersion++;
           pushHash(link.hash);
@@ -913,7 +939,7 @@
         });
       });
 
-      import('./src/image-viewer.js?v=aa617528').then(function (mod) { mod.initImageViewer(); }).catch(function () {
+      import('./src/image-viewer.js?v=096bdd34').then(function (mod) { mod.initImageViewer(); }).catch(function () {
         /* 原图链接在增强不可用时仍可直接打开。 */
       });
 
@@ -999,6 +1025,7 @@
 
       const replay = document.getElementById('replay-route');
       if (replay) replay.addEventListener('click', function () {
+        revealExplorer();
         document.dispatchEvent(new CustomEvent('chishui:chapter', {
           detail: { number: Math.max(1, currentChapter), mapReady: Boolean(historicalMap) },
           bubbles: true,
@@ -1130,7 +1157,7 @@
       });
     })();
   </script>
-  <script type="module" src="./src/editorial-motion.js?v=c61ee1a2"></script>
-  <script type="module" src="./src/mao-exhibition.js?v=b05967dd"></script>
+  <script type="module" src="./src/editorial-motion.js?v=da08760c"></script>
+  <script type="module" src="./src/mao-exhibition.js?v=84140cd7"></script>
 </body>
 </html>
